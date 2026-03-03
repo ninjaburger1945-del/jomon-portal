@@ -1,0 +1,153 @@
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import styles from "./page.module.css";
+import facilitiesData from "../../data/facilities.json";
+import newsData from "../../data/news.json";
+
+interface Facility {
+    id: string;
+    name: string;
+    region: string;
+    prefecture: string;
+    address: string;
+    description: string;
+    url: string;
+    thumbnail: string;
+    tags: string[];
+    twitter?: string;
+}
+
+export async function generateStaticParams() {
+    return facilitiesData.map((facility) => ({
+        id: facility.id,
+    }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const facility = facilitiesData.find((f) => f.id === id);
+    if (!facility) return { title: '施設が見つかりません' };
+
+    return {
+        title: `${facility.name} | 縄文博物館・資料館ポータル`,
+        description: `${facility.prefecture}にある${facility.name}の施設情報、最新トピック、アクセス情報。${facility.description.substring(0, 100)}`,
+    };
+}
+
+export default async function FacilityPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const facility = facilitiesData.find((f) => f.id === id) as Facility | undefined;
+
+    if (!facility) {
+        notFound();
+    }
+
+    const facilityNews = newsData.filter((news) => news.facilityId === id);
+
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Museum",
+        "name": facility.name,
+        "description": facility.description,
+        "url": facility.url,
+        "image": facility.thumbnail,
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": facility.prefecture,
+            "streetAddress": facility.address,
+            "addressCountry": "JP"
+        }
+    };
+
+    return (
+        <main className={styles.container}>
+            {/* 構造化データの埋め込み */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            {/* Navigation */}
+            <nav className={styles.nav}>
+                <Link href="/" className={styles.backLink}>
+                    &larr; トップページに戻る
+                </Link>
+            </nav>
+
+            <article className={styles.article}>
+                {/* Header Section */}
+                <header className={styles.header}>
+                    <div className={styles.tags}>
+                        {facility.tags.map(tag => (
+                            <span key={tag} className={styles.tag}>{tag}</span>
+                        ))}
+                    </div>
+                    <h1 className={styles.title}>{facility.name}</h1>
+                    <p className={styles.location}>📍 {facility.address}</p>
+                </header>
+
+                {/* Thumbnail Section */}
+                <div className={styles.imageWrapper}>
+                    <Image
+                        src={facility.thumbnail}
+                        alt={facility.name}
+                        fill
+                        className={styles.image}
+                        priority
+                    />
+                </div>
+
+                {/* Main Content */}
+                <div className={styles.contentGrid}>
+                    <section className={styles.mainInfo}>
+                        <h2 className={styles.sectionTitle}>施設概要</h2>
+                        <p className={styles.description}>{facility.description}</p>
+
+                        <div className={styles.linkBox}>
+                            <a
+                                href={facility.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.officialBtn}
+                            >
+                                公式サイトを見る &nearr;
+                            </a>
+                        </div>
+                    </section>
+
+                    <aside className={styles.sidebar}>
+                        <div className={styles.widget}>
+                            <h3 className={styles.widgetTitle}>最新トピック</h3>
+                            {facilityNews.length > 0 ? (
+                                <ul className={styles.newsList}>
+                                    {facilityNews.map((item, idx) => (
+                                        <li key={idx} className={styles.newsItem}>
+                                            <span className={styles.newsDate}>{item.date}</span>
+                                            <a href={item.link} target="_blank" rel="noopener noreferrer" className={styles.newsLink}>
+                                                {item.title}
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className={styles.widgetText}>
+                                    現在、最新のお知らせはありません。
+                                </p>
+                            )}
+                        </div>
+
+                        {facility.twitter && (
+                            <div className={styles.widget}>
+                                <h3 className={styles.widgetTitle}>公式X（Twitter）</h3>
+                                <div className={styles.twitterWrapper}>
+                                    <a className="twitter-timeline" data-height="400" href={facility.twitter}>Tweets by {facility.name}</a>
+                                    <script async src="https://platform.twitter.com/widgets.js" charSet="utf-8"></script>
+                                </div>
+                            </div>
+                        )}
+                    </aside>
+                </div>
+            </article>
+        </main>
+    );
+}

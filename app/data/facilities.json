@@ -1,0 +1,142 @@
+[
+    {
+        "id": "sannaimaruyama",
+        "name": "特別史跡 三内丸山遺跡",
+        "region": "Hokkaido-Tohoku",
+        "prefecture": "青森県",
+        "address": "青森県青森市三内字丸山305",
+        "description": "日本最大級の縄文集落跡。大型竪穴建物跡や大型掘立柱建物跡が復元されており、縄文時代のムラの様子を体感できます。",
+        "url": "https://sannaimaruyama.pref.aomori.jp/",
+        "thumbnail": "https://placehold.co/600x400/8B4513/FFF?text=Sannaimaruyama",
+        "tags": [
+            "史跡",
+            "博物館"
+        ]
+    },
+    {
+        "id": "togariishi",
+        "name": "茅野市尖石縄文考古館",
+        "region": "Chubu",
+        "prefecture": "長野県",
+        "address": "長野県茅野市豊平4734-132",
+        "description": "国宝に指定された2体の土偶「縄文のビーナス」と「仮面の女神」を所蔵し、八ヶ岳山麓の縄文文化を伝える考古館。",
+        "url": "https://www.city.chino.lg.jp/site/togariishi/",
+        "thumbnail": "https://placehold.co/600x400/556B2F/FFF?text=Togariishi",
+        "tags": [
+            "博物館",
+            "国宝"
+        ]
+    },
+    {
+        "id": "kasori",
+        "name": "加曽利貝塚博物館",
+        "region": "Kanto",
+        "prefecture": "千葉県",
+        "address": "千葉県千葉市若葉区桜木8-33-1",
+        "description": "世界最大規模の貝塚である特別史跡 加曽利貝塚。縄文人の食生活や貝塚の形成過程を学ぶことができます。",
+        "url": "https://www.city.chiba.jp/kasori/",
+        "thumbnail": "https://placehold.co/600x400/A0522D/FFF?text=Kasori",
+        "tags": [
+            "貝塚",
+            "博物館"
+        ]
+    },
+    {
+        "id": "korekawa",
+        "name": "八戸市埋蔵文化財センター 是川縄文館",
+        "region": "Hokkaido-Tohoku",
+        "prefecture": "青森県",
+        "address": "青森県八戸市大字是川字横山1",
+        "description": "国宝の「合掌土偶」や精巧な漆器などを展示。是川遺跡や風張1遺跡から出土した貴重な遺物が見どころ。",
+        "url": "https://www.korekawa-jomon.jp/",
+        "thumbnail": "https://placehold.co/600x400/8B4513/FFF?text=Korekawa",
+        "tags": [
+            "博物館",
+            "国宝"
+        ]
+    },
+    {
+        "id": "idojiri",
+        "name": "井戸尻考古館",
+        "region": "Chubu",
+        "prefecture": "長野県",
+        "address": "長野県諏訪郡富士見町境7053",
+        "description": "独特の造形美を持つ「井戸尻式土器」や、水煙渦巻文深鉢など、縄文中期を代表する芸術的な土器群を展示。",
+        "url": "https://userweb.alles.or.jp/fujimi/idojiri.html",
+        "thumbnail": "https://placehold.co/600x400/556B2F/FFF?text=Idojiri",
+        "tags": [
+            "博物館",
+            "土器"
+        ]
+    },
+    {
+        "id": "jomon-museum",
+        "name": "若狭三方縄文博物館",
+        "region": "Chubu",
+        "prefecture": "福井県",
+        "address": "福井県三方上中郡若狭町鳥浜122-28-1",
+        "description": "鳥浜貝塚などの出土品を中心に、縄文人の技術や環境利用について展示。丸木舟や漆器なども紹介。",
+        "url": "http://www.wakasamikata-jomon.com/",
+        "thumbnail": "https://placehold.co/600x400/A0522D/FFF?text=Wakasa+Mikata",
+        "tags": [
+            "博物館",
+            "貝塚"
+        ]
+    },
+    {
+        "id": "umaikata",
+        "name": "新潟県立歴史博物館",
+        "region": "Chubu",
+        "prefecture": "新潟県",
+        "address": "新潟県長岡市関原町1丁目字権現堂2247番2",
+        "description": "火焔型土器の全盛期である信濃川流域の縄文文化を中心に、新潟県の歴史を俯瞰する博物館。ダイナミックな縄文展示が特徴。",
+        "url": "http://nbz.or.jp/",
+        "thumbnail": "https://placehold.co/600x400/8B4513/FFF?text=Niigata+History",
+        "tags": [
+            "博物館",
+            "火焔型土器"
+        ]
+    },
+    {
+        "id": "uenohara",
+        "name": "上野原縄文の森",
+        "region": "Kyushu",
+        "prefecture": "鹿児島県",
+        "address": "鹿児島県霧島市国分上野原縄文の森1-1",
+        "description": "約9500年前の大集落跡である上野原遺跡。広大な敷地に復元集落や展示館があり、南九州の縄文文化を感じることができます。",
+        "url": "https://www.jomon-no-mori.jp/",
+        "thumbnail": "https://placehold.co/600x400/556B2F/FFF?text=Uenohara",
+        "tags": [
+            "史跡",
+            "博物館"
+        ]
+    },
+    {
+        "id": "maibun",
+        "name": "山梨県立考古博物館",
+        "region": "Chubu",
+        "prefecture": "山梨県",
+        "address": "山梨県甲府市下曽根町923",
+        "description": "山梨県内の豊かな縄文時代の出土品を展示。水煙文土器や精巧な土偶など、縄文人たちの高い芸術性を確認できます。",
+        "url": "https://www.pref.yamanashi.jp/kouko-hak/",
+        "thumbnail": "https://placehold.co/600x400/A0522D/FFF?text=Yamanashi",
+        "tags": [
+            "博物館",
+            "土偶"
+        ]
+    },
+    {
+        "id": "ofune",
+        "name": "大船遺跡",
+        "region": "Hokkaido-Tohoku",
+        "prefecture": "北海道",
+        "address": "北海道函館市大船町575-1",
+        "description": "世界文化遺産「北海道・北東北の縄文遺跡群」の一部。深く掘り込まれた巨大な竪穴建物跡が特徴で、祭祀場や盛土が残る。",
+        "url": "https://jomon-japansite.jp/site/ofune/",
+        "thumbnail": "https://placehold.co/600x400/8B4513/FFF?text=Ofune",
+        "tags": [
+            "史跡",
+            "世界遺産"
+        ]
+    }
+]

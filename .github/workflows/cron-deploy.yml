@@ -1,0 +1,44 @@
+name: Daily Crawler and Deploy
+
+on:
+  schedule:
+    # 毎日 UTC 23:00 (日本時間の朝 08:00) に自動実行
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+    # 手動実行用ボタンも有効化（テストなどに便利）
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # LTSバージョン
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Crawler
+        run: node scripts/crawler.js
+        env:
+          # クローラー実行時に必要な環境変数があれば設定
+          NODE_ENV: production
+
+      - name: Build Next.js App
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          channelId: live
+          projectId: jomon-portal # ←★ Firebaseの正しいプロジェクトIDに書き換えること
