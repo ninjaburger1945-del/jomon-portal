@@ -103,21 +103,29 @@
 }
 
 .officialBtn {
-    display: inline-block;
-    background-color: var(--accent-forest);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: var(--accent-terracotta);
     color: #fff;
-    padding: 14px 28px;
-    border-radius: 8px;
+    padding: 16px 32px;
+    border-radius: 50px;
     font-weight: 700;
-    font-size: 1.1rem;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    font-size: 1.15rem;
+    box-shadow: 0 4px 15px rgba(215, 110, 84, 0.4);
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    text-decoration: none;
 }
 
 .officialBtn:hover {
-    background-color: #1e3315;
-    transform: translateY(-2px);
+    background-color: #fff;
+    color: var(--accent-terracotta);
+    border: 2px solid var(--accent-terracotta);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(215, 110, 84, 0.5);
     opacity: 1;
-    /* override global hover */
 }
 
 .sidebar {
@@ -225,4 +233,20 @@
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.05);
     }
+}
+
+.aiBadge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    backdrop-filter: blur(4px);
+    z-index: 2;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!-- Author: Bub's, this artwork is *not* copyrighted -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="260" height="200">
+ <path d="M 47,135 C 103,154 117,139 137,125 C 160,113 176,103 226,120 L 213,160 C 188,153 168,154 142,173 C 114,194 77,192 34,175 Z" style="fill:#CCC"/>
+ <path d="M 52,200 L 0,149 L 66,123 Z" style="fill:#CCC"/>
+ <path d="M 213,64 C 159,44 143,60 123,74 C 101,86 84,96 35,79 L 49,37 C 73,46 92,45 118,26 C 147,5 185,6 226,24 Z" style="fill:#666"/>
+ <path d="M 208,0 L 260,50 L 195,76 Z" style="fill:#666"/>
+</svg>

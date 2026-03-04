@@ -10,7 +10,7 @@ const TARGETS = [
         name: '特別史跡 三内丸山遺跡',
         url: 'https://sannaimaruyama.pref.aomori.jp/',
         // セレクターは公式サイトの構造に合わせて調整（プロトタイプ用の仮設定）
-        selector: '.news-list li',
+        selector: '#top_cont_news li',
     }
 ];
 
@@ -33,33 +33,86 @@ async function crawl() {
             });
 
             // CheerioでHTMLをパース
+            require('fs').writeFileSync('sannai.html', response.data);
             const $ = cheerio.load(response.data);
             const newsItems = [];
 
-            // 指定されたセレクターに従って情報を抽出（最初の5件）
-            $(target.selector).slice(0, 5).each((i, el) => {
-                // ※ 実際のサイトの構造（aタグ、spanタグ等）に合わせて取得ロジックは微調整が必要です
-                const date = $(el).find('time, .date, span').first().text().trim() || new Date().toISOString().split('T')[0];
-                const title = $(el).find('a').text().trim() || $(el).text().trim();
-                const rawLink = $(el).find('a').attr('href');
+            // 汎用的なセレクターでニュースアイテム候補を取得
+            const selectors = [
+                target.selector,
+                '.news-list li', '.info-list li', 'ul.news li', 'dl.news', '.topics li', 'article', '.list-news li',
+                '.top-news li', '.information li', '#news li', '#topics li', 'ul.whatsnew li', 'ul.info li',
+                '.p-top-news__item'
+            ].filter(Boolean);
 
-                // 相対パスの場合は絶対URLに変換
-                let link = rawLink;
-                if (link && link.startsWith('/')) {
-                    const urlObj = new URL(target.url);
-                    link = `${urlObj.protocol}//${urlObj.host}${link}`;
+            let elements = null;
+            for (const sel of selectors) {
+                const els = $(sel);
+                if (els.length > 0) {
+                    elements = els;
+                    console.log(`セレクター '${sel}' で ${els.length} 件の要素を見つけました。`);
+                    break;
                 }
+            }
 
-                if (title) {
-                    newsItems.push({
-                        facilityId: target.id,
-                        facilityName: target.name,
-                        date,
-                        title,
-                        link: link || target.url
-                    });
-                }
-            });
+            if (elements) {
+                elements.slice(0, 5).each((i, el) => {
+                    // 日付の取得: time, .date, span などから
+                    let dateStr = $(el).find('time, .date, .day, span').first().text().trim();
+                    // 日付っぽい文字列がない場合のフォールバック（YYYY.MM.DD や YYYY/MM/DD などを探す）
+                    if (!dateStr || !/\d{4}[年./-]?\d{1,2}[月./-]?\d{1,2}/.test(dateStr)) {
+                        const text = $(el).text();
+                        const match = text.match(/\d{4}[年./-]?\d{1,2}[月./-]?\d{1,2}/);
+                        if (match) {
+                            dateStr = match[0];
+                        } else {
+                            dateStr = new Date().toISOString().split('T')[0];
+                        }
+                    } else {
+                        // 余計な改行などを除去
+                        dateStr = dateStr.replace(/\s+/g, ' ');
+                    }
+
+                    // タイトルの取得: aタグのテキスト、なければ要素全体のテキスト
+                    let title = $(el).find('a').text().trim();
+                    if (!title) {
+                        title = $(el).text().trim().replace(/\s+/g, ' ');
+                        // 日付部分が含まれていたら除去してみる
+                        if (title.includes(dateStr)) {
+                            title = title.replace(dateStr, '').trim();
+                        }
+                    }
+
+                    // リンクの取得
+                    const rawLink = $(el).find('a').attr('href');
+
+                    // 相対パスの場合は絶対URLに変換
+                    let link = rawLink;
+                    if (link && !link.startsWith('http')) {
+                        try {
+                            const urlObj = new URL(target.url);
+                            if (link.startsWith('/')) {
+                                link = `${urlObj.protocol}//${urlObj.host}${link}`;
+                            } else {
+                                link = `${urlObj.href.replace(/\/+$/, '')}/${link}`;
+                            }
+                        } catch (e) {
+                            // パースエラー時は元のURLにする
+                            link = target.url;
+                        }
+                    }
+
+                    if (title && title.length > 0 && title !== dateStr) {
+                        newsItems.push({
+                            facilityId: target.id,
+                            facilityName: target.name,
+                            date: dateStr,
+                            title,
+                            link: link || target.url
+                        });
+                    }
+                });
+            }
 
             console.log(`=> ${newsItems.length}件のニュースを取得しました。`);
             allNews.push(...newsItems);
