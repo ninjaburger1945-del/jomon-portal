@@ -1,0 +1,58 @@
+name: "Daily Autopilot: Jomon Explorer"
+
+on:
+  schedule:
+    # 毎日 UTC 23:00 (日本時間の 08:00)
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  explore-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 変更をコミットするために必要
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: AI Crawler - Find 5 New Facilities
+        run: node scripts/daily-crawler.js
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Verify Links strict check
+        run: node scripts/verify-all.js
+
+      - name: Build Next.js Static Export
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          channelId: live
+          projectId: jomon-portal 
+
+      - name: Commit Database Updates
+        if: success()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/data/facilities.json
+          git commit -m "chore(data): auto-added 5 new Jomon facilities via AI crawler" || echo "No changes to commit"
+          git push

@@ -16,6 +16,11 @@ interface Facility {
     thumbnail: string;
     tags: string[];
     twitter?: string;
+    access?: {
+        info: string;
+        rank: "S" | "A" | "B";
+        advice: string;
+    };
 }
 
 export async function generateStaticParams() {
@@ -104,6 +109,24 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                     <section className={styles.mainInfo}>
                         <h2 className={styles.sectionTitle}>施設概要</h2>
                         <p className={styles.description}>{facility.description}</p>
+
+                        {facility.access && (
+                            <div className={styles.accessSection}>
+                                <h2 className={styles.sectionTitle}>アクセス情報</h2>
+                                <div className={styles.accessBox}>
+                                    <div className={styles.accessHeader}>
+                                        <span className={`${styles.rankBadge} ${styles[`rank${facility.access.rank}`]}`}>
+                                            難易度 {facility.access.rank}
+                                        </span>
+                                        <p className={styles.accessInfoText}>{facility.access.info}</p>
+                                    </div>
+                                    <div className={styles.adviceBubble}>
+                                        <div className={styles.senpaiIcon}>👦 遺跡少年</div>
+                                        <p className={styles.adviceText}>{facility.access.advice}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <div className={styles.linkBox}>
                             <a
