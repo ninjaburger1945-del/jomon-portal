@@ -3,14 +3,14 @@ name: "Daily Autopilot: Jomon Explorer"
 on:
   schedule:
     - cron: '48 22 * * *' # 毎日日本時間 7:48
-  workflow_dispatch: # 手動実行用ボタン
+  workflow_dispatch: # 手動実行ボタン
 
 jobs:
   explore-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write # リポジトリへの書き込み権限を明示
-    
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -31,12 +31,13 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-      # 生成された facilities.json をリポジトリにコミットする（重要）
+      # 生成された facilities.json をリポジトリにコミットする
+      # git add . にすることで、新規ファイル作成時のエラーを回避します
       - name: Commit and Push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add facilities.json
+          git add .
           git diff --quiet && git diff --staged --quiet || (git commit -m "Update Jomon facilities data" && git push)
 
       - name: Build
