@@ -6,9 +6,10 @@ async function run() {
   try {
     if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing");
 
-    const genAI = new GoogleGenerative AI(process.env.GEMINI_API_KEY);
+    // 修正：スペースを削除して GoogleGenerativeAI に
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     
-    // 404回避：2026年最新の gemini-2.5-flash を指定
+    // 最新モデル 2.5-flash を使用
     const model = genAI.getGenerativeModel(
       { model: "gemini-2.5-flash" }, 
       { apiVersion: "v1" }
