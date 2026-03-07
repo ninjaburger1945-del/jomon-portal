@@ -48,3 +48,25 @@ async function run() {
     // Markdownの装飾を除去してパース
     const jsonString = text.replace(/```json/g, "").replace(/```/g, "").trim();
     const newData = JSON.parse(jsonString);
+
+    // 取得したデータが既存のものと被っていないか最終チェック
+    const isDuplicate = existingData.some(d => d.name === newData[0].name);
+
+    if (isDuplicate) {
+      console.log(`⚠️ Duplicate found: ${newData[0].name}. Skipping save.`);
+    } else {
+      const updatedData = [...existingData, ...newData];
+      fs.writeFileSync(filePath, JSON.stringify(updatedData, null, 2));
+      console.log(`--- Execution Success ---`);
+      console.log(`Added New Site: ${newData[0].name}`);
+      console.log(`Total records now: ${updatedData.length}`);
+    }
+
+  } catch (error) {
+    console.error("Detailed Error:", error.message);
+    process.exit(1);
+  }
+}
+
+// ここまで入っているか確認してください
+run();
