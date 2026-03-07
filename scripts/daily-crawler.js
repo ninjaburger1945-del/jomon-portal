@@ -9,6 +9,7 @@ if (!process.env.GEMINI_API_KEY) {
     process.exit(1);
 }
 
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const facilitiesPath = path.join(__dirname, '../app/data/facilities.json');
 
