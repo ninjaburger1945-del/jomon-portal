@@ -6,11 +6,11 @@ async function run() {
   try {
     if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing");
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const genAI = new GoogleGenerative AI(process.env.GEMINI_API_KEY);
     
-    // クォータ制限に強い 'gemini-2.0-flash-lite' を使用
+    // 404回避：2026年最新の gemini-2.5-flash を指定
     const model = genAI.getGenerativeModel(
-      { model: "gemini-2.0-flash-lite" }, 
+      { model: "gemini-2.5-flash" }, 
       { apiVersion: "v1" }
     );
 
@@ -20,7 +20,7 @@ async function run() {
       純粋なJSONデータのみを出力し、解説は含めないでください。
     `;
 
-    console.log("Connecting to Gemini API (v1) using gemini-2.0-flash-lite...");
+    console.log("Connecting to Gemini API (v1) using gemini-2.5-flash...");
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -46,10 +46,6 @@ async function run() {
 
   } catch (error) {
     console.error("Detailed Error:", error.message);
-    // 429エラー（制限）が出た場合の対策アドバイス
-    if (error.message.includes("429")) {
-      console.error("💡 クォータ制限に達しました。Google AI StudioでPay-as-you-goを有効にするか、リセットを待ってください。");
-    }
     process.exit(1);
   }
 }
