@@ -1,6 +1,5 @@
 name: "Daily Autopilot: Jomon Explorer"
 
-
 on:
   schedule:
     - cron: '48 22 * * *'
@@ -18,7 +17,9 @@ jobs:
         with:
           node-version: '20'
       - name: Install
-        run: npm install
+        run: |
+          npm install
+          npm install @google/generative-ai@latest
       - name: Run AI Crawler
         run: node scripts/daily-crawler.js
         env:
