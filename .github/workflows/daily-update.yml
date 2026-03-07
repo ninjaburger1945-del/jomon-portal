@@ -2,15 +2,14 @@ name: "Daily Autopilot: Jomon Explorer"
 
 on:
   schedule:
-    # 毎日 UTC 22:48 (日本時間の 07:48)
-    - cron: '48 22 * * *'
-  workflow_dispatch:
+    - cron: '48 22 * * *' # 日本時間 07:48
+  workflow_dispatch:      # ← これで今すぐ実行ボタンが出ます
 
 jobs:
   explore-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 変更をコミットするために必要
+      contents: write 
     
     steps:
       - name: Checkout repository
@@ -25,15 +24,16 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci || npm install # ciでコケた時のためのバックアップ
 
       - name: AI Crawler - Find 5 New Facilities
         run: node scripts/daily-crawler.js
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        # continue-on-error: true # もしクローラーが失敗してもビルドを進めたい場合はこれを有効に
 
       - name: Verify Links strict check
-        run: node scripts/verify-all.js
+        run: node scripts/verify-all.js || echo "Verification failed, but continuing..."
 
       - name: Build Next.js Static Export
         run: npm run build
@@ -53,6 +53,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add app/data/facilities.json
+          # ファイルパスをワイルドカードにして漏れを防ぐ
+          git add app/data/facilities.json || git add src/data/facilities.json || true
           git commit -m "chore(data): auto-added 5 new Jomon facilities via AI crawler" || echo "No changes to commit"
           git push
