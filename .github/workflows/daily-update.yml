@@ -1,71 +1,49 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const fs = require("fs");
-const path = require("path");
+name: "Daily Autopilot: Jomon Explorer"
 
-async function run() {
-  try {
-    if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing");
+on:
+  schedule:
+    - cron: '48 22 * * *'
+  workflow_dispatch:
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }, { apiVersion: "v1" });
+jobs:
+  explore-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    const filePath = path.join(__dirname, "../facilities.json");
-    let existingData = [];
-    if (fs.existsSync(filePath)) {
-      const fileContent = fs.readFileSync(filePath, "utf-8");
-      existingData = JSON.parse(fileContent || "[]");
-    }
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    const existingNames = existingData.map(d => d.name);
-    
-    // AIの「思考の偏り」を防ぐため、ランダムに地方を指定する仕掛け
-    const regions = ["北海道", "東北", "関東", "中部", "近畿", "中国", "四国", "九州"];
-    const randomRegion = regions[Math.floor(Math.random() * regions.length)];
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install @google/generative-ai@latest
 
-    const prompt = `
-      日本の縄文遺跡を1つ選び、JSON形式で出力してください。
-      今回の探索ターゲット地方: 【${randomRegion}地方】
-      
-      【絶対遵守のルール】
-      1. 以下の遺跡名は既にリストにあるため、これらとは「異なる」別の遺跡を必ず選んでください。
-         既にある遺跡: ${existingNames.join(", ")}
-      2. 世界遺産（三内丸山、大湯など）以外の、地元で知られるような遺跡も積極的に選んでください。
-      3. 出力は以下のJSON配列のみとし、解説文は一切含めないでください。
+      - name: Run AI Crawler
+        run: node scripts/daily-crawler.js
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-      [ { "name": "遺跡名", "location": "都道府県・市区町村", "description": "100文字程度の解説" } ]
-    `;
+      - name: Commit and Push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update Jomon facilities data" && git push)
 
-    console.log(`Current records: ${existingData.length}. Targeting ${randomRegion} region...`);
-    
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+      - name: Build
+        run: npm run build
 
-    const jsonString = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    const newData = JSON.parse(jsonString);
-    const newSiteName = newData[0].name;
-
-    // より厳しい重複チェック（部分一致も許さない）
-    const isDuplicate = existingNames.some(name => 
-      newSiteName.includes(name) || name.includes(newSiteName) || newSiteName === name
-    );
-
-    if (isDuplicate) {
-      console.error(`❌ Duplicate detected: "${newSiteName}". Retrying in next run.`);
-      process.exit(1); // GitHub Actionsを「失敗」させて、変なデータの保存を防ぐ
-    }
-
-    const updatedData = [...existingData, ...newData];
-    fs.writeFileSync(filePath, JSON.stringify(updatedData, null, 2));
-
-    console.log(`--- Execution Success ---`);
-    console.log(`Added: ${newSiteName} (${newData[0].location})`);
-    console.log(`Total count: ${updatedData.length}`);
-
-  } catch (error) {
-    console.error("Detailed Error:", error.message);
-    process.exit(1);
-  }
-}
-
-run();
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          channelId: live
+          projectId: jomon-portal
