@@ -2,26 +2,90 @@
   {
     "name": "三内丸山遺跡",
     "location": "青森県青森市",
-    "description": "約5,900年前から4,200年前（縄文時代中期）にかけての大規模な集落跡です。大型掘立柱建物、貯蔵穴、竪穴住居、盛土などが見つかり、縄文文化の定住性や豊かな生活を伝える重要な遺跡です。2021年には「北海道・北東北の縄文遺跡群」の一部として世界文化遺産に登録されました。"
-  },
-  {
-    "name": "三内丸山遺跡",
-    "location": "青森県青森市",
-    "description": "約5,900年前から4,200年前（縄文時代前期中頃から中期末）にかけて営まれた、日本最大級の縄文集落跡。大型掘立柱建物跡や多数の竪穴建物跡、墓、貯蔵穴などが発見されており、当時の人々の定住生活や高度な文化を示す貴重な遺跡である。2021年に世界遺産「北海道・北東北の縄文遺跡群」の構成資産の一つとして登録された。"
+    "description": "日本最大級の縄文集落跡。大型竪穴建物跡や大型掘立柱建物跡が復元されており、縄文時代のムラの様子を体感できます。",
+    "access": "JR青森駅から市営バスで約20分「三内丸山遺跡前」下車すぐ。",
+    "difficulty": "A",
+    "ai_comment": "ここは縄文の聖地だよ！バスの本数も多くて、初心者でも安心して行けるアクセス難易度Aの優等生だね。",
+    "official_url": "https://sannaimaruyama.pref.aomori.jp/"
   },
   {
     "name": "大湯環状列石",
     "location": "秋田県鹿角市",
-    "description": "後期縄文時代の大規模なストーンサークル（環状列石）を主体とする遺跡。万座と野中という2つの環状列石を中心に、竪穴住居跡や配石遺構などが発見されています。日時計説や天体観測施設説など、その用途については諸説あります。国の特別史跡に指定され、「北海道・北東北の縄文遺跡群」の一部として世界遺産に登録されています。"
+    "description": "万座と野中堂の2つの大きなストーンサークルからなる遺跡。高度な天文学的知識があったことを示唆しています。",
+    "access": "JR鹿角花輪駅からバスで約20分。ただし本数が少ないため注意が必要。",
+    "difficulty": "C",
+    "ai_comment": "ストーンサークルの迫力はすごいけど、公共交通機関だとちょっと大変かな。レンタカーを借りるのが正解だよ！",
+    "official_url": "https://www.city.kazuno.akita.jp/kanko_bunka_sports/bunka_geijutsu/7/index.html"
   },
   {
     "name": "御所野遺跡",
     "location": "岩手県一戸町",
-    "description": "岩手県一戸町にある縄文時代中期の集落遺跡。大規模な竪穴住居群や貯蔵穴、土偶、土器などが出土しており、当時の豊かな暮らしを伝えています。特に、復元された竪穴住居群が特徴的で、縄文時代の生活の様子を体感できます。2021年には「北海道・北東北の縄文遺跡群」の一部として世界遺産に登録されました。"
+    "description": "土屋根の竪穴建物が復元された配石遺構を伴う集落跡。世界遺産にも登録された美しい遺跡公園です。",
+    "access": "IGRいわて銀河鉄道「一戸駅」からタクシーで約5分。",
+    "difficulty": "B",
+    "ai_comment": "駅から歩くのは厳しいけど、タクシーを使えばすぐだよ。土屋根の建物は全国でも珍しいから必見だね！",
+    "official_url": "https://goshono-iseki.com/"
   },
   {
-    "name": "井戸尻遺跡群",
-    "location": "長野県諏訪郡富士見町",
-    "description": "長野県富士見町に広がる縄文時代中期の遺跡群。井戸尻遺跡、居沢遺跡、藤内遺跡などが含まれ、豊かな自然の中で大規模な集落が営まれました。特に、独特の造形美を持つ土器や土偶が多数出土しており、縄文文化の中でも際立った地域色を示します。「水煙文土器」に代表される躍動感あふれる土器や、写実的かつ幻想的な土偶（神像筒形土器など）は、井戸尻文化として知られ、地域の縄文文化の豊かさを物語っています。国指定史跡であり、出土品は井戸尻考古館に展示されています。"
-  }
-]
+    "name": "是川石器時代遺跡",
+    "location": "青森県八戸市",
+    "description": "「合掌土偶」や優れた漆器が出土。縄文晩期の高度な精神文化と工芸技術を象徴する遺跡です。",
+    "access": "JR八戸駅から南部バスで約20分「是川縄文館」下車。",
+    "difficulty": "B",
+    "ai_comment": "バスで行けるけど、展示が充実してるから時間に余裕を持って行ってね。漆器の美しさには驚くはずだよ！",
+    "official_url": "https://www.korekawa-jomon.jp/"
+  },
+  {
+    "name": "小牧野遺跡",
+    "location": "青森県青森市",
+    "description": "三重の環状列石が特徴的な遺跡。当時の祭祀や信仰の場であったと考えられています。",
+    "access": "JR青森駅からタクシーで約30分。公共交通機関のみでは到達困難。",
+    "difficulty": "C",
+    "ai_comment": "ここはアクセス難易度【C】。レンタカー必須かタクシーを推奨するよ。山の上にあるから景色も最高だよ！",
+    "official_url": "https://komakino.jp/"
+  },
+  {
+    "name": "尖石石器時代遺跡",
+    "location": "長野県茅野市",
+    "description": "「縄文のビーナス」が出土した八ヶ岳麓の遺跡。黒曜石の交易拠点としても知られています。",
+    "access": "JR茅野駅からバス「渋の湯線」で約20分「尖石縄文考古館」下車。",
+    "difficulty": "B",
+    "ai_comment": "八ヶ岳の麓で空気もおいしいよ！バスの時間を事前に調べておけば、スムーズに国宝土偶に会えるよ。",
+    "official_url": "https://www.city.chino.lg.jp/site/togariishi/"
+  },
+  {
+    "name": "加曽利貝塚",
+    "location": "千葉県千葉市",
+    "description": "日本最大級の貝塚。ドーナツ型の巨大な貝層断面を見学でき、数千年の歴史を体感できます。",
+    "access": "千葉モノレール「桜木駅」から徒歩約15分。",
+    "difficulty": "A",
+    "ai_comment": "モノレールの駅から歩いて行けるアクセスの良さが魅力！お散歩気分で縄文のタイムカプセルを楽しもう。",
+    "official_url": "https://www.city.chiba.jp/kasori/"
+  },
+  {
+    "name": "上野原遺跡",
+    "location": "鹿児島県霧島市",
+    "description": "国内最古級の定住集落跡。火山灰の下から当時の生活面がそのまま発見された貴重な遺跡です。",
+    "access": "JR国分駅からタクシーで約15分。",
+    "difficulty": "B",
+    "ai_comment": "九州の縄文文化の始まりを知るならここ！高台にあるから桜島が見えることもあるよ。",
+    "official_url": "https://www.jomon-no-mori.jp/"
+  },
+  { "name": "大森勝山遺跡", "location": "青森県弘前市", "description": "岩木山を望む環状列石。冬至の日の入り方向に軸が向いています。", "access": "弘前駅からバスと徒歩で約1時間。", "difficulty": "D", "ai_comment": "ここはかなりの難所。車がないと厳しいけど、その分、神聖な空気を感じられるよ！", "official_url": "https://www.city.hirosaki.aomori.jp/omori-katsuyama/" },
+  { "name": "伊勢堂岱遺跡", "location": "秋田県北秋田市", "description": "4つの環状列石が集中する遺跡。祭祀の空間として機能していました。", "access": "秋田内陸縦貫鉄道「縄文小ヶ田駅」から徒歩5分。", "difficulty": "A", "ai_comment": "専用の駅があるからアクセスは最高だね！内陸線の旅と一緒に楽しんでね。", "official_url": "https://www.city.kitaakita.akita.jp/isedotai/" },
+  { "name": "入江・高砂貝塚", "location": "北海道洞爺湖町", "description": "噴火湾を望む貝塚。当時の食生活や埋葬文化を伝えています。", "access": "JR洞爺駅からバスで約15分。", "difficulty": "B", "ai_comment": "洞爺湖観光とセットで行けるよ。海と山の幸を食べてた縄文人の豊かさがわかるよ！", "official_url": "https://www.town.toyako.hokkaido.jp/rekisinotoki/" },
+  { "name": "北黄金貝塚", "location": "北海道伊達市", "description": "豊かな海産物を利用した貝塚。アニミズム思想の痕跡も見つかっています。", "access": "JR黄金駅から徒歩約20分。", "difficulty": "B", "ai_comment": "噴火湾の景色がきれいだよ。水場の祭祀跡は神秘的だから、ぜひ見てほしいな。", "official_url": "https://www.city.date.hokkaido.jp/kaizuka/" },
+  { "name": "大船遺跡", "location": "北海道函館市", "description": "巨大な竪穴建物跡と大規模な盛り土が特徴。定住生活の深まりを示します。", "access": "JR函館駅から車で約1時間。", "difficulty": "C", "ai_comment": "建物の深さに驚くはず！車がおすすめだけど、函館の歴史の奥深さを感じられるよ。", "official_url": "https://www.city.hakodate.hokkaido.jp/docs/2014041100342/" },
+  { "name": "垣ノ島遺跡", "location": "北海道函館市", "description": "国内最古級の漆製品が出土。大規模な土木工事の形跡が見られます。", "access": "JR函館駅から車で約1時間。", "difficulty": "C", "ai_comment": "大船遺跡の近くだよ。セットで回るのが縄文ファンのお約束だね！", "official_url": "https://www.city.hakodate.hokkaido.jp/docs/2014041100342/" },
+  { "name": "井戸尻遺跡群", "location": "長野県富士見町", "description": "湧水地に形成された集落。独特な文様の土器が多く出土しています。", "access": "JR信濃境駅から徒歩約15分。", "difficulty": "A", "ai_comment": "駅から歩けるのが嬉しいね。八ヶ岳の山並みがバックに写る写真は映えるよ！", "official_url": "https://userweb.idojiri.jp/" },
+  { "name": "鳥浜貝塚", "location": "福井県若狭町", "description": "「縄文のタイムカプセル」と呼ばれる湿地遺跡。木製品が良好に残っています。", "access": "JR三方駅から徒歩約20分。", "difficulty": "B", "ai_comment": "丸木舟の実物が見られるのはここだけかも。縄文人の航海技術にワクワクするね！", "official_url": "https://www.town.fukui-wakasa.lg.jp/jomon/" },
+  { "name": "水洗山遺跡", "location": "千葉県市原市", "description": "東京湾沿岸の大規模貝塚。海洋資源の利用実態を伝えます。", "access": "JR五井駅からタクシーで約10分。", "difficulty": "B", "ai_comment": "貝塚の規模にびっくりするよ。千葉は貝塚王国だから、ここも外せないね！", "official_url": "https://www.city.ichihara.chiba.jp/" },
+  { "name": "大平山元遺跡", "location": "青森県外ヶ浜町", "description": "国内最古級の土器片が出土。土器の出現という転換点を象徴します。", "access": "JR蟹田駅から車で約15分。", "difficulty": "C", "ai_comment": "縄文の始まりの場所だね。公共交通は不便だけど、歴史の重みは唯一無二だよ。", "official_url": "https://www.town.sotogahama.lg.jp/" },
+  { "name": "真脇遺跡", "location": "石川県能登町", "description": "イルカの骨が大量に出土した漁労集落。ウッドサークルも発見。", "access": "のと鉄道穴水駅からバスで約1時間。", "difficulty": "C", "ai_comment": "能登の豊かな海の恵みを感じられるよ。ウッドサークルは圧巻の存在感！", "official_url": "https://mawaki-iseki.jp/" },
+  { "name": "チカモリ遺跡", "location": "石川県金沢市", "description": "巨大な木柱を環状に配置した遺構が特徴。巨木信仰がうかがえます。", "access": "JR金沢駅からバスで約15分「新神田」下車徒歩10分。", "difficulty": "A", "ai_comment": "金沢市街に近いから、観光ついでに行きやすいよ。巨大な柱の迫力を楽しんでね。", "official_url": "https://www.kanazawa-museum.jp/maizou/" },
+  { "name": "釈迦堂遺跡", "location": "山梨県笛吹市", "description": "中央道建設時に発見。膨大な数の土偶が出土しました。", "access": "中央道釈迦堂PAから徒歩すぐ（一般道からも入場可）。", "difficulty": "A", "ai_comment": "高速道路のPAから行ける珍しい遺跡だよ。ドライブの休憩に縄文を楽しもう！", "official_url": "https://www.shakado.jp/" },
+  { "name": "水久保遺跡", "location": "長野県辰野町", "description": "石器製作の跡が鮮明に残る遺跡。技術を磨く縄文人の姿が浮かびます。", "access": "JR辰野駅からタクシーで約10分。", "difficulty": "B", "ai_comment": "石器づくりの職人村だったのかな。ものづくりが好きな人にはたまらない場所だよ。", "official_url": "https://www.town.tatsuno.lg.jp/" },
+  { "name": "津茂遺跡", "location": "島根県益田市", "description": "山陰地方を代表する縄文集落。中国地方の定住過程を知る上で重要です。", "access": "JR益田駅から車で約15分。", "difficulty": "C", "ai_comment": "山陰の縄文文化は個性的だよ。車があればアクセスもしやすいからおすすめ！", "official_url": "https://www.city.masuda.lg.jp/" },
+  { "name": "平出遺跡", "location": "長野県塩尻市", "description": "縄文から平安まで続く複合遺跡。中期の集落規模は最大級です。", "access": "JR塩尻駅から徒歩約20分、またはタクシー。", "difficulty": "B", "ai_comment": "広々とした公園になってるよ。歴史の積み重なりをゆっくり散歩しながら感じてね。", "official_url": "https://www.city.shiojiri.lg.jp/soshiki/45/" },
+  { "name": "長者ヶ原遺跡", "location": "新潟県糸魚川市", "description": "ヒスイの加工拠点として栄えた遺跡。遠方との交易を支えました。", "access": "JR糸魚川駅からバスで約15分「長者ヶ原遺跡」下車。", "difficulty": "B", "ai_comment": "ヒスイの輝きは縄文人の憧れだったんだね。ここに来るとその情熱が伝わってくるよ。", "official_url": "https://www.city.itoigawa.lg.jp/2437.htm" },
+  { "name": "原山支石墓群", "location": "長崎県島原市", "description": "縄文晩期から弥生への変遷を示す墓制。大陸との交流を伝えます。", "access": "島原鉄道「島原駅」からタクシーで約15分。", "
