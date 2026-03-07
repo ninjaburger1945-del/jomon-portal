@@ -59,7 +59,8 @@ ${existingNames}
 
     try {
         console.log("Requesting 5 new facilities from Gemini AI...");
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+        // 「gemini-」をあえて外したこの名前を試してください
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
 
