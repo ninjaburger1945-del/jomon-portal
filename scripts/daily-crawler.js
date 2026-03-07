@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
+
 // Check for API Key
 if (!process.env.GEMINI_API_KEY) {
     console.error("CRITICAL: GEMINI_API_KEY is not set. Cannot run AI crawler.");
