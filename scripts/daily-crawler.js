@@ -10,7 +10,6 @@ async function run() {
     }
 
     // 2. SDKの初期化とモデルの取得
-    // apiVersion: "v1" を指定することで 404 エラーを確実に回避します
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel(
       { model: "gemini-1.5-flash" },
@@ -31,4 +30,48 @@ async function run() {
     const text = response.text();
 
     // 4. JSONの抽出とパース
-    // 余計な文字（Markdownの枠など）を削
+    const jsonString = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    let newData;
+    try {
+      newData = JSON.parse(jsonString);
+    } catch (e) {
+      console.error("Failed to parse JSON. Raw response:", text);
+      throw new Error("Gemini returned invalid JSON format.");
+    }
+
+    // 5. ファイルの読み書き（パスの解決）
+    const filePath = path.join(__dirname, "../facilities.json");
+    
+    let existingData = [];
+    if (fs.existsSync(filePath)) {
+      const fileContent = fs.readFileSync(filePath, "utf-8");
+      try {
+        existingData = JSON.parse(fileContent || "[]");
+      } catch (e) {
+        console.warn("Existing facilities.json was invalid. Starting fresh.");
+        existingData = [];
+      }
+    }
+
+    // 6. データのマージと保存
+    const updatedData = [...existingData, ...newData];
+    fs.writeFileSync(filePath, JSON.stringify(updatedData, null, 2));
+
+    console.log("--- Execution Success ---");
+    console.log(`Added: ${newData[0]?.name || "Unknown site"}`);
+    console.log(`Total records: ${updatedData.length}`);
+    console.log("-------------------------");
+
+  } catch (error) {
+    console.error("--- Detailed Error Report ---");
+    console.error("Message:", error.message);
+    if (error.stack) {
+      console.error("Stack:", error.stack);
+    }
+    console.error("-----------------------------");
+    process.exit(1);
+  }
+}
+
+// 最後にこの関数を呼び出す
+run();
