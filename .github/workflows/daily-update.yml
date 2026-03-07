@@ -1,5 +1,6 @@
 name: "Daily Autopilot: Jomon Explorer"
 
+
 on:
   schedule:
     - cron: '48 22 * * *'
