@@ -5,10 +5,11 @@ const path = require("path");
 async function validateUrl(url, facilityName) {
     if (!url || !url.startsWith("http")) return `https://www.google.com/search?q=${encodeURIComponent(facilityName)}`;
     try {
-        const headRes = await fetch(url, { method: 'HEAD' });
-        if (headRes.ok) return url;
-        const getRes = await fetch(url, { method: 'GET' });
-        if (getRes.ok) return url;
+        const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36' };
+        const headRes = await fetch(url, { method: 'HEAD', headers });
+        if (headRes.ok || headRes.status === 403 || headRes.status === 405) return url;
+        const getRes = await fetch(url, { method: 'GET', headers });
+        if (getRes.ok || getRes.status === 403 || getRes.status === 405) return url;
     } catch(e) {}
     console.warn(`[WARN] URL ${url} is dead or invalid. Using fallback search link.`);
     return `https://www.google.com/search?q=${encodeURIComponent(facilityName)}`;
@@ -103,7 +104,7 @@ ${existingNames}
             try {
                 console.log(`Downloading AI image for ${nf.name} from Pollinations AI...`);
                 let success = false;
-                for (let attempt = 1; attempt <= 3; attempt++) {
+                for (let attempt = 1; attempt <= 10; attempt++) {
                     const imgRes = await fetch(imageUrl);
                     if (imgRes.ok) {
                         const arrayBuffer = await imgRes.arrayBuffer();
@@ -113,9 +114,9 @@ ${existingNames}
                         nf.thumbnail = `/images/facilities/${nf.id}_ai.png`;
                         success = true;
                         break;
-                    } else if (imgRes.status === 429) {
-                        console.warn(`[WARN] 429 Too Many Requests on attempt ${attempt}. Waiting...`);
-                        await new Promise(r => setTimeout(r, 5000));
+                    } else if (imgRes.status === 429 || imgRes.status >= 500) {
+                        console.warn(`[WARN] HTTP ${imgRes.status} on attempt ${attempt}. Waiting 15s...`);
+                        await new Promise(r => setTimeout(r, 15000));
                     } else {
                         throw new Error(`HTTP Error ${imgRes.status}: ${imgRes.statusText}`);
                     }
