@@ -66,12 +66,14 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
     };
 
     const isAiGenerated = (f: any) => {
-        // URLがhttp/httpsから始まる外部画像は非表示（実際の写真）、内部パスや未設定の場合はAI生成画像として表示
+        // 未設定の場合は動的にPollinations AIから生成されるためAI画像扱い
         if (!f.thumbnail) return true;
-        if (f.thumbnail.startsWith('http://') || f.thumbnail.startsWith('https://')) {
-            return false;
-        }
-        return true;
+        
+        // プロジェクト内に保存されている .png の画像は以前AIで一括生成されたもの（640x640）
+        if (f.thumbnail.endsWith('.png') && f.thumbnail.startsWith('/images/')) return true;
+        
+        // それ以外（外部URLの直リンクや、拡張子が.jpgの実写画像など）は本物の写真とみなす
+        return false;
     };
 
     return (
