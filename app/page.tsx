@@ -201,15 +201,7 @@ export default function Home() {
         )}
       </section>
 
-      <section className={`${styles.section} ${styles.eventsSection}`}>
-        <div className="container">
-          <h2 className={styles.sectionTitle}>各施設の新着情報</h2>
-          <p style={{ textAlign: 'center', opacity: 0.8 }}>
-            全国の縄文施設から最新のワークショップ・展示情報を自動収集しています。
-            <br />（※第2フェーズにてFirebase連携と一緒に実装予定）
-          </p>
-        </div>
-      </section>
+
     </main>
   );
 }
