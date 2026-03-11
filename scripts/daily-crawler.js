@@ -2,6 +2,18 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require("fs");
 const path = require("path");
 
+async function validateUrl(url, facilityName) {
+    if (!url || !url.startsWith("http")) return `https://www.google.com/search?q=${encodeURIComponent(facilityName)}`;
+    try {
+        const headRes = await fetch(url, { method: 'HEAD' });
+        if (headRes.ok) return url;
+        const getRes = await fetch(url, { method: 'GET' });
+        if (getRes.ok) return url;
+    } catch(e) {}
+    console.warn(`[WARN] URL ${url} is dead or invalid. Using fallback search link.`);
+    return `https://www.google.com/search?q=${encodeURIComponent(facilityName)}`;
+}
+
 async function run() {
   try {
     if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing");
@@ -79,6 +91,9 @@ ${existingNames}
     for (const nf of newFacilities) {
         const isDuplicate = existingData.some(f => f.id === nf.id || f.name.includes(nf.name) || nf.name.includes(f.name));
         if (!isDuplicate) {
+            console.log(`Validating URL for ${nf.name}: ${nf.url}`);
+            nf.url = await validateUrl(nf.url, nf.name);
+
             // Pollinations AI will crash with an Internal Server Error if you pass raw Japanese or URL-encoded Japanese that it doesn't like.
             // Sending a purely English string using its ID is much safer.
             const safeName = nf.id.replace(/-/g, ' ');
