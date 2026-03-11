@@ -58,7 +58,7 @@ export default function Home() {
       // フリーワード検索
       const matchQuery =
         facility.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        facility.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (facility.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
         facility.prefecture.includes(searchQuery);
 
       // タグフィルタ

@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
     return {
         title: `${facility.name} | 縄文博物館・資料館ポータル`,
-        description: `${facility.prefecture}にある${facility.name}の施設情報、最新トピック、アクセス情報。${facility.description.substring(0, 100)}`,
+        description: `${facility.prefecture}にある${facility.name}の施設情報、最新トピック、アクセス情報。${facility.description ? facility.description.substring(0, 100) : ''}`,
     };
 }
 
