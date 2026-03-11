@@ -41,23 +41,16 @@ async function run() {
 
     const prompt = `
 あなたは日本の縄文時代における遺跡・貝塚・環状列石などの専門リサーチャーです。
-以下の「すでに登録済みの施設リスト」に含まれていない、**日本国内の重要な縄文時代の遺跡・博物館・資料館**を新たに **1件** ピックアップし、JSON形式で出力してください。
-
-【既存リスト（これらは除外してください）】
-${existingNames}
-
-【条件】
-ターゲット地方: 【${randomRegion}地方】
-世界遺産ではない、その土地ならではの遺跡を探してください。
+今回は臨時として、必ず「市川考古博物館・堀之内貝塚」をピックアップし、JSON形式で出力してください。
 
 【出力要件】
 1. 完全なJSON配列（\`[\{...\}]\`）のみを出力してください。マークダウンのバッククォート不要です。
 2. データ構造は以下の通りにしてください：
 {
-  "id": "英数字のハイフン繋ぎ（例: uenohara-jomon）",
-  "name": "施設の正式名称",
-  "region": "Chubu", 
-  "prefecture": "都道府県名",
+  "id": "ichikawa-horinouchi",
+  "name": "市川考古博物館・堀之内貝塚",
+  "region": "Kanto", 
+  "prefecture": "千葉県",
   "address": "住所",
   "description": "200文字程度の魅力的な紹介文",
   "url": "Google検索機能を用いて必ず正しい公式ウェブサイトのURLを取得し設定してください（lg.jp, go.jp, or.jp等の公的機関や観光協会など。Googleの検索結果URLは絶対に不可です。どうしても見つからない場合は空文字にして下さい）",
@@ -99,37 +92,28 @@ ${existingNames}
             console.log(`Validating URL for ${nf.name}: ${nf.url}`);
             nf.url = await validateUrl(nf.url, nf.name);
 
-            // Pollinations AI will crash with an Internal Server Error if you pass raw Japanese or URL-encoded Japanese that it doesn't like.
-            // Sending a purely English string using its ID is much safer.
-            const safeName = nf.id.replace(/-/g, ' ');
-            const aiPrompt = encodeURIComponent(safeName + " Jomon period historical site in Japan, photorealistic, cinematic lighting");
-            const imageUrl = `https://image.pollinations.ai/prompt/${aiPrompt}?width=640&height=640&nologo=true`;
-            
             try {
-                console.log(`Downloading AI image for ${nf.name} from Pollinations AI...`);
-                let success = false;
-                for (let attempt = 1; attempt <= 10; attempt++) {
-                    const imgRes = await fetch(imageUrl);
-                    if (imgRes.ok) {
-                        const arrayBuffer = await imgRes.arrayBuffer();
-                        const imagePath = path.join(__dirname, '../public/images/facilities', `${nf.id}_ai.png`);
-                        fs.writeFileSync(imagePath, Buffer.from(arrayBuffer));
-                        console.log(`Successfully saved image to ${imagePath}`);
-                        nf.thumbnail = `/images/facilities/${nf.id}_ai.png`;
-                        success = true;
-                        break;
-                    } else if (imgRes.status === 429 || imgRes.status >= 500) {
-                        console.warn(`[WARN] HTTP ${imgRes.status} on attempt ${attempt}. Waiting 15s...`);
-                        await new Promise(r => setTimeout(r, 15000));
-                    } else {
-                        throw new Error(`HTTP Error ${imgRes.status}: ${imgRes.statusText}`);
-                    }
-                }
-                if (!success && !nf.thumbnail) {
-                    nf.thumbnail = ""; // Leave blank if all attempts failed
+                console.log(`Selecting an existing AI image for ${nf.name}...`);
+                const imagesDir = path.join(__dirname, '../public/images/facilities');
+                const files = fs.readdirSync(imagesDir);
+                // Filter only existings AI images
+                const aiImages = files.filter(f => f.endsWith('_ai.png'));
+                
+                if (aiImages.length > 0) {
+                    const randomImage = aiImages[Math.floor(Math.random() * aiImages.length)];
+                    const sourcePath = path.join(imagesDir, randomImage);
+                    const targetFileName = `${nf.id}_ai.png`;
+                    const targetPath = path.join(imagesDir, targetFileName);
+                    
+                    fs.copyFileSync(sourcePath, targetPath);
+                    console.log(`Successfully copied ${randomImage} to ${targetFileName}`);
+                    nf.thumbnail = `/images/facilities/${targetFileName}`;
+                } else {
+                    console.warn(`[WARN] No existing AI images found to reuse.`);
+                    nf.thumbnail = "";
                 }
             } catch (imgErr) {
-                console.error(`Failed to download image for ${nf.name}:`, imgErr);
+                console.error(`Failed to assign existing image for ${nf.name}:`, imgErr);
                 nf.thumbnail = "";
             }
 
