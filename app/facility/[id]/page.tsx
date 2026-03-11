@@ -69,10 +69,10 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
         // 未設定の場合は動的にPollinations AIから生成されるためAI画像扱い
         if (!f.thumbnail) return true;
         
-        // プロジェクト内に保存されている .png の画像は以前AIで一括生成されたもの（640x640）
-        if (f.thumbnail.endsWith('.png') && f.thumbnail.startsWith('/images/')) return true;
+        // プロジェクト内に保存されている _ai. を含む画像のみをAIで一括生成されたものとして扱う
+        if (f.thumbnail.includes('_ai.')) return true;
         
-        // それ以外（外部URLの直リンクや、拡張子が.jpgの実写画像など）は本物の写真とみなす
+        // それ以外（加曽利貝塚の200x200 PNGや、外部URLの直リンク、拡張子が.jpgの実写画像など）は本物の写真とみなす
         return false;
     };
 
