@@ -65,6 +65,15 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
         }
     };
 
+    const isAiGenerated = (f: any) => {
+        // URLがhttp/httpsから始まる外部画像は非表示（実際の写真）、内部パスや未設定の場合はAI生成画像として表示
+        if (!f.thumbnail) return true;
+        if (f.thumbnail.startsWith('http://') || f.thumbnail.startsWith('https://')) {
+            return false;
+        }
+        return true;
+    };
+
     return (
         <main className={styles.container}>
             {/* 構造化データの埋め込み */}
@@ -101,8 +110,15 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                         priority
                         unoptimized={!facility.thumbnail}
                     />
-                    {!facility.thumbnail && <div className={styles.aiBadge}>AI生成画像</div>}
+                    {isAiGenerated(facility) && (
+                        <div className={styles.aiBadgeDetailed}>AI Visualized</div>
+                    )}
                 </div>
+                {isAiGenerated(facility) && (
+                    <p className={styles.aiAnnotationDetailed}>
+                        ※このイラストは遺跡の情報を元にAIで生成されたイメージ図です。
+                    </p>
+                )}
 
                 {/* Main Content */}
                 <div className={styles.contentGrid}>
@@ -110,7 +126,7 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                         <h2 className={styles.sectionTitle}>施設概要</h2>
                         <p className={styles.description}>{facility.description}</p>
 
-                        {facility.access && (
+                        {facility.access ? (
                             <div className={styles.accessSection}>
                                 <h2 className={styles.sectionTitle}>アクセス情報</h2>
                                 <div className={styles.accessBox}>
@@ -126,22 +142,33 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                                     </div>
                                 </div>
                             </div>
+                        ) : (
+                            <div className={styles.accessSection}>
+                                <h2 className={styles.sectionTitle}>アクセス情報</h2>
+                                <p className={styles.fallbackText}>現在、詳細なアクセス情報を準備中です。</p>
+                            </div>
                         )}
 
                         <div className={styles.linkBox}>
-                            <a
-                                href={facility.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={styles.officialBtn}
-                            >
-                                <span>公式サイトを見る（外部サイト）</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                    <polyline points="15 3 21 3 21 9"></polyline>
-                                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                                </svg>
-                            </a>
+                            {facility.url ? (
+                                <a
+                                    href={facility.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={styles.officialBtn}
+                                >
+                                    <span>公式サイトを見る（外部サイト）</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                    </svg>
+                                </a>
+                            ) : (
+                                <div className={styles.officialBtnDisabled}>
+                                    <span>公式サイト：準備中</span>
+                                </div>
+                            )}
                         </div>
                     </section>
 

@@ -32,7 +32,7 @@ jobs:
           npm install
           npm install @google/generative-ai@latest
 
-      - name: Run AI Crawler
+      - name: AI Crawler - Find 1 New Facilities
         run: node scripts/daily-crawler.js
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -54,4 +54,13 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           channelId: live
-          projectId: jomon-portal
+          projectId: jomon-portal 
+
+      - name: Commit Database Updates
+        if: success()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/data/facilities.json
+          git commit -m "chore(data): auto-added 1 new Jomon facilities via AI crawler" || echo "No changes to commit"
+          git push

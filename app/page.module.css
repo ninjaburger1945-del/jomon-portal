@@ -250,3 +250,40 @@
   letter-spacing: 0.05em;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+.aiAnnotation {
+  font-size: 0.7rem;
+  color: #888;
+  margin: 0;
+  padding: 8px 16px 0 16px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.loadMoreContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1rem;
+}
+
+.loadMoreBtn {
+  background-color: var(--accent-terracotta);
+  color: white;
+  border: none;
+  padding: 1rem 3.5rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-base);
+  box-shadow: 0 6px 15px rgba(200, 90, 23, 0.4);
+}
+
+.loadMoreBtn:hover {
+  background-color: #e64a19; /* Slightly darker/more intense orange-red */
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(200, 90, 23, 0.5);
+}

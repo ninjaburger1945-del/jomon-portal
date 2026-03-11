@@ -25,48 +25,78 @@ async function run() {
     const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
     const prompt = `
-      日本の縄文遺跡を1つ選び、JSON形式で出力してください。
-      
-      【最優先：重複禁止ルール】
-      以下の遺跡は「絶対に」選ばないでください。既にリストにあります：
-      三内丸山遺跡, 大湯環状列石, 御所野遺跡, 是川石器時代遺跡, 小牧野遺跡
-      その他、既にリストにある ${existingData.length} 件の遺跡。
+あなたは日本の縄文時代における遺跡・貝塚・環状列石などの専門リサーチャーです。
+以下の「すでに登録済みの施設リスト」に含まれていない、**日本国内の重要な縄文時代の遺跡・博物館・資料館**を新たに **1件** ピックアップし、JSON形式で出力してください。
 
-      【今回の条件】
-      ターゲット地方: 【${randomRegion}地方】
-      世界遺産ではない、その土地ならではの遺跡を探してください。
+【既存リスト（これらは除外してください）】
+${existingNames}
 
-      [ { "name": "遺跡名", "location": "都道府県・市区町村", "description": "解説" } ]
-    `;
-
-    console.log(`Current recognized records: ${existingData.length}. Region: ${randomRegion}`);
-    
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-    const jsonString = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    const newData = JSON.parse(jsonString);
-    const newSiteName = newData[0].name;
-
-    // 部分一致も含めた厳格チェック
-    const isDuplicate = existingNames.some(name => newSiteName.includes(name) || name.includes(newSiteName));
-
-    if (isDuplicate) {
-      console.error(`❌ Duplicate detected: "${newSiteName}".`);
-      process.exit(1); 
-    }
-
-    const updatedData = [...existingData, ...newData];
-    fs.writeFileSync(filePath, JSON.stringify(updatedData, null, 2));
-
-    console.log(`--- Success ---`);
-    console.log(`Added: ${newSiteName}`);
-    console.log(`Total count: ${updatedData.length}`);
-
-  } catch (error) {
-    console.error("Error:", error.message);
-    process.exit(1);
+【出力要件】
+1. 完全なJSON配列（\`[\{...\}]\`）のみを出力してください。マークダウンのバッククォート不要です。
+2. データ構造は以下の通りにしてください：
+{
+  "id": "英数字のハイフン繋ぎ（例: uenohara-jomon）",
+  "name": "施設の正式名称",
+  "prefecture": "都道府県名",
+  "address": "住所",
+  "description": "200文字程度の魅力的な紹介文",
+  "url": "公式ウェブサイトのURL（絶対にlg.jp, go.jp, or.jp, ed.jpなどの信頼できる公的ドメインや、第三セクター・観光協会のURLを推測・検索して設定すること）",
+  "thumbnail": "",
+  "tags": ["史跡", "博物館", "貝塚", "環状列石"などから1〜2個],
+  "lat": 緯度(数値),
+  "lng": 経度(数値),
+  "access": {
+    "info": "最寄り駅からの詳細なルート（例：JR東京駅からバスで15分、「〇〇」下車徒歩5分）。情報が曖昧な場合は自身で現実の路線から「具体的なルート・駅名・時間」を算出・補完すること。絶対に「公式サイト参照」などにしないこと。",
+    "rank": "S", // S: 駅から1km以内（徒歩圏内）, A: 駅から1〜5km（バス・タクシー推奨）, B: 駅から5km以上、または山間部（車・レンタカー必須）
+    "advice": "遺跡少年からのアドバイス。上記のルートと難易度に完全に一致したアドバイスにすること。（例: Sなら駅近を褒める、Bならレンタカー予約を促す）"
   }
+}
+3. urlは必ず 'http' から始まる有効なURL形式にしてください。
+4. thumbnail は空文字（""）にしておいてください。
+`;
+
+    try {
+        console.log("Requesting 1 new facilities from Gemini AI...");
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+
+        // Clean up potential markdown formatting
+        let jsonStr = responseText.trim();
+        if (jsonStr.startsWith('```json')) jsonStr = jsonStr.substring(7);
+        if (jsonStr.startsWith('```')) jsonStr = jsonStr.substring(3);
+        if (jsonStr.endsWith('```')) jsonStr = jsonStr.substring(0, jsonStr.length - 3);
+        jsonStr = jsonStr.trim();
+
+        const newFacilities = JSON.parse(jsonStr);
+
+        if (!Array.isArray(newFacilities) || newFacilities.length === 0) {
+            throw new Error("AI did not return a valid array of facilities.");
+        }
+
+        console.log(`Successfully generated ${newFacilities.length} new facilities.`);
+
+        // Merge new facilities with explicit protection for existing data (Data Protection / Holy Grounding)
+        newFacilities.forEach(nf => {
+            const exists = existingData.find(f => f.id === nf.id || f.name === nf.name);
+            if (!exists) {
+                existingData.push(nf);
+            } else {
+                console.log(`[PROTECTED] Skipped AI modification for existing facility to protect its URL/imageUrl: ${nf.name}`);
+            }
+        });
+        fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
+
+        console.log('--- Added the following facilities ---');
+        newFacilities.forEach(f => {
+            console.log(`- ${f.name} (${f.url})`);
+        });
+
+        console.log('Finished crawler.');
+    } catch (error) {
+        console.error("Failed to generate or parse AI content:", error.message);
+        process.exit(1);
+    }
 }
 
 run();

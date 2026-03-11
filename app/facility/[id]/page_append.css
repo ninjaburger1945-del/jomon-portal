@@ -1,0 +1,85 @@
+
+.aiBadgeDetailed {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+    z-index: 2;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.disclaimerBoy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: rgba(200, 90, 23, 0.05); /* very light terracotta */
+    border-left: 4px solid var(--accent-terracotta);
+    padding: 1rem 1.5rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 2rem;
+    margin-top: -1.5rem; /* pull up closer to image */
+}
+
+.boyIcon {
+    font-weight: bold;
+    color: var(--accent-terracotta);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.disclaimerBoy p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.fallbackText {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    background: rgba(0, 0, 0, 0.02);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.officialBtnDisabled {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: var(--glass-border);
+    color: var(--text-secondary);
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.15rem;
+    cursor: not-allowed;
+    text-decoration: none;
+    opacity: 0.7;
+}
+
+@media (prefers-color-scheme: dark) {
+    .disclaimerBoy {
+        background: rgba(255, 255, 255, 0.05);
+        color: #ddd;
+    }
+    .disclaimerBoy p {
+        color: #bbb;
+    }
+    .fallbackText {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px dashed rgba(255, 255, 255, 0.2);
+    }
+}

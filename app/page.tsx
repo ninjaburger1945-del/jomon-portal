@@ -12,6 +12,7 @@ export default function Home() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortByDistance, setSortByDistance] = useState(false);
   const [locationError, setLocationError] = useState("");
+  const [visibleCount, setVisibleCount] = useState(20);
 
   // 全てのタグを取得して重複排除
   const allTags = Array.from(new Set(facilitiesData.flatMap(f => f.tags)));
@@ -85,6 +86,15 @@ export default function Home() {
     return `https://image.pollinations.ai/prompt/${prompt}?width=600&height=400&nologo=true&seed=${facility.id}`;
   };
 
+  const isAiGenerated = (facility: any) => {
+    // URLがhttp/httpsから始まる外部画像は非表示（実際の写真）、内部パスや未設定の場合はAI生成画像として表示
+    if (!facility.thumbnail) return true;
+    if (facility.thumbnail.startsWith('http://') || facility.thumbnail.startsWith('https://')) {
+      return false;
+    }
+    return true;
+  };
+
   return (
     <main>
       <header className={styles.hero}>
@@ -146,8 +156,15 @@ export default function Home() {
                     className={styles.cardImage}
                     unoptimized={!facility.thumbnail} // AI生成画像の最適化回避
                   />
-                  {!facility.thumbnail && <div className={styles.aiBadge}>AI生成</div>}
+                  {isAiGenerated(facility) && (
+                    <div className={styles.aiBadge}>AI Visualized</div>
+                  )}
                 </div>
+                {isAiGenerated(facility) && (
+                  <p className={styles.aiAnnotation}>
+                    ※このイラストは遺跡の情報を元にAIで生成されたイメージ図です。
+                  </p>
+                )}
                 <div className={styles.cardContent}>
                   <div>
                     {facility.tags.map(tag => (
@@ -167,8 +184,19 @@ export default function Home() {
                 </div>
               </Link>
             );
-          })}
+          }).slice(0, visibleCount)}
         </div>
+
+        {visibleCount < filteredAndSortedFacilities.length && (
+          <div className={styles.loadMoreContainer}>
+            <button
+              className={styles.loadMoreBtn}
+              onClick={() => setVisibleCount(prev => prev + 20)}
+            >
+              もっと見る
+            </button>
+          </div>
+        )}
       </section>
 
       <section className={`${styles.section} ${styles.eventsSection}`}>
