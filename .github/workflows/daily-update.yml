@@ -43,7 +43,12 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add app/data/facilities.json
           git add public/images/facilities/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore(data): auto-added new Jomon facility and AI image [skip ci]" && git push origin main)
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "chore(data): auto-added new Jomon facility and AI image [skip ci]"
+            git push origin main
+          else
+            echo "No changes to commit"
+          fi
 
       - name: Build
         run: npm run build
