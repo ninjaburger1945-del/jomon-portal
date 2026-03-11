@@ -2,7 +2,7 @@ name: "Daily Autopilot: Jomon Explorer"
 
 on:
   schedule:
-    - cron: '0 1 * * *'  # 日本時間 毎日 午前 10:00 (UTC 01:00)
+    - cron: '15 9 * * *'  # 日本時間 毎日 18:15 (UTC 09:15)
   workflow_dispatch:      # 手動実行ボタンを有効化
 
 jobs:

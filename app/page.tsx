@@ -12,7 +12,7 @@ export default function Home() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortByDistance, setSortByDistance] = useState(false);
   const [locationError, setLocationError] = useState("");
-  const [visibleCount, setVisibleCount] = useState(20);
+  const [visibleCount, setVisibleCount] = useState(30);
 
   // 全てのタグを取得して重複排除
   const allTags = Array.from(new Set(facilitiesData.flatMap(f => f.tags)));
@@ -82,19 +82,8 @@ export default function Home() {
   // AI画像のURL生成
   const getImageUrl = (facility: any) => {
     if (facility.thumbnail) return facility.thumbnail;
-    const prompt = encodeURIComponent(`Jomon period archaeological site, ${facility.name}, ${facility.tags.join(' ')}, photorealistic, cinematic lighting, ancient Japan landscape, highly detailed nature`);
-    return `https://image.pollinations.ai/prompt/${prompt}?width=600&height=400&nologo=true&seed=${facility.id}`;
-  };
-
-  const isAiGenerated = (facility: any) => {
-    // 未設定の場合は動的にPollinations AIから生成されるためAI画像扱い
-    if (!facility.thumbnail) return true;
-    
-    // プロジェクト内に保存されている _ai. を含む画像のみをAIで一括生成されたものとして扱う
-    if (facility.thumbnail.includes('_ai.')) return true;
-    
-    // それ以外（加曽利貝塚の200x200 PNGや、外部URLの直リンク、拡張子が.jpgの実写画像など）は本物の写真とみなす
-    return false;
+    const prompt = encodeURIComponent(`Jomon period archaeological site, ${facility.id.replace(/-/g, ' ')}, photorealistic, cinematic lighting, ancient Japan landscape, highly detailed nature`);
+    return `https://image.pollinations.ai/prompt/${prompt}?width=600&height=400&nologo=true`;
   };
 
   return (
@@ -156,17 +145,11 @@ export default function Home() {
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className={styles.cardImage}
-                    unoptimized={!facility.thumbnail} // AI生成画像の最適化回避
                   />
-                  {isAiGenerated(facility) && (
-                    <div className={styles.aiBadge}>AI Visualized</div>
-                  )}
                 </div>
-                {isAiGenerated(facility) && (
-                  <p className={styles.aiAnnotation}>
-                    ※このイラストは遺跡の情報を元にAIで生成されたイメージ図です。
-                  </p>
-                )}
+                <p className={styles.aiAnnotation}>
+                  ※このイラストは遺跡の情報を元にAIで生成されたイメージ図です。
+                </p>
                 <div className={styles.cardContent}>
                   <div>
                     {facility.tags.map(tag => (

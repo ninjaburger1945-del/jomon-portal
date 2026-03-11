@@ -65,17 +65,6 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
         }
     };
 
-    const isAiGenerated = (f: any) => {
-        // 未設定の場合は動的にPollinations AIから生成されるためAI画像扱い
-        if (!f.thumbnail) return true;
-        
-        // プロジェクト内に保存されている _ai. を含む画像のみをAIで一括生成されたものとして扱う
-        if (f.thumbnail.includes('_ai.')) return true;
-        
-        // それ以外（加曽利貝塚の200x200 PNGや、外部URLの直リンク、拡張子が.jpgの実写画像など）は本物の写真とみなす
-        return false;
-    };
-
     return (
         <main className={styles.container}>
             {/* 構造化データの埋め込み */}
@@ -105,22 +94,16 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                 {/* Thumbnail Section */}
                 <div className={styles.imageWrapper}>
                     <Image
-                        src={facility.thumbnail || `https://image.pollinations.ai/prompt/${encodeURIComponent(`Jomon period archaeological site, ${facility.name}, ${facility.tags.join(' ')}, photorealistic, cinematic lighting, ancient Japan landscape, highly detailed nature`)}?width=1200&height=600&nologo=true&seed=${facility.id}`}
+                        src={facility.thumbnail || `https://image.pollinations.ai/prompt/${encodeURIComponent(`Jomon period archaeological site, ${facility.id.replace(/-/g, ' ')}, photorealistic, cinematic lighting, ancient Japan landscape, highly detailed nature`)}?width=1200&height=600&nologo=true`}
                         alt={facility.name}
                         fill
                         className={styles.image}
                         priority
-                        unoptimized={!facility.thumbnail}
                     />
-                    {isAiGenerated(facility) && (
-                        <div className={styles.aiBadgeDetailed}>AI Visualized</div>
-                    )}
                 </div>
-                {isAiGenerated(facility) && (
-                    <p className={styles.aiAnnotationDetailed}>
-                        ※このイラストは遺跡の情報を元にAIで生成されたイメージ図です。
-                    </p>
-                )}
+                <p className={styles.aiAnnotationDetailed}>
+                    ※このイラストは遺跡の情報を元にAIで生成されたイメージ図です。
+                </p>
 
                 {/* Main Content */}
                 <div className={styles.contentGrid}>
@@ -133,9 +116,6 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                                 <h2 className={styles.sectionTitle}>アクセス情報</h2>
                                 <div className={styles.accessBox}>
                                     <div className={styles.accessHeader}>
-                                        <span className={`${styles.rankBadge} ${styles[`rank${facility.access.rank}`]}`}>
-                                            難易度 {facility.access.rank}
-                                        </span>
                                         <p className={styles.accessInfoText}>{facility.access.info}</p>
                                     </div>
                                     <div className={styles.adviceBubble}>

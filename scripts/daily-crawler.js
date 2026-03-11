@@ -60,10 +60,10 @@ ${existingNames}
   "tags": ["史跡", "博物館", "貝塚", "環状列石"などから1〜2個],
   "lat": 緯度(数値),
   "lng": 経度(数値),
-  "access": {
-    "info": "最寄り駅からの詳細なルート（例：JR東京駅からバスで15分、「〇〇」下車徒歩5分）。",
-    "rank": "S", 
-    "advice": "遺跡少年からのアドバイス。"
+    "access": {
+      "info": "最寄り駅やバス停からのルート案内（機械的な見出しや記号は付けず、自然な文章で『〇〇駅から徒歩X分』のように）",
+      "advice": "遺跡少年からのアドバイス（『駅からちょっと歩くよ！車で行くのがおすすめ！』など、元気で親しみやすい話し言葉のトーンで）"
+    }
   }
 }
 3. urlは必ず 'http' から始まる有効なURL形式にしてください。
@@ -102,13 +102,27 @@ ${existingNames}
             
             try {
                 console.log(`Downloading AI image for ${nf.name} from Pollinations AI...`);
-                // Using fetch which is available in Node 18+ natively
-                const imgRes = await fetch(imageUrl);
-                const arrayBuffer = await imgRes.arrayBuffer();
-                const imagePath = path.join(__dirname, '../public/images/facilities', `${nf.id}_ai.png`);
-                fs.writeFileSync(imagePath, Buffer.from(arrayBuffer));
-                console.log(`Successfully saved image to ${imagePath}`);
-                nf.thumbnail = `/images/facilities/${nf.id}_ai.png`;
+                let success = false;
+                for (let attempt = 1; attempt <= 3; attempt++) {
+                    const imgRes = await fetch(imageUrl);
+                    if (imgRes.ok) {
+                        const arrayBuffer = await imgRes.arrayBuffer();
+                        const imagePath = path.join(__dirname, '../public/images/facilities', `${nf.id}_ai.png`);
+                        fs.writeFileSync(imagePath, Buffer.from(arrayBuffer));
+                        console.log(`Successfully saved image to ${imagePath}`);
+                        nf.thumbnail = `/images/facilities/${nf.id}_ai.png`;
+                        success = true;
+                        break;
+                    } else if (imgRes.status === 429) {
+                        console.warn(`[WARN] 429 Too Many Requests on attempt ${attempt}. Waiting...`);
+                        await new Promise(r => setTimeout(r, 5000));
+                    } else {
+                        throw new Error(`HTTP Error ${imgRes.status}: ${imgRes.statusText}`);
+                    }
+                }
+                if (!success && !nf.thumbnail) {
+                    nf.thumbnail = ""; // Leave blank if all attempts failed
+                }
             } catch (imgErr) {
                 console.error(`Failed to download image for ${nf.name}:`, imgErr);
                 nf.thumbnail = "";
