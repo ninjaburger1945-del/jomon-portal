@@ -2,7 +2,7 @@ name: "Daily Autopilot: Jomon Explorer"
 
 on:
   schedule:
-    - cron: '48 22 * * *'  # 日本時間 毎日 午前 7:48
+    - cron: '0 1 * * *'  # 日本時間 毎日 午前 10:00 (UTC 01:00)
   workflow_dispatch:      # 手動実行ボタンを有効化
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 過去の履歴を含め全データを確実に取得
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -37,13 +37,13 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-      - name: Commit and Push changes
+      - name: Commit and Push Database and Image Updates
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add facilities.json
-          # 変更がある場合のみコミットしてプッシュ
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update Jomon facilities data [skip ci]" && git push origin main)
+          git add app/data/facilities.json
+          git add public/images/facilities/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore(data): auto-added new Jomon facility and AI image [skip ci]" && git push origin main)
 
       - name: Build
         run: npm run build
@@ -55,12 +55,3 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           channelId: live
           projectId: jomon-portal 
-
-      - name: Commit Database Updates
-        if: success()
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add app/data/facilities.json
-          git commit -m "chore(data): auto-added 1 new Jomon facilities via AI crawler" || echo "No changes to commit"
-          git push

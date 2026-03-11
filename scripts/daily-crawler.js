@@ -7,10 +7,9 @@ async function run() {
     if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing");
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }, { apiVersion: "v1" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
-    // ファイルの絶対パスを確実に指定
-    const filePath = path.resolve(__dirname, "../facilities.json");
+    const filePath = path.join(__dirname, "../app/data/facilities.json");
     
     let existingData = [];
     if (fs.existsSync(filePath)) {
@@ -18,10 +17,9 @@ async function run() {
       existingData = JSON.parse(fileContent || "[]");
     }
 
-    // 【重要】もし読み込めた件数が少ない場合、AIに「有名どころ」を避けるよう強く指示
-    const existingNames = existingData.map(d => d.name);
+    const existingNames = existingData.map(d => d.name).join(", ");
     
-    const regions = ["関東", "中部", "近畿", "中国", "四国", "九州"]; // 重複しがちな北東北をあえて外す
+    const regions = ["関東", "中部", "近畿", "中国", "四国", "九州"]; 
     const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
     const prompt = `
@@ -31,12 +29,17 @@ async function run() {
 【既存リスト（これらは除外してください）】
 ${existingNames}
 
+【条件】
+ターゲット地方: 【${randomRegion}地方】
+世界遺産ではない、その土地ならではの遺跡を探してください。
+
 【出力要件】
 1. 完全なJSON配列（\`[\{...\}]\`）のみを出力してください。マークダウンのバッククォート不要です。
 2. データ構造は以下の通りにしてください：
 {
   "id": "英数字のハイフン繋ぎ（例: uenohara-jomon）",
   "name": "施設の正式名称",
+  "region": "Chubu", 
   "prefecture": "都道府県名",
   "address": "住所",
   "description": "200文字程度の魅力的な紹介文",
@@ -46,57 +49,67 @@ ${existingNames}
   "lat": 緯度(数値),
   "lng": 経度(数値),
   "access": {
-    "info": "最寄り駅からの詳細なルート（例：JR東京駅からバスで15分、「〇〇」下車徒歩5分）。情報が曖昧な場合は自身で現実の路線から「具体的なルート・駅名・時間」を算出・補完すること。絶対に「公式サイト参照」などにしないこと。",
-    "rank": "S", // S: 駅から1km以内（徒歩圏内）, A: 駅から1〜5km（バス・タクシー推奨）, B: 駅から5km以上、または山間部（車・レンタカー必須）
-    "advice": "遺跡少年からのアドバイス。上記のルートと難易度に完全に一致したアドバイスにすること。（例: Sなら駅近を褒める、Bならレンタカー予約を促す）"
+    "info": "最寄り駅からの詳細なルート（例：JR東京駅からバスで15分、「〇〇」下車徒歩5分）。",
+    "rank": "S", 
+    "advice": "遺跡少年からのアドバイス。"
   }
 }
 3. urlは必ず 'http' から始まる有効なURL形式にしてください。
 4. thumbnail は空文字（""）にしておいてください。
 `;
 
-    try {
-        console.log("Requesting 1 new facilities from Gemini AI...");
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
+    console.log("Requesting 1 new facilities from Gemini AI...");
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
 
-        // Clean up potential markdown formatting
-        let jsonStr = responseText.trim();
-        if (jsonStr.startsWith('```json')) jsonStr = jsonStr.substring(7);
-        if (jsonStr.startsWith('```')) jsonStr = jsonStr.substring(3);
-        if (jsonStr.endsWith('```')) jsonStr = jsonStr.substring(0, jsonStr.length - 3);
-        jsonStr = jsonStr.trim();
+    let jsonStr = responseText.trim();
+    if (jsonStr.startsWith('```json')) jsonStr = jsonStr.substring(7);
+    if (jsonStr.startsWith('```')) jsonStr = jsonStr.substring(3);
+    if (jsonStr.endsWith('```')) jsonStr = jsonStr.substring(0, jsonStr.length - 3);
+    jsonStr = jsonStr.trim();
 
-        const newFacilities = JSON.parse(jsonStr);
+    const newFacilities = JSON.parse(jsonStr);
 
-        if (!Array.isArray(newFacilities) || newFacilities.length === 0) {
-            throw new Error("AI did not return a valid array of facilities.");
-        }
-
-        console.log(`Successfully generated ${newFacilities.length} new facilities.`);
-
-        // Merge new facilities with explicit protection for existing data (Data Protection / Holy Grounding)
-        newFacilities.forEach(nf => {
-            const exists = existingData.find(f => f.id === nf.id || f.name === nf.name);
-            if (!exists) {
-                existingData.push(nf);
-            } else {
-                console.log(`[PROTECTED] Skipped AI modification for existing facility to protect its URL/imageUrl: ${nf.name}`);
-            }
-        });
-        fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
-
-        console.log('--- Added the following facilities ---');
-        newFacilities.forEach(f => {
-            console.log(`- ${f.name} (${f.url})`);
-        });
-
-        console.log('Finished crawler.');
-    } catch (error) {
-        console.error("Failed to generate or parse AI content:", error.message);
-        process.exit(1);
+    if (!Array.isArray(newFacilities) || newFacilities.length === 0) {
+        throw new Error("AI did not return a valid array of facilities.");
     }
+
+    console.log(`Successfully generated ${newFacilities.length} new facilities.`);
+
+    for (const nf of newFacilities) {
+        const isDuplicate = existingData.some(f => f.id === nf.id || f.name.includes(nf.name) || nf.name.includes(f.name));
+        if (!isDuplicate) {
+            const aiPrompt = encodeURIComponent(nf.name + " Jomon period historical site, photorealistic, cinematic lighting");
+            const imageUrl = `https://image.pollinations.ai/prompt/${aiPrompt}?width=640&height=640&nologo=true`;
+            
+            try {
+                console.log(`Downloading AI image for ${nf.name} from Pollinations AI...`);
+                // Using fetch which is available in Node 18+ natively
+                const imgRes = await fetch(imageUrl);
+                const arrayBuffer = await imgRes.arrayBuffer();
+                const imagePath = path.join(__dirname, '../public/images/facilities', `${nf.id}_ai.png`);
+                fs.writeFileSync(imagePath, Buffer.from(arrayBuffer));
+                console.log(`Successfully saved image to ${imagePath}`);
+                nf.thumbnail = `/images/facilities/${nf.id}_ai.png`;
+            } catch (imgErr) {
+                console.error(`Failed to download image for ${nf.name}:`, imgErr);
+                nf.thumbnail = "";
+            }
+
+            existingData.push(nf);
+            console.log(`Added: ${nf.name}`);
+        } else {
+            console.log(`[PROTECTED] Skipped duplicate facility: ${nf.name}`);
+        }
+    }
+    
+    fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
+    console.log(`Total count: ${existingData.length}`);
+    console.log('Finished crawler.');
+  } catch (error) {
+      console.error("Error:", error.message);
+      process.exit(1);
+  }
 }
 
 run();
