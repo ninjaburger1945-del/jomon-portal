@@ -79,7 +79,10 @@ ${existingNames}
     for (const nf of newFacilities) {
         const isDuplicate = existingData.some(f => f.id === nf.id || f.name.includes(nf.name) || nf.name.includes(f.name));
         if (!isDuplicate) {
-            const aiPrompt = encodeURIComponent(nf.name + " Jomon period historical site, photorealistic, cinematic lighting");
+            // Pollinations AI will crash with an Internal Server Error if you pass raw Japanese or URL-encoded Japanese that it doesn't like.
+            // Sending a purely English string using its ID is much safer.
+            const safeName = nf.id.replace(/-/g, ' ');
+            const aiPrompt = encodeURIComponent(safeName + " Jomon period historical site in Japan, photorealistic, cinematic lighting");
             const imageUrl = `https://image.pollinations.ai/prompt/${aiPrompt}?width=640&height=640&nologo=true`;
             
             try {
