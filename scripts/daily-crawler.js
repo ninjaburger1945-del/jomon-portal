@@ -20,7 +20,11 @@ async function run() {
     if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing");
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    // Google Search Groundingを利用して現実の正しいURLを取得させる
+    const model = genAI.getGenerativeModel({ 
+        model: "gemini-2.5-pro",
+        tools: [{ googleSearch: {} }] 
+    });
 
     const filePath = path.join(__dirname, "../app/data/facilities.json");
     
@@ -56,7 +60,7 @@ ${existingNames}
   "prefecture": "都道府県名",
   "address": "住所",
   "description": "200文字程度の魅力的な紹介文",
-  "url": "公式ウェブサイトのURL（絶対にlg.jp, go.jp, or.jp, ed.jpなどの信頼できる公的ドメインや、第三セクター・観光協会のURLを推測・検索して設定すること）",
+  "url": "Google検索機能を用いて必ず正しい公式ウェブサイトのURLを取得し設定してください（lg.jp, go.jp, or.jp等の公的機関や観光協会など。Googleの検索結果URLは絶対に不可です。どうしても見つからない場合は空文字にして下さい）",
   "thumbnail": "",
   "tags": ["史跡", "博物館", "貝塚", "環状列石"などから1〜2個],
   "lat": 緯度(数値),
