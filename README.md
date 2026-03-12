@@ -29,6 +29,25 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## 開発セットアップ
+
+### Git フックの有効化
+
+このリポジトリでは `git push` 前に `facilities.json` のURL品質チェックが自動実行されます。
+クローン後に一度だけ以下のコマンドを実行してください。
+
+```bash
+git config core.hooksPath .githooks
+```
+
+これにより、`app/data/facilities.json` にプレースホルダーURL（Google検索URLなど）が含まれている場合、push が自動的にブロックされます。
+
+チェックを手動実行することもできます。
+
+```bash
+node scripts/validate_urls.js
+```
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
