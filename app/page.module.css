@@ -287,3 +287,187 @@
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(200, 90, 23, 0.5);
 }
+
+/* ===== 1. Sticky counter bar ===== */
+.stickyBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background: var(--accent-forest);
+  color: #fff;
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.02em;
+}
+
+.stickyBarText {
+  opacity: 0.9;
+}
+
+.stickyBarCount strong {
+  color: #f9c06a;
+  font-size: 1.05em;
+}
+
+.mainWithBar {
+  padding-top: 40px;
+}
+
+/* ===== 2. Quick filter chips ===== */
+.quickFilterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  align-items: center;
+}
+
+.quickFilterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.38rem 0.85rem;
+  border-radius: 20px;
+  border: 1.5px solid var(--accent-forest);
+  background: transparent;
+  color: var(--accent-forest);
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+  font-family: var(--font-base);
+}
+
+.quickFilterChip:hover,
+.chipActive {
+  background: var(--accent-forest);
+  color: #fff;
+}
+
+.quickFilterChipPref {
+  border-color: var(--accent-terracotta);
+  color: var(--accent-terracotta);
+}
+
+.quickFilterChipPref:hover,
+.chipActivePref {
+  background: var(--accent-terracotta) !important;
+  color: #fff !important;
+  border-color: var(--accent-terracotta) !important;
+}
+
+.chipCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  padding: 0 5px;
+  font-size: 0.77em;
+  min-width: 18px;
+  font-weight: 700;
+}
+
+.quickFilterChip:not(.chipActive):not(.chipActivePref) .chipCount {
+  background: rgba(46, 74, 34, 0.12);
+  color: var(--accent-forest);
+}
+
+.quickFilterChipPref:not(.chipActivePref) .chipCount {
+  background: rgba(200, 90, 23, 0.12);
+  color: var(--accent-terracotta);
+}
+
+.quickFilterReset {
+  padding: 0.38rem 0.8rem;
+  border-radius: 20px;
+  border: 1.5px solid #bbb;
+  background: transparent;
+  color: #888;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: var(--font-base);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.quickFilterReset:hover {
+  background: #f0f0f0;
+  color: #555;
+}
+
+/* ===== 3. Floating counter ===== */
+.floatingCounter {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 500;
+  background: rgba(46, 74, 34, 0.9);
+  color: #fff;
+  padding: 0.45rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+  animation: fadeInUp 0.25s ease;
+}
+
+.floatingCounter strong {
+  color: #f9c06a;
+}
+
+/* ===== 4. Verified badge ===== */
+.verifiedBadge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(46, 74, 34, 0.82);
+  color: #fff;
+  padding: 3px 8px;
+  font-size: 0.68rem;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 2;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .stickyBar {
+    font-size: 0.78rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.4rem 0.75rem;
+  }
+
+  .quickFilterRow {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.25rem;
+  }
+
+  .quickFilterChip {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .floatingCounter {
+    bottom: 1rem;
+    right: 0.75rem;
+    font-size: 0.74rem;
+    padding: 0.38rem 0.8rem;
+  }
+}
