@@ -1,0 +1,12 @@
+#!/bin/sh
+# .githooks/pre-push
+# git push 前に facilities.json のURL品質チェックを自動実行する。
+# セットアップ: git config core.hooksPath .githooks
+
+echo "🔍 [pre-push] facilities.json のURLを検証中..."
+node "$(git rev-parse --show-toplevel)/scripts/validate_urls.js"
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "💡 ヒント: URLを修正して git add / git commit してから再度 push してください。"
+  exit 1
+fi
