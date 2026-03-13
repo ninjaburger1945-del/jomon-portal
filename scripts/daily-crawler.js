@@ -119,6 +119,48 @@ async function validateUrlStrict(url, facilityName) {
   }
 }
 
+/**
+ * URL検証失敗時のフォールバック: Gemini Google Search で正しいURLを再検索
+ * @returns {Promise<{valid: boolean, url: string, verified: boolean}>}
+ */
+async function searchAlternativeUrl(model, facilityName, prefecture) {
+  console.log(`[URL_SEARCH] "${facilityName}" の公式URLをGeminiで再検索中...`);
+  try {
+    const searchPrompt = `
+Google検索を使って、「${facilityName}」（${prefecture}）の公式ウェブサイトのURLを1つだけ見つけてください。
+
+条件:
+- 施設の公式サイト（自治体 .lg.jp、または施設独自ドメイン）
+- トップページや観光ページ（/kanko/ 等）ではなく、施設名が直接掲載されているページ
+- 必ず実在するURLのみ
+
+URLだけを1行で出力してください。見つからない場合は「なし」と出力してください。
+`;
+    const result = await model.generateContent(searchPrompt);
+    const text = result.response.text().trim();
+
+    if (!text || text === 'なし' || !text.startsWith('http')) {
+      console.warn(`[URL_SEARCH] 再検索結果なし`);
+      return { valid: false, url: "", verified: false };
+    }
+
+    // URLだけ抽出（余分なテキストが付いている場合に対応）
+    const urlMatch = text.match(/https?:\/\/[^\s\n]+/);
+    if (!urlMatch) {
+      console.warn(`[URL_SEARCH] URLを抽出できませんでした: ${text}`);
+      return { valid: false, url: "", verified: false };
+    }
+
+    const candidateUrl = urlMatch[0].replace(/[。、」）\]>]+$/, ''); // 末尾の日本語記号を除去
+    console.log(`[URL_SEARCH] 再検索結果: ${candidateUrl}`);
+    return await validateUrlStrict(candidateUrl, facilityName);
+
+  } catch (e) {
+    console.warn(`[URL_SEARCH] 再検索エラー: ${e.message}`);
+    return { valid: false, url: "", verified: false };
+  }
+}
+
 async function run() {
   try {
     if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing");
@@ -217,11 +259,15 @@ ${existingNames}
         continue;
       }
 
-      // 厳格URLバリデーション（失敗してもエントリは追加。url=""で保存）
+      // 厳格URLバリデーション → 失敗時はGeminiで再検索 → それでも失敗なら url=""
       console.log(`[VALIDATE] ${nf.name}: ${nf.url}`);
-      const validation = await validateUrlStrict(nf.url, nf.name);
+      let validation = await validateUrlStrict(nf.url, nf.name);
       if (!validation.valid) {
-        console.warn(`[URL_WARN] ${nf.name}: URLバリデーション失敗。url="" で追加します。`);
+        console.warn(`[URL_WARN] 初回URL失敗。Geminiで代替URLを再検索します...`);
+        validation = await searchAlternativeUrl(model, nf.name, nf.prefecture);
+      }
+      if (!validation.valid) {
+        console.warn(`[URL_WARN] ${nf.name}: 再検索も失敗。url="" で追加します。`);
         nf.url = "";
         nf.verified = false;
       } else {
