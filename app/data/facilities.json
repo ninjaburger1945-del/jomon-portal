@@ -2,7 +2,7 @@
   {
     "id": "sannaimaruyama",
     "name": "特別史跡 三内丸山遺跡",
-    "region": "Hokkaido-Tohoku",
+    "region": "Tohoku",
     "prefecture": "青森県",
     "address": "青森県青森市三内字丸山305",
     "description": "日本最大級の縄文集落跡。大型竪穴建物跡や大型掘立柱建物跡が復元されており、縄文時代のムラの様子を体感できます。",
@@ -65,7 +65,7 @@
   {
     "id": "korekawa",
     "name": "八戸市埋蔵文化財センター 是川縄文館",
-    "region": "Hokkaido-Tohoku",
+    "region": "Tohoku",
     "prefecture": "青森県",
     "address": "青森県八戸市大字是川字横山1",
     "description": "国宝の「合掌土偶」や精巧な漆器などを展示。是川遺跡や風張1遺跡から出土した貴重な遺物が見どころ。",
@@ -191,7 +191,7 @@
   {
     "id": "ofune",
     "name": "大船遺跡",
-    "region": "Hokkaido-Tohoku",
+    "region": "Hokkaido",
     "prefecture": "北海道",
     "address": "北海道函館市大船町575-1",
     "description": "世界文化遺産「北海道・北東北の縄文遺跡群」の一部。深く掘り込まれた巨大な竪穴建物跡が特徴で、祭祀場や盛土が残る。",
@@ -212,7 +212,7 @@
   {
     "id": "oyu",
     "name": "大湯環状列石",
-    "region": "Hokkaido-Tohoku",
+    "region": "Tohoku",
     "prefecture": "秋田県",
     "address": "秋田県鹿角市十和田大湯字万座45",
     "description": "特別史跡。万座環状列石と野中堂環状列石の2つからなる大規模な配石遺跡で、世界遺産構成資産のひとつ。",
@@ -233,7 +233,7 @@
   {
     "id": "isedotai",
     "name": "伊勢堂岱遺跡",
-    "region": "Hokkaido-Tohoku",
+    "region": "Tohoku",
     "prefecture": "秋田県",
     "address": "秋田県北秋田市脇神字伊勢堂岱",
     "description": "世界遺産構成資産。4つの環状列石が集中して発見された祭祀遺跡で、縄文人の精神的紐帯を示す重要な場所。",
@@ -254,7 +254,7 @@
   {
     "id": "komakino",
     "name": "小牧野遺跡",
-    "region": "Hokkaido-Tohoku",
+    "region": "Tohoku",
     "prefecture": "青森県",
     "address": "青森県青森市野沢字小牧野41",
     "description": "世界遺産構成資産。斜面を平坦に造成して斜めに石を配置した珍しい配石構造を持つ環状列石。",
@@ -275,7 +275,7 @@
   {
     "id": "kamegaoka",
     "name": "亀ヶ岡石器時代遺跡",
-    "region": "Hokkaido-Tohoku",
+    "region": "Tohoku",
     "prefecture": "青森県",
     "address": "青森県つがる市木造舘岡",
     "description": "「遮光器土偶」が出土したことで有名な世界遺産構成資産。精巧な土器や漆器などの亀ヶ岡文化の中心地。",
@@ -296,7 +296,7 @@
   {
     "id": "kitakogane",
     "name": "北黄金貝塚",
-    "region": "Hokkaido-Tohoku",
+    "region": "Hokkaido",
     "prefecture": "北海道",
     "address": "北海道伊達市北黄金町75",
     "description": "世界遺産。内浦湾を望む台地上に形成された大規模な貝塚集落で、水場遺構など貴重な祭祀の痕跡が残る。",
@@ -317,7 +317,7 @@
   {
     "id": "kakinoshima",
     "name": "垣ノ島遺跡",
-    "region": "Hokkaido-Tohoku",
+    "region": "Hokkaido",
     "prefecture": "北海道",
     "address": "北海道函館市臼尻町252-1",
     "description": "世界遺産。国内最大級の「大土坑」が見つかっており、縄文早期からの長期にわたる居住の痕跡を示す。",
@@ -338,7 +338,7 @@
   {
     "id": "irie-takasago",
     "name": "入江・高砂貝塚",
-    "region": "Hokkaido-Tohoku",
+    "region": "Hokkaido",
     "prefecture": "北海道",
     "address": "北海道虻田郡洞爺湖町高砂町44",
     "description": "世界遺産。内浦湾の豊かな海産物を利用していた貝塚で、埋葬された人骨や多様な装身具が出土。",
@@ -359,7 +359,7 @@
   {
     "id": "goshono",
     "name": "御所野遺跡",
-    "region": "Hokkaido-Tohoku",
+    "region": "Tohoku",
     "prefecture": "岩手県",
     "address": "岩手県二戸郡一戸町岩舘字御所野2",
     "description": "世界遺産。屋根に土を被せた「土屋根」の竪穴建物が復元され、縄文人の高度な植物利用を物語る。",
@@ -527,7 +527,7 @@
   {
     "id": "satohama",
     "name": "里浜貝塚",
-    "region": "Hokkaido-Tohoku",
+    "region": "Tohoku",
     "prefecture": "宮城県",
     "address": "宮城県東松島市宮戸字里",
     "description": "奥松島の海に面した国内最大級の貝塚。長期間にわたる縄文人の豊かな海浜生活の様子を今に伝える。",
@@ -632,7 +632,7 @@
   {
     "id": "jomon-culture-center",
     "name": "函館市縄文文化交流センター",
-    "region": "Hokkaido-Tohoku",
+    "region": "Hokkaido",
     "prefecture": "北海道",
     "address": "北海道函館市臼尻町551-1",
     "description": "北海道唯一の国宝「中空土偶」を常設展示する施設。周辺の縄文遺跡群から出土した貴重な遺物を多数展示しています。",
@@ -653,7 +653,7 @@
   {
     "id": "jomopia-miyahata",
     "name": "じょーもぴあ宮畑",
-    "region": "Hokkaido-Tohoku",
+    "region": "Tohoku",
     "prefecture": "福島県",
     "address": "福島県福島市岡島字宮田78",
     "description": "縄文時代の集落跡である宮畑遺跡を整備した歴史公園と資料館。大規模な掘立柱建物跡などが復元されています。",

@@ -6,23 +6,27 @@ import facilitiesData from "../../data/facilities.json";
 import newsData from "../../data/news.json";
 
 const REGION_LABELS: Record<string, string> = {
-  "Hokkaido-Tohoku": "北海道・東北",
-  "Kanto":           "関東",
-  "Chubu":           "中部",
-  "Kinki":           "近畿",
-  "Chugoku":         "中国",
-  "Shikoku":         "四国",
-  "Kyushu":          "九州",
+  "Hokkaido": "北海道",
+  "Tohoku":   "東北",
+  "Kanto":    "関東",
+  "Chubu":    "中部",
+  "Kinki":    "近畿",
+  "Chugoku":  "中国",
+  "Shikoku":  "四国",
+  "Kyushu":   "九州",
+  "Okinawa":  "沖縄",
 };
 
 const REGION_COLORS: Record<string, string> = {
-  "Hokkaido-Tohoku": "#2E6B35",
-  "Kanto":           "#1B6FA8",
-  "Chubu":           "#7A5C1E",
-  "Kinki":           "#6B3A6E",
-  "Chugoku":         "#1A7070",
-  "Shikoku":         "#8A4B1A",
-  "Kyushu":          "#9B2B2B",
+  "Hokkaido": "#1A5276",
+  "Tohoku":   "#2E6B35",
+  "Kanto":    "#1B6FA8",
+  "Chubu":    "#7A5C1E",
+  "Kinki":    "#6B3A6E",
+  "Chugoku":  "#1A7070",
+  "Shikoku":  "#8A4B1A",
+  "Kyushu":   "#9B2B2B",
+  "Okinawa":  "#0E8C7A",
 };
 
 interface Facility {

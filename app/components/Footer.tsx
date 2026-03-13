@@ -11,7 +11,7 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={styles.container}>
         <p className={styles.copyright}>&copy; 2026 JOMON PORTAL All rights reserved.</p>
-        <button className={styles.aiPolicyLink} onClick={() => setIsModalOpen(true)}>
+        <button className={styles.aiPolicyLink} onClick={() => { setIsExpanded(false); setIsModalOpen(true); }}>
           このサイトについて
         </button>
       </div>
