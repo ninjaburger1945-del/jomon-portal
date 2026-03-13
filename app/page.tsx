@@ -270,7 +270,7 @@ export default function Home() {
                     <div className={styles.cardImageWrapper}>
                       <Image
                         src={getImageUrl(facility)}
-                        alt={facility.name}
+                        alt={`${facility.name} のAI生成イメージイラスト`}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className={styles.cardImage}

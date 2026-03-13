@@ -50,19 +50,29 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
 
     const facilityNews = newsData.filter((news) => news.facilityId === id);
 
+    const schemaType = facility.tags.some(t => ["博物館", "資料館"].includes(t))
+        ? "Museum"
+        : "LandmarksOrHistoricalBuildings";
+
     const jsonLd = {
         "@context": "https://schema.org",
-        "@type": "Museum",
+        "@type": [schemaType, "TouristAttraction"],
         "name": facility.name,
         "description": facility.description,
-        "url": facility.url,
-        "image": facility.thumbnail,
+        "url": facility.url || undefined,
+        "image": facility.thumbnail || undefined,
         "address": {
             "@type": "PostalAddress",
             "addressLocality": facility.prefecture,
             "streetAddress": facility.address,
             "addressCountry": "JP"
-        }
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": (facility as any).lat,
+            "longitude": (facility as any).lng,
+        },
+        "touristType": "縄文時代の歴史・文化に関心がある方",
     };
 
     return (
@@ -95,7 +105,7 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                 <div className={styles.imageWrapper}>
                     <Image
                         src={facility.thumbnail || `https://image.pollinations.ai/prompt/${encodeURIComponent(`Jomon period archaeological site, ${facility.id.replace(/-/g, ' ')}, photorealistic, cinematic lighting, ancient Japan landscape, highly detailed nature`)}?width=1200&height=600&nologo=true`}
-                        alt={facility.name}
+                        alt={`${facility.name} のAI生成イメージイラスト`}
                         fill
                         className={styles.image}
                         priority
