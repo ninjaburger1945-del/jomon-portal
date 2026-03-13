@@ -1,27 +1,35 @@
 :root {
-  /* Earthy Tones & Jomon Themes */
-  --bg-color: #F8F5F0; /* Sand/Beige */
-  --text-primary: #1A1A1A; /* Charcoal */
-  --text-secondary: #5A5A5A;
-  --accent-terracotta: #C85A17; /* Dogu / Pottery */
-  --accent-forest: #2E4A22; /* Ancient Forest */
-  
-  /* Glassmorphism & UI */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.08);
+  /* ── カラーパレット：縄文の大地と森 ── */
+  --bg-color: #F0EAD6;             /* 生成り色（なまなり）*/
+  --bg-card: rgba(248, 242, 226, 0.88); /* カード背景：温かい羊皮紙 */
+  --text-primary: #1C150A;         /* 墨色 */
+  --text-secondary: #5A4E3A;       /* 古木色 */
+  --accent-terracotta: #B8401A;    /* 漆の朱色 */
+  --accent-forest: #2E4A22;        /* 深い森の緑 */
 
+  /* ── ガラスモーフィズム（温かみのある琥珀ガラス）── */
+  --glass-bg: rgba(248, 242, 226, 0.80);
+  --glass-border: rgba(160, 120, 60, 0.20);
+
+  /* ── シャドウ（土の温かみ）── */
+  --shadow-sm: 0 4px 12px rgba(70, 45, 10, 0.08);
+  --shadow-md: 0 12px 32px rgba(70, 45, 10, 0.13);
+
+  /* ── フォント ── */
   --font-base: var(--font-noto-sans-jp), sans-serif;
+  --font-heading: var(--font-noto-serif-jp), "游明朝", "Yu Mincho", "HGS明朝E", serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-color: #121212;
-    --text-primary: #EAEAEA;
-    --text-secondary: #A0A0A0;
-    --glass-bg: rgba(30, 30, 30, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --bg-color: #17120A;
+    --bg-card: rgba(32, 25, 14, 0.88);
+    --text-primary: #EDE8DC;
+    --text-secondary: #A89880;
+    --glass-bg: rgba(32, 25, 14, 0.80);
+    --glass-border: rgba(160, 120, 60, 0.18);
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.35);
   }
 }
 
@@ -37,6 +45,11 @@ body {
   font-family: var(--font-base);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* 見出しに明朝体を適用 */
+h1, h2, h3 {
+  font-family: var(--font-heading);
 }
 
 * {
