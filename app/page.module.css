@@ -1,36 +1,227 @@
 .hero {
   position: relative;
-  height: 80vh;
-  min-height: 600px;
+  height: 90vh;
+  min-height: 640px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1601555541604-a63e691216d0?auto=format&fit=crop&q=80&w=2000') center/cover no-repeat;
+  background:
+    linear-gradient(to bottom, rgba(15, 10, 3, 0.35) 0%, rgba(15, 10, 3, 0.65) 100%),
+    url('https://images.unsplash.com/photo-1601555541604-a63e691216d0?auto=format&fit=crop&q=80&w=2000') center/cover no-repeat;
   color: #fff;
   text-align: center;
 }
 
 .heroContent {
   animation: fadeInUp 1s ease-out;
-  padding: 2rem;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3rem 3.5rem;
+  background: rgba(10, 7, 2, 0.38);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 20px;
+  border: 1px solid rgba(200, 160, 80, 0.22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.heroEyebrow {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  color: rgba(255, 220, 150, 0.85);
+  text-transform: uppercase;
 }
 
 .heroTitle {
-  font-size: 4rem;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  margin-bottom: 1rem;
-  font-family: var(--font-base);
+  font-size: 4.5rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  font-family: var(--font-heading);
+  line-height: 1.1;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
 }
 
 .heroSubtitle {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 400;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.12em;
+  color: rgba(255, 245, 225, 0.9);
+  font-family: var(--font-heading);
+}
+
+.heroDecor {
+  font-size: 1.1rem;
+  color: rgba(200, 160, 80, 0.7);
+  letter-spacing: 0.3em;
+  margin-top: 0.25rem;
+}
+
+/* ===== 今日の1件 ===== */
+.todaySection {
+  padding: 4rem 0 2rem;
+}
+
+.todaySectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.todayBadge {
+  background: var(--accent-terracotta);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.todaySectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-forest);
+}
+
+.todayCard {
+  display: flex;
+  gap: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(70, 45, 10, 0.14);
+  border: 1px solid var(--glass-border);
+  background: var(--bg-card);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.todayCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(70, 45, 10, 0.2);
+}
+
+.todayCardImage {
+  position: relative;
+  flex: 0 0 45%;
+  min-height: 260px;
+}
+
+.todayCardImageInner {
+  object-fit: cover;
+}
+
+.todayCardContent {
+  flex: 1;
+  padding: 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.todayCardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.todayCardTitle {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.todayCardPref {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.todayCardDesc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.todayCardLink {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent-terracotta);
+  margin-top: 0.5rem;
+}
+
+/* ===== エリアタイルナビゲーション ===== */
+.regionTilesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.regionTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.9rem 0.5rem;
+  border-radius: 14px;
+  border: 1.5px solid var(--glass-border);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  font-family: var(--font-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.regionTile:hover {
+  background: var(--glass-bg);
+  border-color: var(--accent-forest);
+  transform: translateY(-2px);
+}
+
+.regionTileActive {
+  background: var(--accent-forest) !important;
+  border-color: var(--accent-forest) !important;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(46, 74, 34, 0.3);
+}
+
+.regionTileIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.regionTileLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: inherit;
+}
+
+.regionTileCount {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  padding: 1px 7px;
+}
+
+.regionTileActive .regionTileCount {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 都道府県チップ行 */
+.prefChipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  align-items: center;
 }
 
 .section {
@@ -450,6 +641,39 @@
 }
 
 /* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 2.8rem;
+  }
+
+  .heroContent {
+    padding: 2rem 1.5rem;
+  }
+
+  .todayCard {
+    flex-direction: column;
+  }
+
+  .todayCardImage {
+    flex: none;
+    width: 100%;
+    min-height: 200px;
+  }
+
+  .todayCardContent {
+    padding: 1.5rem;
+  }
+
+  .todayCardTitle {
+    font-size: 1.25rem;
+  }
+
+  .regionTilesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.5rem;
+  }
+}
+
 @media (max-width: 600px) {
   .stickyBar {
     font-size: 0.78rem;
@@ -458,7 +682,7 @@
     padding: 0.4rem 0.75rem;
   }
 
-  .quickFilterRow {
+  .prefChipRow {
     overflow-x: auto;
     flex-wrap: nowrap;
     padding-bottom: 0.25rem;

@@ -10,9 +10,20 @@ const REGION_LABELS: Record<string, string> = {
   "Hokkaido-Tohoku": "北海道・東北",
   "Kanto": "関東",
   "Chubu": "中部",
+  "Kinki": "近畿",
   "Chugoku": "中国",
   "Shikoku": "四国",
   "Kyushu": "九州",
+};
+
+const REGION_ICONS: Record<string, string> = {
+  "Hokkaido-Tohoku": "🌲",
+  "Kanto": "🏺",
+  "Chubu": "⛰️",
+  "Kinki": "🌿",
+  "Chugoku": "🌊",
+  "Shikoku": "🌰",
+  "Kyushu": "🌋",
 };
 
 const PLACEHOLDER_PATTERNS = [
@@ -46,6 +57,7 @@ export default function Home() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const visibleIndicesRef = useRef(new Set<number>());
 
+  const todayFacility = facilitiesData[facilitiesData.length - 1];
   const allTags = Array.from(new Set(facilitiesData.flatMap(f => f.tags)));
 
   const regionCounts = useMemo(() => {
@@ -54,7 +66,6 @@ export default function Home() {
     return counts;
   }, []);
 
-  // 3件以上の都道府県を件数降順で表示
   const topPrefectures = useMemo(() => {
     const counts: Record<string, number> = {};
     facilitiesData.forEach(f => { counts[f.prefecture] = (counts[f.prefecture] || 0) + 1; });
@@ -127,12 +138,10 @@ export default function Home() {
     return result;
   }, [searchQuery, selectedType, selectedRegion, selectedPrefecture, sortByDistance, userLocation]);
 
-  // フィルター変更時に表示件数をリセット
   useEffect(() => {
     setVisibleCount(30);
   }, [searchQuery, selectedType, selectedRegion, selectedPrefecture]);
 
-  // IntersectionObserver でフローティングカウンター用の先頭インデックスを追跡
   useEffect(() => {
     observerRef.current?.disconnect();
     visibleIndicesRef.current.clear();
@@ -155,9 +164,8 @@ export default function Home() {
     return () => observerRef.current?.disconnect();
   }, [filteredAndSortedFacilities, visibleCount]);
 
-  // ヒーロー通過後にフローティングカウンターを表示
   useEffect(() => {
-    const onScroll = () => setShowFloating(window.scrollY > 400);
+    const onScroll = () => setShowFloating(window.scrollY > 500);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -174,7 +182,7 @@ export default function Home() {
 
   return (
     <>
-      {/* 1. 全国縄文パトロール Sticky bar */}
+      {/* Sticky bar */}
       <div className={styles.stickyBar}>
         <span className={styles.stickyBarText}>
           🏺 全国 {facilitiesData.length} カ所の縄文遺跡を公開中
@@ -182,15 +190,61 @@ export default function Home() {
       </div>
 
       <main className={styles.mainWithBar}>
+
+        {/* ── 1. ヒーローセクション ── */}
         <header className={styles.hero}>
           <div className={styles.heroContent}>
+            <p className={styles.heroEyebrow}>縄文時代 — 1万年の記憶</p>
             <h1 className={styles.heroTitle}>JOMON PORTAL</h1>
             <p className={styles.heroSubtitle}>時を越えて、日本の原風景に出会う</p>
+            <div className={styles.heroDecor}>&#x2E3B;&ensp;&#xFF3C;&ensp;&#x2E3B;</div>
           </div>
         </header>
 
+        {/* ── 2. 今日の1件 ── */}
+        {todayFacility && (
+          <section className={`${styles.todaySection} container`}>
+            <div className={styles.todaySectionHeader}>
+              <span className={styles.todayBadge}>NEW</span>
+              <h2 className={styles.todaySectionTitle}>今日の1件</h2>
+            </div>
+            <Link href={`/facility/${todayFacility.id}`} className={styles.todayCard}>
+              <div className={styles.todayCardImage}>
+                <Image
+                  src={getImageUrl(todayFacility)}
+                  alt={`${todayFacility.name} のAI生成イメージイラスト`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className={styles.todayCardImageInner}
+                />
+                {isVerifiedUrl(todayFacility.url) && (
+                  <span className={`${styles.verifiedBadge}${isLgJpUrl(todayFacility.url) ? ` ${styles.verifiedBadgeLg}` : ''}`}>
+                    {isLgJpUrl(todayFacility.url) ? '✓ 自治体公式' : '✓ 公式リンク確認済'}
+                  </span>
+                )}
+              </div>
+              <div className={styles.todayCardContent}>
+                <div className={styles.todayCardTags}>
+                  {todayFacility.tags.map(tag => (
+                    <span key={tag} className={styles.cardTag}>{tag}</span>
+                  ))}
+                </div>
+                <h3 className={styles.todayCardTitle}>{todayFacility.name}</h3>
+                <p className={styles.todayCardPref}>📍 {todayFacility.prefecture}</p>
+                <p className={styles.todayCardDesc}>
+                  {todayFacility.description
+                    ? todayFacility.description.substring(0, 120) + "..."
+                    : ""}
+                </p>
+                <span className={styles.todayCardLink}>詳しく見る →</span>
+              </div>
+            </Link>
+          </section>
+        )}
+
+        {/* ── 3. 遺跡一覧 ── */}
         <section className={`${styles.section} container`}>
-          <h2 className={styles.sectionTitle}>注目の縄文スポット</h2>
+          <h2 className={styles.sectionTitle}>全国の縄文スポット</h2>
 
           {/* 検索・フィルターUI */}
           <div className={styles.searchBar}>
@@ -218,37 +272,45 @@ export default function Home() {
           </div>
           {locationError && <p className={styles.errorText}>{locationError}</p>}
 
-          {/* 2. 地方・都道府県別クイックフィルター */}
-          <div className={styles.quickFilterRow}>
+          {/* エリアタイルナビゲーション */}
+          <div className={styles.regionTilesGrid}>
             {Object.entries(REGION_LABELS).map(([key, label]) =>
               regionCounts[key] ? (
                 <button
                   key={key}
-                  className={`${styles.quickFilterChip} ${selectedRegion === key ? styles.chipActive : ""}`}
+                  className={`${styles.regionTile} ${selectedRegion === key ? styles.regionTileActive : ""}`}
                   onClick={() => handleRegionChip(key)}
                 >
-                  {label} <span className={styles.chipCount}>{regionCounts[key]}</span>
+                  <span className={styles.regionTileIcon}>{REGION_ICONS[key]}</span>
+                  <span className={styles.regionTileLabel}>{label}</span>
+                  <span className={styles.regionTileCount}>{regionCounts[key]}件</span>
                 </button>
               ) : null
             )}
-            {topPrefectures.map(([pref, count]) => (
-              <button
-                key={pref}
-                className={`${styles.quickFilterChip} ${styles.quickFilterChipPref} ${selectedPrefecture === pref ? styles.chipActivePref : ""}`}
-                onClick={() => handlePrefectureChip(pref)}
-              >
-                {pref.replace(/[都道府県]$/, "")} <span className={styles.chipCount}>{count}</span>
-              </button>
-            ))}
-            {(selectedRegion || selectedPrefecture) && (
-              <button
-                className={styles.quickFilterReset}
-                onClick={() => { setSelectedRegion(""); setSelectedPrefecture(""); }}
-              >
-                ✕ クリア
-              </button>
-            )}
           </div>
+
+          {/* 都道府県チップ */}
+          {topPrefectures.length > 0 && (
+            <div className={styles.prefChipRow}>
+              {topPrefectures.map(([pref, count]) => (
+                <button
+                  key={pref}
+                  className={`${styles.quickFilterChip} ${styles.quickFilterChipPref} ${selectedPrefecture === pref ? styles.chipActivePref : ""}`}
+                  onClick={() => handlePrefectureChip(pref)}
+                >
+                  {pref.replace(/[都道府県]$/, "")} <span className={styles.chipCount}>{count}</span>
+                </button>
+              ))}
+              {(selectedRegion || selectedPrefecture) && (
+                <button
+                  className={styles.quickFilterReset}
+                  onClick={() => { setSelectedRegion(""); setSelectedPrefecture(""); }}
+                >
+                  ✕ クリア
+                </button>
+              )}
+            </div>
+          )}
 
           <p className={styles.resultCount}>
             該当件数: {filteredAndSortedFacilities.length}件 / 全{facilitiesData.length}件
@@ -275,7 +337,6 @@ export default function Home() {
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className={styles.cardImage}
                       />
-                      {/* 4. 公式リンク確認済バッジ */}
                       {isVerifiedUrl(facility.url) && (
                         <span className={`${styles.verifiedBadge}${isLgJpUrl(facility.url) ? ` ${styles.verifiedBadgeLg}` : ''}`}>
                           {isLgJpUrl(facility.url) ? '✓ 自治体公式' : '✓ 公式リンク確認済'}
@@ -321,7 +382,7 @@ export default function Home() {
         </section>
       </main>
 
-      {/* 3. ダイナミック・フローティングカウンター */}
+      {/* フローティングカウンター */}
       {showFloating && (
         <div className={styles.floatingCounter}>
           全 {filteredAndSortedFacilities.length} 件中{" "}
