@@ -177,7 +177,7 @@ export default function Home() {
       {/* 1. 全国縄文パトロール Sticky bar */}
       <div className={styles.stickyBar}>
         <span className={styles.stickyBarText}>
-          🏺 全国 180カ所以上の縄文遺跡を公開中
+          🏺 全国 {facilitiesData.length} カ所の縄文遺跡を公開中
         </span>
         <span className={styles.stickyBarCount}>
           現在 <strong>{filteredAndSortedFacilities.length}</strong> 件を表示
