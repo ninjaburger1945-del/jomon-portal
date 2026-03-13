@@ -16,14 +16,14 @@ const REGION_LABELS: Record<string, string> = {
   "Kyushu": "九州",
 };
 
-const REGION_ICONS: Record<string, string> = {
-  "Hokkaido-Tohoku": "🌲",
-  "Kanto": "🏺",
-  "Chubu": "⛰️",
-  "Kinki": "🌿",
-  "Chugoku": "🌊",
-  "Shikoku": "🌰",
-  "Kyushu": "🌋",
+const REGION_COLORS: Record<string, string> = {
+  "Hokkaido-Tohoku": "#2E6B35",
+  "Kanto":           "#1B6FA8",
+  "Chubu":           "#7A5C1E",
+  "Kinki":           "#6B3A6E",
+  "Chugoku":         "#1A7070",
+  "Shikoku":         "#8A4B1A",
+  "Kyushu":          "#9B2B2B",
 };
 
 const PLACEHOLDER_PATTERNS = [
@@ -44,8 +44,6 @@ const isLgJpUrl = (url: string) =>
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState("");
-  const [selectedPrefecture, setSelectedPrefecture] = useState("");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortByDistance, setSortByDistance] = useState(false);
   const [locationError, setLocationError] = useState("");
@@ -60,19 +58,6 @@ export default function Home() {
   const todayFacility = facilitiesData[facilitiesData.length - 1];
   const allTags = Array.from(new Set(facilitiesData.flatMap(f => f.tags)));
 
-  const regionCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    facilitiesData.forEach(f => { counts[f.region] = (counts[f.region] || 0) + 1; });
-    return counts;
-  }, []);
-
-  const topPrefectures = useMemo(() => {
-    const counts: Record<string, number> = {};
-    facilitiesData.forEach(f => { counts[f.prefecture] = (counts[f.prefecture] || 0) + 1; });
-    return Object.entries(counts)
-      .filter(([, count]) => count >= 3)
-      .sort((a, b) => b[1] - a[1]);
-  }, []);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371;
@@ -107,16 +92,6 @@ export default function Home() {
     }
   };
 
-  const handleRegionChip = (region: string) => {
-    setSelectedRegion(prev => prev === region ? "" : region);
-    setSelectedPrefecture("");
-  };
-
-  const handlePrefectureChip = (prefecture: string) => {
-    setSelectedPrefecture(prev => prev === prefecture ? "" : prefecture);
-    setSelectedRegion("");
-  };
-
   const filteredAndSortedFacilities = useMemo(() => {
     let result = facilitiesData.filter(facility => {
       const matchQuery =
@@ -124,9 +99,7 @@ export default function Home() {
         (facility.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
         facility.prefecture.includes(searchQuery);
       const matchType = selectedType === "" || facility.tags.includes(selectedType);
-      const matchRegion = selectedRegion === "" || facility.region === selectedRegion;
-      const matchPrefecture = selectedPrefecture === "" || facility.prefecture === selectedPrefecture;
-      return matchQuery && matchType && matchRegion && matchPrefecture;
+      return matchQuery && matchType;
     });
 
     if (sortByDistance && userLocation) {
@@ -136,11 +109,11 @@ export default function Home() {
       );
     }
     return result;
-  }, [searchQuery, selectedType, selectedRegion, selectedPrefecture, sortByDistance, userLocation]);
+  }, [searchQuery, selectedType, sortByDistance, userLocation]);
 
   useEffect(() => {
     setVisibleCount(30);
-  }, [searchQuery, selectedType, selectedRegion, selectedPrefecture]);
+  }, [searchQuery, selectedType]);
 
   useEffect(() => {
     observerRef.current?.disconnect();
@@ -230,7 +203,12 @@ export default function Home() {
                   ))}
                 </div>
                 <h3 className={styles.todayCardTitle}>{todayFacility.name}</h3>
-                <p className={styles.todayCardPref}>📍 {todayFacility.prefecture}</p>
+                <div className={styles.cardMeta}>
+                  <span className={styles.regionTag} style={{ backgroundColor: REGION_COLORS[todayFacility.region] ?? '#666' }}>
+                    {REGION_LABELS[todayFacility.region]}
+                  </span>
+                  <span className={styles.cardPref}>📍 {todayFacility.prefecture}</span>
+                </div>
                 <p className={styles.todayCardDesc}>
                   {todayFacility.description
                     ? todayFacility.description.substring(0, 120) + "..."
@@ -271,46 +249,6 @@ export default function Home() {
             </label>
           </div>
           {locationError && <p className={styles.errorText}>{locationError}</p>}
-
-          {/* エリアタイルナビゲーション */}
-          <div className={styles.regionTilesGrid}>
-            {Object.entries(REGION_LABELS).map(([key, label]) =>
-              regionCounts[key] ? (
-                <button
-                  key={key}
-                  className={`${styles.regionTile} ${selectedRegion === key ? styles.regionTileActive : ""}`}
-                  onClick={() => handleRegionChip(key)}
-                >
-                  <span className={styles.regionTileIcon}>{REGION_ICONS[key]}</span>
-                  <span className={styles.regionTileLabel}>{label}</span>
-                  <span className={styles.regionTileCount}>{regionCounts[key]}件</span>
-                </button>
-              ) : null
-            )}
-          </div>
-
-          {/* 都道府県チップ */}
-          {topPrefectures.length > 0 && (
-            <div className={styles.prefChipRow}>
-              {topPrefectures.map(([pref, count]) => (
-                <button
-                  key={pref}
-                  className={`${styles.quickFilterChip} ${styles.quickFilterChipPref} ${selectedPrefecture === pref ? styles.chipActivePref : ""}`}
-                  onClick={() => handlePrefectureChip(pref)}
-                >
-                  {pref.replace(/[都道府県]$/, "")} <span className={styles.chipCount}>{count}</span>
-                </button>
-              ))}
-              {(selectedRegion || selectedPrefecture) && (
-                <button
-                  className={styles.quickFilterReset}
-                  onClick={() => { setSelectedRegion(""); setSelectedPrefecture(""); }}
-                >
-                  ✕ クリア
-                </button>
-              )}
-            </div>
-          )}
 
           <p className={styles.resultCount}>
             該当件数: {filteredAndSortedFacilities.length}件 / 全{facilitiesData.length}件
@@ -353,10 +291,15 @@ export default function Home() {
                         ))}
                       </div>
                       <h3 className={styles.cardTitle}>{facility.name}</h3>
-                      <span className={styles.cardRegion}>
-                        {facility.prefecture}
-                        {distance !== null && ` (${distance.toFixed(1)} km)`}
-                      </span>
+                      <div className={styles.cardMeta}>
+                        <span className={styles.regionTag} style={{ backgroundColor: REGION_COLORS[facility.region] ?? '#666' }}>
+                          {REGION_LABELS[facility.region]}
+                        </span>
+                        <span className={styles.cardPref}>
+                          {facility.prefecture}
+                          {distance !== null && ` ・ ${distance.toFixed(1)} km`}
+                        </span>
+                      </div>
                       <p className={styles.cardText}>
                         {facility.description && facility.description.length > 60
                           ? facility.description.substring(0, 60) + "..."

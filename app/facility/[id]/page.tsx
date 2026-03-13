@@ -5,6 +5,26 @@ import styles from "./page.module.css";
 import facilitiesData from "../../data/facilities.json";
 import newsData from "../../data/news.json";
 
+const REGION_LABELS: Record<string, string> = {
+  "Hokkaido-Tohoku": "北海道・東北",
+  "Kanto":           "関東",
+  "Chubu":           "中部",
+  "Kinki":           "近畿",
+  "Chugoku":         "中国",
+  "Shikoku":         "四国",
+  "Kyushu":          "九州",
+};
+
+const REGION_COLORS: Record<string, string> = {
+  "Hokkaido-Tohoku": "#2E6B35",
+  "Kanto":           "#1B6FA8",
+  "Chubu":           "#7A5C1E",
+  "Kinki":           "#6B3A6E",
+  "Chugoku":         "#1A7070",
+  "Shikoku":         "#8A4B1A",
+  "Kyushu":          "#9B2B2B",
+};
+
 interface Facility {
     id: string;
     name: string;
@@ -98,6 +118,15 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                         ))}
                     </div>
                     <h1 className={styles.title}>{facility.name}</h1>
+                    <div className={styles.regionMeta}>
+                        <span
+                            className={styles.regionTag}
+                            style={{ backgroundColor: REGION_COLORS[facility.region] ?? '#666' }}
+                        >
+                            {REGION_LABELS[facility.region]}
+                        </span>
+                        <span className={styles.prefLabel}>{facility.prefecture}</span>
+                    </div>
                     <p className={styles.location}>📍 {facility.address}</p>
                 </header>
 

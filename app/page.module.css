@@ -137,7 +137,7 @@
 }
 
 .todayCardPref {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
 }
 
@@ -154,74 +154,30 @@
   margin-top: 0.5rem;
 }
 
-/* ===== エリアタイルナビゲーション ===== */
-.regionTilesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-}
-
-.regionTile {
+/* ===== カードメタ情報（地方タグ＋県名） ===== */
+.cardMeta {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.9rem 0.5rem;
-  border-radius: 14px;
-  border: 1.5px solid var(--glass-border);
-  background: var(--bg-card);
-  cursor: pointer;
-  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
-  font-family: var(--font-base);
-  box-shadow: var(--shadow-sm);
-}
-
-.regionTile:hover {
-  background: var(--glass-bg);
-  border-color: var(--accent-forest);
-  transform: translateY(-2px);
-}
-
-.regionTileActive {
-  background: var(--accent-forest) !important;
-  border-color: var(--accent-forest) !important;
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(46, 74, 34, 0.3);
-}
-
-.regionTileIcon {
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.regionTileLabel {
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: inherit;
-}
-
-.regionTileCount {
-  font-size: 0.7rem;
-  color: var(--text-secondary);
-  background: rgba(0, 0, 0, 0.06);
-  border-radius: 10px;
-  padding: 1px 7px;
-}
-
-.regionTileActive .regionTileCount {
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* 都道府県チップ行 */
-.prefChipRow {
-  display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1.25rem;
-  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.regionTag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 3px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.cardPref {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .section {
@@ -249,8 +205,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2.5rem;
 }
 
 .card {
@@ -273,7 +229,7 @@
 .cardImageWrapper {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 240px;
   overflow: hidden;
 }
 
@@ -668,10 +624,6 @@
     font-size: 1.25rem;
   }
 
-  .regionTilesGrid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 0.5rem;
-  }
 }
 
 @media (max-width: 600px) {
@@ -680,17 +632,6 @@
     gap: 0.75rem;
     flex-wrap: wrap;
     padding: 0.4rem 0.75rem;
-  }
-
-  .prefChipRow {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 0.25rem;
-  }
-
-  .quickFilterChip {
-    white-space: nowrap;
-    flex-shrink: 0;
   }
 
   .floatingCounter {

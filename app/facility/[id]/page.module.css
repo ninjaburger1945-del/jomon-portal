@@ -57,6 +57,30 @@
     font-family: var(--font-base);
 }
 
+.regionMeta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.regionTag {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+}
+
+.prefLabel {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
 .location {
     color: var(--text-secondary);
     font-size: 1.1rem;
