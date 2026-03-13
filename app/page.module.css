@@ -444,6 +444,11 @@
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
+/* .lg.jp / .go.jp 自治体公式バッジ（金色） */
+.verifiedBadgeLg {
+  background: rgba(160, 100, 0, 0.88);
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 600px) {
   .stickyBar {

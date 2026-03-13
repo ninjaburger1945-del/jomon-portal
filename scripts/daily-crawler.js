@@ -2,17 +2,121 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require("fs");
 const path = require("path");
 
-async function validateUrl(url, facilityName) {
-    if (!url || !url.startsWith("http")) return `https://www.google.com/search?q=${encodeURIComponent(facilityName)}`;
-    try {
-        const headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36' };
-        const headRes = await fetch(url, { method: 'HEAD', headers });
-        if (headRes.ok || headRes.status === 403 || headRes.status === 405) return url;
-        const getRes = await fetch(url, { method: 'GET', headers });
-        if (getRes.ok || getRes.status === 403 || getRes.status === 405) return url;
-    } catch(e) {}
-    console.warn(`[WARN] URL ${url} is dead or invalid. Using fallback search link.`);
-    return `https://www.google.com/search?q=${encodeURIComponent(facilityName)}`;
+// 観光トップページ・浅い階層へのリダイレクト検知パターン
+const REDIRECT_TRAP_PATTERNS = [
+  /\/kanko\/?(\?.*)?$/i,
+  /\/kankou\/?(\?.*)?$/i,
+  /\/tourism\/?(\?.*)?$/i,
+  /\/sightseeing\/?(\?.*)?$/i,
+  /\/spot\/?(\?.*)?$/i,
+  // ドメイントップ（パスなし）
+  /^https?:\/\/[^/]+\/?(\?.*)?$/,
+  // 浅い1階層（/xxx/ のみ）
+  /^https?:\/\/[^/]+\/[^/]+\/?(\?.*)?$/,
+];
+
+// ページ死亡検知パターン
+const DEAD_PAGE_PATTERNS = [
+  /404 Not Found/i,
+  /ページが見つかりません/,
+  /このページは存在しません/,
+  /お探しのページ.*ありません/,
+  /ページは移動または削除/,
+  /削除されました/,
+  /<title[^>]*>.*404.*<\/title>/i,
+];
+
+/**
+ * 厳格URLバリデーション
+ * - リダイレクト先が観光トップ等なら失敗
+ * - ページに「404」「存在しません」等があれば失敗
+ * - <title>/<h1> に施設名キーワードが含まれない場合は失敗
+ * @returns {{ valid: boolean, url: string, verified: boolean }}
+ */
+async function validateUrlStrict(url, facilityName) {
+  if (!url || !url.startsWith("http")) {
+    console.warn(`[URL_SKIP] URLなし: スキップ`);
+    return { valid: false, url: "", verified: false };
+  }
+
+  try {
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'ja,en-US;q=0.7,en;q=0.3',
+    };
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers,
+      redirect: 'follow',
+      signal: AbortSignal.timeout(12000),
+    });
+
+    const finalUrl = res.url || url;
+
+    // リダイレクトトラップ検知
+    for (const pattern of REDIRECT_TRAP_PATTERNS) {
+      if (pattern.test(finalUrl)) {
+        console.warn(`[REDIRECT_TRAP] ${url} → ${finalUrl}`);
+        return { valid: false, url: "", verified: false };
+      }
+    }
+
+    // HTTPエラー（403/405は許容）
+    if (!res.ok && res.status !== 403 && res.status !== 405) {
+      console.warn(`[HTTP_${res.status}] ${url}`);
+      return { valid: false, url: "", verified: false };
+    }
+
+    // ページ内容取得（最大150KB）
+    let html = "";
+    if (res.ok) {
+      const buffer = await res.arrayBuffer();
+      html = new TextDecoder('utf-8').decode(buffer.slice(0, 150000));
+    }
+
+    // 死亡ページ検知
+    for (const pattern of DEAD_PAGE_PATTERNS) {
+      if (pattern.test(html)) {
+        console.warn(`[DEAD_PAGE] ${url} マッチ: ${pattern}`);
+        return { valid: false, url: "", verified: false };
+      }
+    }
+
+    // タイトル一致確認: <title> or <h1> に施設名のキーワードが含まれるか
+    if (html && facilityName) {
+      const keyword = facilityName
+        .replace(/^(特別|国|県|市|町|村)(指定)?(史跡|遺跡)?\s*/g, '')
+        .replace(/^(特別史跡|史跡|遺跡群|縄文遺跡)\s*/g, '')
+        .replace(/(遺跡|貝塚|遺跡群|縄文遺跡|縄文館|博物館|資料館|記念館|センター|公園|学習館)$/, '')
+        .trim()
+        .split(/[\s　]/)[0];
+
+      if (keyword.length >= 2) {
+        const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+        const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+        const titleText = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '') : '';
+        const h1Text = h1Match ? h1Match[1].replace(/<[^>]+>/g, '') : '';
+        const pageText = titleText + ' ' + h1Text;
+
+        if (!pageText.includes(keyword)) {
+          console.warn(`[TITLE_MISMATCH] キーワード「${keyword}」が title/h1 に見つからず: ${url}`);
+          console.warn(`  title: "${titleText.substring(0, 80)}" | h1: "${h1Text.substring(0, 80)}"`);
+          return { valid: false, url: "", verified: false };
+        }
+      }
+    }
+
+    // .lg.jp / .go.jp は公式自治体として verified=true
+    const verified = /\.(lg|go)\.jp/i.test(finalUrl);
+    console.log(`[VALID] ${finalUrl}${verified ? ' ✓ (公式自治体)' : ''}`);
+    return { valid: true, url: finalUrl, verified };
+
+  } catch (e) {
+    console.warn(`[FETCH_ERROR] ${url}: ${e.message}`);
+    return { valid: false, url: "", verified: false };
+  }
 }
 
 async function run() {
@@ -20,23 +124,19 @@ async function run() {
     if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is missing");
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // Google Search Groundingを利用して現実の正しいURLを取得させる
-    const model = genAI.getGenerativeModel({ 
-        model: "gemini-2.5-pro",
-        tools: [{ googleSearch: {} }] 
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-pro",
+      tools: [{ googleSearch: {} }],
     });
 
     const filePath = path.join(__dirname, "../app/data/facilities.json");
-    
     let existingData = [];
     if (fs.existsSync(filePath)) {
-      const fileContent = fs.readFileSync(filePath, "utf-8");
-      existingData = JSON.parse(fileContent || "[]");
+      existingData = JSON.parse(fs.readFileSync(filePath, "utf-8") || "[]");
     }
 
     const existingNames = existingData.map(d => d.name).join(", ");
-    
-    const regions = ["関東", "中部", "近畿", "中国", "四国", "九州"]; 
+    const regions = ["関東", "中部", "近畿", "中国", "四国", "九州"];
     const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
     const prompt = `
@@ -50,93 +150,122 @@ ${existingNames}
 ターゲット地方: 【${randomRegion}地方】
 世界遺産ではない、その土地ならではの遺跡を探してください。
 
+【URL取得に関する最重要指示】
+- Google検索機能を使って、施設の **自治体（.lg.jp）の深い階層のURL** を最優先で探してください
+  例: https://www.city.xxx.lg.jp/shisei/bunka/iseki/xxxx.html
+- 観光トップページ（/kanko/, /tourism/ 等）や、ドメイントップ（https://xxx.lg.jp/）は不可
+- 必ず施設名そのものが<title>や<h1>に含まれるページのURLを選んでください
+- .lg.jp が見つからない場合は .go.jp、次に公的観光協会サイトを検討してください
+- どうしても見つからない場合は空文字（""）にしてください
+
 【出力要件】
-1. 完全なJSON配列（\`[\{...\}]\`）のみを出力してください。マークダウンのバッククォート不要です。
-2. データ構造は以下の通りにしてください：
+1. 完全なJSON配列（\`[{...}]\`）のみを出力してください。マークダウンのバッククォート不要です。
+2. データ構造は以下の通り:
 {
   "id": "英数字のハイフン繋ぎ（例: uenohara-jomon）",
   "name": "施設の正式名称",
-  "region": "Chubu", 
+  "region": "Chubu",
   "prefecture": "都道府県名",
   "address": "住所",
   "description": "200文字程度の魅力的な紹介文",
-  "url": "Google検索機能を用いて必ず正しい公式ウェブサイトのURLを取得し設定してください（lg.jp, go.jp, or.jp等の公的機関や観光協会など。Googleの検索結果URLは絶対に不可です。どうしても見つからない場合は空文字にして下さい）",
+  "url": "自治体(.lg.jp)の深い階層URLを優先。見つからなければ空文字",
   "thumbnail": "",
   "tags": ["史跡", "博物館", "貝塚", "環状列石"などから1〜2個],
   "lat": 緯度(数値),
   "lng": 経度(数値),
-    "access": {
-      "info": "最寄り駅やバス停からのルート案内（機械的な見出しや記号は付けず、自然な文章で『〇〇駅から徒歩X分』のように）",
-      "advice": "遺跡少年からのアドバイス（『駅からちょっと歩くよ！車で行くのがおすすめ！』など、元気で親しみやすい話し言葉のトーンで）"
-    }
+  "access": {
+    "info": "最寄り駅やバス停からのルート案内（自然な文章で）",
+    "advice": "遺跡少年からのアドバイス（元気で親しみやすい話し言葉）"
   }
 }
-3. urlは必ず 'http' から始まる有効なURL形式にしてください。
-4. thumbnail は空文字（""）にしておいてください。
+3. urlは 'http' から始まるURL形式、または空文字にしてください。
+4. thumbnail は空文字（""）にしてください。
 `;
 
-    console.log("Requesting 1 new facilities from Gemini AI...");
+    console.log(`[CRAWLER] Gemini AI にリクエスト (地方: ${randomRegion})...`);
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
 
     let jsonStr = responseText.trim();
-    if (jsonStr.startsWith('```json')) jsonStr = jsonStr.substring(7);
-    if (jsonStr.startsWith('```')) jsonStr = jsonStr.substring(3);
-    if (jsonStr.endsWith('```')) jsonStr = jsonStr.substring(0, jsonStr.length - 3);
+    if (jsonStr.startsWith('```json')) jsonStr = jsonStr.slice(7);
+    if (jsonStr.startsWith('```')) jsonStr = jsonStr.slice(3);
+    if (jsonStr.endsWith('```')) jsonStr = jsonStr.slice(0, -3);
     jsonStr = jsonStr.trim();
 
-    const newFacilities = JSON.parse(jsonStr);
-
-    if (!Array.isArray(newFacilities) || newFacilities.length === 0) {
-        throw new Error("AI did not return a valid array of facilities.");
+    const candidates = JSON.parse(jsonStr);
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+      throw new Error("AI が有効な配列を返しませんでした。");
     }
 
-    console.log(`Successfully generated ${newFacilities.length} new facilities.`);
+    console.log(`[CRAWLER] AI が ${candidates.length} 件の候補を返却。検証開始...`);
 
-    for (const nf of newFacilities) {
-        const isDuplicate = existingData.some(f => f.id === nf.id || f.name.includes(nf.name) || nf.name.includes(f.name));
-        if (!isDuplicate) {
-            console.log(`Validating URL for ${nf.name}: ${nf.url}`);
-            nf.url = await validateUrl(nf.url, nf.name);
+    let addedCount = 0;
+    for (const nf of candidates) {
+      // 1件制限
+      if (addedCount >= 1) {
+        console.log(`[LIMIT] 1件制限: 残りの候補をスキップ`);
+        break;
+      }
 
-            try {
-                console.log(`Selecting an existing AI image for ${nf.name}...`);
-                const imagesDir = path.join(__dirname, '../public/images/facilities');
-                const files = fs.readdirSync(imagesDir);
-                // Filter only existings AI images
-                const aiImages = files.filter(f => f.endsWith('_ai.png'));
-                
-                if (aiImages.length > 0) {
-                    const randomImage = aiImages[Math.floor(Math.random() * aiImages.length)];
-                    const sourcePath = path.join(imagesDir, randomImage);
-                    const targetFileName = `${nf.id}_ai.png`;
-                    const targetPath = path.join(imagesDir, targetFileName);
-                    
-                    fs.copyFileSync(sourcePath, targetPath);
-                    console.log(`Successfully copied ${randomImage} to ${targetFileName}`);
-                    nf.thumbnail = `/images/facilities/${targetFileName}`;
-                } else {
-                    console.warn(`[WARN] No existing AI images found to reuse.`);
-                    nf.thumbnail = "";
-                }
-            } catch (imgErr) {
-                console.error(`Failed to assign existing image for ${nf.name}:`, imgErr);
-                nf.thumbnail = "";
-            }
+      // 重複チェック
+      const isDuplicate = existingData.some(f =>
+        f.id === nf.id || f.name.includes(nf.name) || nf.name.includes(f.name)
+      );
+      if (isDuplicate) {
+        console.log(`[DUPLICATE] スキップ: ${nf.name}`);
+        continue;
+      }
 
-            existingData.push(nf);
-            console.log(`Added: ${nf.name}`);
+      // 厳格URLバリデーション
+      console.log(`[VALIDATE] ${nf.name}: ${nf.url}`);
+      const validation = await validateUrlStrict(nf.url, nf.name);
+      if (!validation.valid) {
+        console.warn(`[REJECTED] ${nf.name}: URLバリデーション失敗。このエントリを破棄。`);
+        continue;
+      }
+
+      nf.url = validation.url;
+      nf.verified = validation.verified;
+
+      // 既存AIイメージをランダムコピー
+      try {
+        const imagesDir = path.join(__dirname, '../public/images/facilities');
+        const files = fs.readdirSync(imagesDir);
+        const aiImages = files.filter(f => f.endsWith('_ai.png'));
+        if (aiImages.length > 0) {
+          const randomImage = aiImages[Math.floor(Math.random() * aiImages.length)];
+          const targetFileName = `${nf.id}_ai.png`;
+          fs.copyFileSync(
+            path.join(imagesDir, randomImage),
+            path.join(imagesDir, targetFileName)
+          );
+          nf.thumbnail = `/images/facilities/${targetFileName}`;
+          console.log(`[IMAGE] ${randomImage} → ${targetFileName}`);
         } else {
-            console.log(`[PROTECTED] Skipped duplicate facility: ${nf.name}`);
+          nf.thumbnail = "";
         }
+      } catch (imgErr) {
+        console.error(`[IMAGE_ERROR] ${imgErr.message}`);
+        nf.thumbnail = "";
+      }
+
+      existingData.push(nf);
+      addedCount++;
+      console.log(`[ADDED] ${nf.name} | verified: ${nf.verified} | url: ${nf.url}`);
     }
-    
+
+    if (addedCount === 0) {
+      console.warn('[RESULT] 本日は新規施設を追加できませんでした（全候補が検証失敗または重複）。');
+      process.exit(0);
+    }
+
     fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
-    console.log(`Total count: ${existingData.length}`);
-    console.log('Finished crawler.');
+    console.log(`[RESULT] 合計 ${existingData.length} 件`);
+    console.log('[CRAWLER] 完了。');
+
   } catch (error) {
-      console.error("Error:", error.message);
-      process.exit(1);
+    console.error("[FATAL]", error.message);
+    process.exit(1);
   }
 }
 

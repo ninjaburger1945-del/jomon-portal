@@ -27,6 +27,9 @@ const PLACEHOLDER_PATTERNS = [
 const isVerifiedUrl = (url: string) =>
   !!url && url.trim() !== "" && !PLACEHOLDER_PATTERNS.some(p => p.test(url));
 
+const isLgJpUrl = (url: string) =>
+  !!url && /\.(lg|go)\.jp/i.test(url);
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("");
@@ -277,7 +280,9 @@ export default function Home() {
                       />
                       {/* 4. 公式リンク確認済バッジ */}
                       {isVerifiedUrl(facility.url) && (
-                        <span className={styles.verifiedBadge}>✓ 公式リンク確認済</span>
+                        <span className={`${styles.verifiedBadge}${isLgJpUrl(facility.url) ? ` ${styles.verifiedBadgeLg}` : ''}`}>
+                          {isLgJpUrl(facility.url) ? '✓ 自治体公式' : '✓ 公式リンク確認済'}
+                        </span>
                       )}
                     </div>
                     <p className={styles.aiAnnotation}>
