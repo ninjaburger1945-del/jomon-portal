@@ -159,8 +159,9 @@ ${existingNames}
 - どうしても見つからない場合は空文字（""）にしてください
 
 【出力要件】
-1. 完全なJSON配列（\`[{...}]\`）のみを出力してください。マークダウンのバッククォート不要です。
-2. データ構造は以下の通り:
+1. 異なる施設を **3件** ピックアップしてください（URLバリデーション失敗時のバックアップ用）。追加は最大1件のみです。
+2. 完全なJSON配列（\`[{...}]\`）のみを出力してください。マークダウンのバッククォート不要です。
+3. データ構造は以下の通り:
 {
   "id": "英数字のハイフン繋ぎ（例: uenohara-jomon）",
   "name": "施設の正式名称",
@@ -178,8 +179,8 @@ ${existingNames}
     "advice": "遺跡少年からのアドバイス（元気で親しみやすい話し言葉）"
   }
 }
-3. urlは 'http' から始まるURL形式、または空文字にしてください。
-4. thumbnail は空文字（""）にしてください。
+4. urlは 'http' から始まるURL形式、または空文字にしてください。
+5. thumbnail は空文字（""）にしてください。
 `;
 
     console.log(`[CRAWLER] Gemini AI にリクエスト (地方: ${randomRegion})...`);
@@ -197,7 +198,7 @@ ${existingNames}
       throw new Error("AI が有効な配列を返しませんでした。");
     }
 
-    console.log(`[CRAWLER] AI が ${candidates.length} 件の候補を返却。検証開始...`);
+    console.log(`[CRAWLER] AI が ${candidates.length} 件の候補を返却。1件通過するまで順番に検証...`);
 
     let addedCount = 0;
     for (const nf of candidates) {
