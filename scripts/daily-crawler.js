@@ -141,7 +141,8 @@ async function run() {
 
     const prompt = `
 あなたは日本の縄文時代における遺跡・貝塚・環状列石などの専門リサーチャーです。
-以下の「すでに登録済みの施設リスト」に含まれていない、**日本国内の重要な縄文時代の遺跡・博物館・資料館**を新たに **1件** ピックアップし、JSON形式で出力してください。
+以下の「すでに登録済みの施設リスト」に含まれていない、**日本国内の重要な縄文時代の遺跡・博物館・資料館**を **必ず3件** ピックアップし、JSON配列で出力してください。
+（URLが存在しない場合のバックアップとして3件必要です。必ず3件出力してください。）
 
 【既存リスト（これらは除外してください）】
 ${existingNames}
@@ -159,9 +160,8 @@ ${existingNames}
 - どうしても見つからない場合は空文字（""）にしてください
 
 【出力要件】
-1. 異なる施設を **3件** ピックアップしてください（URLバリデーション失敗時のバックアップ用）。追加は最大1件のみです。
-2. 完全なJSON配列（\`[{...}]\`）のみを出力してください。マークダウンのバッククォート不要です。
-3. データ構造は以下の通り:
+1. 完全なJSON配列（\`[{...}]\`）のみを出力してください。マークダウンのバッククォート不要です。
+2. データ構造は以下の通り（3件分）:
 {
   "id": "英数字のハイフン繋ぎ（例: uenohara-jomon）",
   "name": "施設の正式名称",
@@ -217,16 +217,17 @@ ${existingNames}
         continue;
       }
 
-      // 厳格URLバリデーション
+      // 厳格URLバリデーション（失敗してもエントリは追加。url=""で保存）
       console.log(`[VALIDATE] ${nf.name}: ${nf.url}`);
       const validation = await validateUrlStrict(nf.url, nf.name);
       if (!validation.valid) {
-        console.warn(`[REJECTED] ${nf.name}: URLバリデーション失敗。このエントリを破棄。`);
-        continue;
+        console.warn(`[URL_WARN] ${nf.name}: URLバリデーション失敗。url="" で追加します。`);
+        nf.url = "";
+        nf.verified = false;
+      } else {
+        nf.url = validation.url;
+        nf.verified = validation.verified;
       }
-
-      nf.url = validation.url;
-      nf.verified = validation.verified;
 
       // 既存AIイメージをランダムコピー
       try {
