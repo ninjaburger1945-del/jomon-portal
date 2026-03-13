@@ -89,6 +89,21 @@
   font-size: 1.05rem;
 }
 
+.modalSectionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: inherit;
+  margin: 0 0 0.5rem 0;
+  padding-left: 0.7rem;
+  border-left: 3px solid var(--color-accent, #C85A17);
+}
+
+.modalBody section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
 .closeBtn {
   align-self: flex-end;
   background-color: var(--color-primary);
