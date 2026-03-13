@@ -30,6 +30,18 @@ const REGION_COLORS: Record<string, string> = {
   "Okinawa":  "#0E8C7A",
 };
 
+const REGION_ICONS: Record<string, string> = {
+  "Hokkaido": "❄️",
+  "Tohoku":   "🌲",
+  "Kanto":    "🏺",
+  "Chubu":    "⛰️",
+  "Kinki":    "🌿",
+  "Chugoku":  "🌊",
+  "Shikoku":  "🌰",
+  "Kyushu":   "🌋",
+  "Okinawa":  "🌺",
+};
+
 const PLACEHOLDER_PATTERNS = [
   /google\.com\/search/i,
   /bing\.com\/search/i,
@@ -48,6 +60,7 @@ const isLgJpUrl = (url: string) =>
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState("");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortByDistance, setSortByDistance] = useState(false);
   const [locationError, setLocationError] = useState("");
@@ -61,6 +74,12 @@ export default function Home() {
 
   const todayFacility = facilitiesData[facilitiesData.length - 1];
   const allTags = Array.from(new Set(facilitiesData.flatMap(f => f.tags)));
+
+  const regionCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    facilitiesData.forEach(f => { counts[f.region] = (counts[f.region] || 0) + 1; });
+    return counts;
+  }, []);
 
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -103,7 +122,8 @@ export default function Home() {
         (facility.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
         facility.prefecture.includes(searchQuery);
       const matchType = selectedType === "" || facility.tags.includes(selectedType);
-      return matchQuery && matchType;
+      const matchRegion = selectedRegion === "" || facility.region === selectedRegion;
+      return matchQuery && matchType && matchRegion;
     });
 
     if (sortByDistance && userLocation) {
@@ -113,11 +133,11 @@ export default function Home() {
       );
     }
     return result;
-  }, [searchQuery, selectedType, sortByDistance, userLocation]);
+  }, [searchQuery, selectedType, selectedRegion, sortByDistance, userLocation]);
 
   useEffect(() => {
     setVisibleCount(30);
-  }, [searchQuery, selectedType]);
+  }, [searchQuery, selectedType, selectedRegion]);
 
   useEffect(() => {
     observerRef.current?.disconnect();
@@ -253,6 +273,27 @@ export default function Home() {
             </label>
           </div>
           {locationError && <p className={styles.errorText}>{locationError}</p>}
+
+          {/* 地方タイルナビゲーション */}
+          <div className={styles.regionTilesGrid}>
+            {Object.entries(REGION_LABELS).map(([key, label]) =>
+              regionCounts[key] ? (
+                <button
+                  key={key}
+                  className={`${styles.regionTile} ${selectedRegion === key ? styles.regionTileActive : ""}`}
+                  style={selectedRegion === key
+                    ? { backgroundColor: REGION_COLORS[key], borderColor: REGION_COLORS[key] }
+                    : { borderColor: REGION_COLORS[key] }
+                  }
+                  onClick={() => setSelectedRegion(prev => prev === key ? "" : key)}
+                >
+                  <span className={styles.regionTileIcon}>{REGION_ICONS[key]}</span>
+                  <span className={styles.regionTileLabel}>{label}</span>
+                  <span className={styles.regionTileCount}>{regionCounts[key]}</span>
+                </button>
+              ) : null
+            )}
+          </div>
 
           <p className={styles.resultCount}>
             該当件数: {filteredAndSortedFacilities.length}件 / 全{facilitiesData.length}件
