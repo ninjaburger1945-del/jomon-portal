@@ -18,6 +18,7 @@
   /* ── フォント ── */
   --font-base: var(--font-noto-sans-jp), sans-serif;
   --font-heading: var(--font-noto-serif-jp), "游明朝", "Yu Mincho", "HGS明朝E", serif;
+  --font-hero: var(--font-shippori-mincho), "Shippori Mincho", "游明朝", "Yu Mincho", serif;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -15,7 +15,11 @@
 .heroContent {
   animation: fadeInUp 1s ease-out;
   padding: 3rem 3.5rem;
-  background: rgba(10, 7, 2, 0.38);
+  /* 縄目テクスチャ：2本の位相反転サイン波が交差し、縄の撚りを表現 */
+  background-color: rgba(10, 7, 2, 0.38);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Cpath d='M0 10 C5 4 10 4 15 10 C20 16 25 16 30 10 C35 4 40 4 45 10' stroke='%23c8a040' stroke-width='1.6' fill='none' opacity='0.60'/%3E%3Cpath d='M0 10 C5 16 10 16 15 10 C20 4 25 4 30 10 C35 16 40 16 45 10' stroke='%23d4aa50' stroke-width='1.0' fill='none' opacity='0.42'/%3E%3C/svg%3E");
+  background-size: 40px 20px;
+  background-repeat: repeat;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-radius: 20px;
@@ -37,26 +41,35 @@
 .heroTitle {
   font-size: 4.5rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
-  font-family: var(--font-heading);
+  letter-spacing: 0.22em;
+  font-family: var(--font-hero);
   line-height: 1.1;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.heroTitle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #c8a040, rgba(200,160,64,0.9), #c8a040, transparent);
+  border-radius: 1px;
 }
 
 .heroSubtitle {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 400;
-  letter-spacing: 0.12em;
-  color: rgba(255, 245, 225, 0.9);
-  font-family: var(--font-heading);
+  letter-spacing: 0.18em;
+  color: rgba(255, 245, 225, 0.88);
+  font-family: var(--font-hero);
 }
 
-.heroDecor {
-  font-size: 1.1rem;
-  color: rgba(200, 160, 80, 0.7);
-  letter-spacing: 0.3em;
-  margin-top: 0.25rem;
-}
 
 /* ===== 今日の1件 ===== */
 .todaySection {
@@ -441,29 +454,12 @@
   border-radius: 4px;
 }
 
-.aiBadge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  padding: 4px 8px;
+.aiNote {
+  margin-left: 0.75rem;
   font-size: 0.75rem;
-  border-radius: 4px;
-  backdrop-filter: blur(4px);
-  z-index: 2;
-  font-weight: bold;
-  letter-spacing: 0.05em;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.aiAnnotation {
-  font-size: 0.7rem;
-  color: #888;
-  margin: 0;
-  padding: 8px 16px 0 16px;
-  line-height: 1.4;
-  text-align: left;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  font-weight: 400;
 }
 
 .loadMoreContainer {

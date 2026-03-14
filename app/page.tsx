@@ -194,7 +194,6 @@ export default function Home() {
             <p className={styles.heroEyebrow}>縄文時代 — 1万年の記憶</p>
             <h1 className={styles.heroTitle}>JOMON PORTAL</h1>
             <p className={styles.heroSubtitle}>時を越えて、日本の原風景に出会う</p>
-            <div className={styles.heroDecor}>&#x2E3B;&ensp;&#xFF3C;&ensp;&#x2E3B;</div>
           </div>
         </header>
 
@@ -297,6 +296,7 @@ export default function Home() {
 
           <p className={styles.resultCount}>
             該当件数: {filteredAndSortedFacilities.length}件 / 全{facilitiesData.length}件
+            <span className={styles.aiNote}>※画像はAI生成のイメージ図です</span>
           </p>
 
           <div className={styles.grid}>
@@ -326,9 +326,6 @@ export default function Home() {
                         </span>
                       )}
                     </div>
-                    <p className={styles.aiAnnotation}>
-                      ※このイラストは遺跡の情報を元にAIで生成されたイメージ図です。
-                    </p>
                     <div className={styles.cardContent}>
                       <div>
                         {facility.tags.map(tag => (
