@@ -108,8 +108,9 @@ async function validateUrlStrict(url, facilityName) {
       }
     }
 
-    // .lg.jp / .go.jp は公式自治体として verified=true
-    const verified = /\.(lg|go)\.jp/i.test(finalUrl);
+    // .lg.jp / .go.jp、または city/town/village.xxx.pref.jp（旧来の自治体形式）は verified=true
+    const verified = /\.(lg|go)\.jp/i.test(finalUrl) ||
+      /^https?:\/\/(?:www\.)?(?:city|town|village|machi|mura)\.[^.]+\.[^.]+\.jp/i.test(finalUrl);
     console.log(`[VALID] ${finalUrl}${verified ? ' ✓ (公式自治体)' : ''}`);
     return { valid: true, url: finalUrl, verified };
 
@@ -130,7 +131,7 @@ async function searchAlternativeUrl(model, facilityName, prefecture) {
 Google検索を使って、「${facilityName}」（${prefecture}）の公式ウェブサイトのURLを1つだけ見つけてください。
 
 条件:
-- 施設の公式サイト（自治体 .lg.jp、または施設独自ドメイン）
+- 施設の公式サイト（自治体 .lg.jp 形式、または city.xxx.pref.jp 旧形式、または施設独自ドメイン）
 - トップページや観光ページ（/kanko/ 等）ではなく、施設名が直接掲載されているページ
 - 必ず実在するURLのみ
 
@@ -194,11 +195,13 @@ ${existingNames}
 世界遺産ではない、その土地ならではの遺跡を探してください。
 
 【URL取得に関する最重要指示】
-- Google検索機能を使って、施設の **自治体（.lg.jp）の深い階層のURL** を最優先で探してください
-  例: https://www.city.xxx.lg.jp/shisei/bunka/iseki/xxxx.html
+- Google検索機能を使って、施設の **自治体ウェブサイトの深い階層のURL** を最優先で探してください
+  例（新形式）: https://www.city.xxx.lg.jp/shisei/bunka/iseki/xxxx.html
+  例（旧形式）: https://www.city.xxx.saitama.jp/kyoiku/bunkazai/xxx/index.html
+  ※ 日本の自治体ドメインは「.lg.jp」形式と「city.xxx.pref.jp」形式の両方があります。両方を検索してください。
 - 観光トップページ（/kanko/, /tourism/ 等）や、ドメイントップ（https://xxx.lg.jp/）は不可
 - 必ず施設名そのものが<title>や<h1>に含まれるページのURLを選んでください
-- .lg.jp が見つからない場合は .go.jp、次に公的観光協会サイトを検討してください
+- 自治体サイトが見つからない場合は .go.jp、次に公的観光協会サイトを検討してください
 - どうしても見つからない場合は空文字（""）にしてください
 
 【出力要件】
