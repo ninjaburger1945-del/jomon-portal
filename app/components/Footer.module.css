@@ -48,9 +48,11 @@
   align-items: center;
   z-index: 1000;
   padding: 1rem;
+  cursor: pointer;
 }
 
 .modalContent {
+  cursor: default;
   background-color: rgba(255, 255, 255, 1);
   padding: 2.5rem;
   border-radius: 12px;
@@ -179,3 +181,22 @@
   background: rgba(200, 90, 23, 0.07);
 }
 
+/* モバイル最適化 */
+.summaryMobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .summaryDesktop {
+    display: none;
+  }
+  .summaryMobile {
+    display: block;
+  }
+  .accordionToggleDesktop {
+    display: none;
+  }
+  .accordionBody {
+    display: none !important;
+  }
+}

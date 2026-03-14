@@ -24,8 +24,11 @@ export default function Footer() {
               <button className={styles.closeXBtn} onClick={() => setIsModalOpen(false)} aria-label="閉じる">✕</button>
             </div>
             <div className={styles.modalBody}>
-              <p className={styles.modalSummary}>
+              <p className={`${styles.modalSummary} ${styles.summaryDesktop}`}>
                 Jomon Portalは、全国の縄文遺跡を網羅したポータルサイトです。AIが毎日1件ずつ情報を更新し、公式サイトへの正確なリンクと、遺跡ごとのAI生成イラストで当時の空気感をお届けします。
+              </p>
+              <p className={`${styles.modalSummary} ${styles.summaryMobile}`}>
+                AIが毎日更新する縄文遺跡ポータル。公式リンク＆AIイラスト付き。
               </p>
 
               {isExpanded && (
@@ -46,7 +49,7 @@ export default function Footer() {
               )}
 
               <button
-                className={styles.accordionToggle}
+                className={`${styles.accordionToggle} ${styles.accordionToggleDesktop}`}
                 onClick={() => setIsExpanded(prev => !prev)}
               >
                 {isExpanded ? "▲ 閉じる" : "▼ 詳細を読む"}

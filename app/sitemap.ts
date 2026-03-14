@@ -9,7 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const facilityPages: MetadataRoute.Sitemap = facilitiesData.map((f) => ({
     url: `${BASE_URL}/facility/${f.id}/`,
     lastModified: new Date(),
-    changeFrequency: "weekly",
+    changeFrequency: "daily",
     priority: 0.8,
   }));
 

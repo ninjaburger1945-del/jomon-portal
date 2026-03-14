@@ -58,9 +58,26 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const facility = facilitiesData.find((f) => f.id === id);
     if (!facility) return { title: '施設が見つかりません' };
 
+    const tagStr = facility.tags.join('・');
+    const descBase = facility.description ? facility.description.substring(0, 90) : '';
     return {
-        title: `${facility.name} | 縄文博物館・資料館ポータル`,
-        description: `${facility.prefecture}にある${facility.name}の施設情報、最新トピック、アクセス情報。${facility.description ? facility.description.substring(0, 100) : ''}`,
+        title: `${facility.name}【${facility.prefecture}の縄文遺跡】| JOMON PORTAL`,
+        description: `${facility.prefecture}の${tagStr}「${facility.name}」。アクセス情報・施設概要・公式リンクを掲載。${descBase}`,
+        keywords: [facility.name, facility.prefecture, ...facility.tags, '縄文', '遺跡', '博物館', '縄文時代', 'JOMON PORTAL'],
+        openGraph: {
+            title: `${facility.name} | JOMON PORTAL`,
+            description: `${facility.prefecture}の縄文遺跡・${tagStr}。${descBase}`,
+            url: `https://jomon-portal.web.app/facility/${facility.id}/`,
+            siteName: 'JOMON PORTAL',
+            images: facility.thumbnail ? [{ url: `https://jomon-portal.web.app${facility.thumbnail}`, alt: facility.name }] : [],
+            locale: 'ja_JP',
+            type: 'article',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${facility.name} | JOMON PORTAL`,
+            description: `${facility.prefecture}の縄文遺跡・${tagStr}`,
+        },
     };
 }
 

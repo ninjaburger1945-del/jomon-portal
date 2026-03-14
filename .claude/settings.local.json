@@ -54,7 +54,13 @@
       "Bash(taskkill //F //IM node.exe 2>&1 && sleep 2 && cd \"C:/Users/ninja/.gemini/antigravity/scratch/jomon-portal\" && npx next build 2>&1 | tail -25)",
       "Bash(git -C /c/Users/ninja/.gemini/antigravity/scratch/jomon-portal/ log --oneline -10)",
       "Bash(git -C /c/Users/ninja/.gemini/antigravity/scratch/jomon-portal/ remote -v)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(cat \"C:\\\\Users\\\\ninja\\\\.gemini\\\\antigravity\\\\scratch\\\\jomon-portal\\\\.github/workflows\"*.yml 2>/dev/null | head -100)",
+      "Bash(cd \"C:\\\\Users\\\\ninja\\\\.gemini\\\\antigravity\\\\scratch\\\\jomon-portal\" && grep -c '\"id\"' app/data/facilities.json)",
+      "Bash(cd \"C:\\\\Users\\\\ninja\\\\.gemini\\\\antigravity\\\\scratch\\\\jomon-portal\" && cat .github/workflows/*.yml | grep -A3 \"on:\" | head -40)",
+      "Bash(cd \"C:\\\\Users\\\\ninja\\\\.gemini\\\\antigravity\\\\scratch\\\\jomon-portal\" && npx next build 2>&1 | tail -20)",
+      "Bash(cd \"C:\\\\Users\\\\ninja\\\\.gemini\\\\antigravity\\\\scratch\\\\jomon-portal\" && npx next build 2>&1 | tail -15)",
+      "Bash(taskkill //F //IM node.exe 2>&1; sleep 3 && cd \"C:\\\\Users\\\\ninja\\\\.gemini\\\\antigravity\\\\scratch\\\\jomon-portal\" && npx next build 2>&1 | tail -15)"
     ]
   }
 }
