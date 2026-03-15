@@ -190,21 +190,26 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                                 <div className={styles.accessBox}>
                                     {facility.access.train ? (
                                         <dl className={styles.accessGrid}>
-                                            {facility.access.train && (
-                                                <>
-                                                    <dt className={styles.accessMode}>🚃 電車</dt>
-                                                    <dd className={styles.accessInfoText}>{facility.access.train}</dd>
-                                                </>
-                                            )}
-                                            {facility.access.bus && !isWalkableFromStation(facility.access.train) && (
-                                                <>
-                                                    <dt className={styles.accessMode}>🚌 バス</dt>
-                                                    <dd className={styles.accessInfoText}>{facility.access.bus}</dd>
-                                                </>
-                                            )}
+                                            {(() => {
+                                                const walkable = isWalkableFromStation(facility.access.train);
+                                                if (!walkable && facility.access.bus) {
+                                                    return (
+                                                        <>
+                                                            <dt className={styles.accessMode}>🚃🚌</dt>
+                                                            <dd className={styles.accessInfoText}>{facility.access.train}。{facility.access.bus}</dd>
+                                                        </>
+                                                    );
+                                                }
+                                                return (
+                                                    <>
+                                                        <dt className={styles.accessMode}>🚃</dt>
+                                                        <dd className={styles.accessInfoText}>{facility.access.train}</dd>
+                                                    </>
+                                                );
+                                            })()}
                                             {facility.access.car && (
                                                 <>
-                                                    <dt className={styles.accessMode}>🚗 車</dt>
+                                                    <dt className={styles.accessMode}>🚗</dt>
                                                     <dd className={styles.accessInfoText}>{facility.access.car}</dd>
                                                 </>
                                             )}
