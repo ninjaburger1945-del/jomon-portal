@@ -9,7 +9,6 @@
     "url": "https://sannaimaruyama.pref.aomori.jp/",
     "thumbnail": "/images/facilities/sannaimaruyama_ai.png",
     "tags": [
-      "史跡",
       "博物館"
     ],
     "lat": 40.8114,
@@ -135,8 +134,7 @@
     "url": "https://www.nbz.or.jp/",
     "thumbnail": "/images/facilities/umaikata_ai.png",
     "tags": [
-      "博物館",
-      "火焔型土器"
+      "博物館"
     ],
     "lat": 37.4475,
     "lng": 138.7904,
@@ -156,7 +154,6 @@
     "url": "https://www.jomon-no-mori.jp/",
     "thumbnail": "/images/facilities/uenohara_ai.png",
     "tags": [
-      "史跡",
       "博物館"
     ],
     "lat": 31.7345,
@@ -198,7 +195,6 @@
     "url": "https://jomon-japan.jp/learn/jomon-sites/ofune",
     "thumbnail": "/images/facilities/ofune_ai.png",
     "tags": [
-      "史跡",
       "世界遺産"
     ],
     "lat": 41.9367,
@@ -282,7 +278,6 @@
     "url": "https://www.pref.aomori.lg.jp/soshiki/kyoiku/e-bunka/kinen_siseki_05.html",
     "thumbnail": "/images/facilities/kamegaoka_ai.png",
     "tags": [
-      "史跡",
       "世界遺産"
     ],
     "lat": 40.8902,
@@ -324,7 +319,6 @@
     "url": "https://jomon-japan.jp/learn/jomon-sites/kakinoshima",
     "thumbnail": "/images/facilities/kakinoshima_ai.png",
     "tags": [
-      "史跡",
       "世界遺産"
     ],
     "lat": 41.9288,
@@ -366,7 +360,6 @@
     "url": "https://jomon-japan.jp/learn/jomon-sites/goshono",
     "thumbnail": "/images/facilities/goshono_ai.png",
     "tags": [
-      "史跡",
       "世界遺産"
     ],
     "lat": 40.2019,
@@ -387,7 +380,6 @@
     "url": "https://tokimeguri.jp/guide/hiraideiseki/",
     "thumbnail": "/images/facilities/hiraide_ai.png",
     "tags": [
-      "史跡",
       "博物館"
     ],
     "lat": 36.1033,
@@ -408,8 +400,7 @@
     "url": "https://shinagawa-kanko.or.jp/spot/oomorikaiduka/",
     "thumbnail": "/images/facilities/oomori_ai.png",
     "tags": [
-      "貝塚",
-      "史跡"
+      "貝塚"
     ],
     "lat": 35.5872,
     "lng": 139.7302,
@@ -429,7 +420,6 @@
     "url": "https://www.town.shimosuwa.lg.jp/www/contents/1475145290897/index.html",
     "thumbnail": "/images/facilities/hoshigato_ai.png",
     "tags": [
-      "史跡",
       "鉱山跡"
     ],
     "lat": 36.1263,
@@ -450,8 +440,7 @@
     "url": "https://apec.aichi-c.ed.jp/kyouka/shakai/kyouzai/2018/syakai/tousan/tou078.htm#:~:text=%E5%90%89%E8%83%A1%E8%B2%9D%E5%A1%9A%EF%BC%88%E3%82%88%E3%81%97%E3%81%94%E3%81%8B%E3%81%84%E3%81%A5%E3%81%8B%EF%BC%89&text=%E5%90%89%E8%83%A1%E8%B2%9D%E5%A1%9A%EF%BC%88%E3%82%88%E3%81%97%E3%81%94%E3%81%8B%E3%81%84%E3%81%A5%E3%81%8B%EF%BC%89%E3%81%AF%EF%BC%8C%E7%B8%84%E6%96%87%E6%99%82%E4%BB%A3,%E3%81%A7%E3%81%AF%E5%A4%A7%E8%A6%8F%E6%A8%A1%E3%81%A7%E3%81%82%E3%82%8B%E3%80%82",
     "thumbnail": "/images/facilities/yoshigo_ai.png",
     "tags": [
-      "貝塚",
-      "史跡"
+      "貝塚"
     ],
     "lat": 34.6869,
     "lng": 137.2838,
@@ -492,8 +481,7 @@
     "url": "https://www.city.kasaoka.okayama.jp/soshiki/39/2424.html",
     "thumbnail": "/images/facilities/tsugumo_ai.png",
     "tags": [
-      "貝塚",
-      "史跡"
+      "貝塚"
     ],
     "lat": 34.4847,
     "lng": 133.528,
@@ -513,8 +501,7 @@
     "url": "https://www.museum.or.jp/museum/6769",
     "thumbnail": "/images/facilities/kamikuroiwa_ai.png",
     "tags": [
-      "洞窟遺跡",
-      "史跡"
+      "洞窟遺跡"
     ],
     "lat": 33.6338,
     "lng": 132.9658,
@@ -534,8 +521,7 @@
     "url": "https://sitereports.nabunken.go.jp/ja/61777",
     "thumbnail": "/images/facilities/satohama_ai.png",
     "tags": [
-      "貝塚",
-      "史跡"
+      "貝塚"
     ],
     "lat": 38.3377,
     "lng": 141.1575,
@@ -555,8 +541,7 @@
     "url": "https://sitereports.nabunken.go.jp/ja/503",
     "thumbnail": "/images/facilities/aku_ai.png",
     "tags": [
-      "環状列石",
-      "史跡"
+      "環状列石"
     ],
     "lat": 35.9897,
     "lng": 138.2252,
@@ -576,8 +561,7 @@
     "url": "https://www.city.ichikawa.lg.jp/edu09/1531000004.html",
     "thumbnail": "/images/facilities/ubayama_ai.png",
     "tags": [
-      "貝塚",
-      "史跡"
+      "貝塚"
     ],
     "lat": 35.7483,
     "lng": 139.9572,
@@ -597,8 +581,7 @@
     "url": "https://www.pref.chiba.lg.jp/kyouiku/bunkazai/bunkazai/n411-029.html",
     "thumbnail": "/images/facilities/soyata_ai.png",
     "tags": [
-      "貝塚",
-      "史跡"
+      "貝塚"
     ],
     "lat": 35.7497,
     "lng": 139.9327,
@@ -618,7 +601,6 @@
     "url": "https://sitereports.nabunken.go.jp/90345",
     "thumbnail": "/images/facilities/nabatake_ai.png",
     "tags": [
-      "史跡",
       "水田跡"
     ],
     "lat": 33.4388,
@@ -660,7 +642,6 @@
     "url": "http://www.f-shinkoukousha.or.jp/jyomopia/index.html",
     "thumbnail": "/images/facilities/jomopia-miyahata_ai.png",
     "tags": [
-      "史跡",
       "資料館"
     ],
     "lat": 37.7925,
@@ -681,8 +662,7 @@
     "url": "http://www.mawakiiseki.jp/",
     "thumbnail": "/images/facilities/mawaki-jomon_ai.png",
     "tags": [
-      "博物館",
-      "史跡"
+      "博物館"
     ],
     "lat": 37.305,
     "lng": 137.2092,
@@ -702,7 +682,6 @@
     "url": "https://www.city.funabashi.lg.jp/shisetsu/bunka/0001/0006/0001/p036786.html",
     "thumbnail": "/images/facilities/tobinodai-museum_ai.png",
     "tags": [
-      "史跡",
       "博物館"
     ],
     "lat": 35.7107,
@@ -744,8 +723,7 @@
     "url": "https://www.city.sagamihara.kanagawa.jp/kurashi/shisetsu/kouen_kankou/kouen_ryokuchi/1003090.html",
     "thumbnail": "/images/facilities/katsusaka-iseki_ai.png",
     "tags": [
-      "史跡",
-      "集落跡"
+      "土器"
     ],
     "lat": 35.5098,
     "lng": 139.3875,
@@ -765,8 +743,7 @@
     "url": "http://www.eps4.comlink.ne.jp/~shakado/",
     "thumbnail": "/images/facilities/shakado-iseki-museum_ai.png",
     "tags": [
-      "博物館",
-      "史跡"
+      "博物館"
     ],
     "lat": 35.66051,
     "lng": 138.71852,
@@ -786,7 +763,6 @@
     "url": "https://www.city.shobara.hiroshima.jp/main/education/shisetsu/cat01/cat/post_1456.html",
     "thumbnail": "/images/facilities/kamikuroiwa_ai.png",
     "tags": [
-      "史跡",
       "博物館"
     ],
     "lat": 34.8217,
@@ -826,7 +802,6 @@
     "url": "https://www.vill.miho.lg.jp/kankou-event/minohobunkazai/mihomurabunkazaicenter/page003523.html",
     "thumbnail": "/images/facilities/ubayama_ai.png",
     "tags": [
-      "史跡",
       "貝塚"
     ],
     "lat": 36.017111,
@@ -846,7 +821,6 @@
     "url": "https://bunka.nii.ac.jp/heritages/detail/163248",
     "thumbnail": "/images/facilities/hikosaki-kaizuka_ai.png",
     "tags": [
-      "史跡",
       "貝塚"
     ],
     "lat": 34.562778,
@@ -866,7 +840,6 @@
     "url": "https://townweb.e-okayamacity.jp/mino-rengou/minorekisi/asanebana/asanebana.html",
     "thumbnail": "/images/facilities/asanebana-kaizuka_ai.png",
     "tags": [
-      "史跡",
       "貝塚"
     ],
     "lat": 34.690639,
@@ -886,7 +859,6 @@
     "url": "https://www.rekihaku.otsu.shiga.jp/",
     "thumbnail": "/images/facilities/awazu-kotei-iseki_ai.png",
     "tags": [
-      "史跡",
       "博物館"
     ],
     "lat": 35.015457,
@@ -907,7 +879,6 @@
     "url": "https://www.city.hasuda.saitama.jp/kyoiku/bunkazai/bunkazai/kurohamakaizuka/index.html",
     "thumbnail": "/images/facilities/kurohama-kaizuka_ai.png",
     "tags": [
-      "史跡",
       "貝塚"
     ],
     "lat": 35.98013,
@@ -928,7 +899,6 @@
     "url": "https://www.town.ainan.ehime.jp/kanko/sightseeing/rekishi/hirajo-kaizuka.html",
     "thumbnail": "/images/facilities/hirajo-kaizuka_ai.png",
     "tags": [
-      "史跡",
       "貝塚"
     ],
     "lat": 32.956389,
