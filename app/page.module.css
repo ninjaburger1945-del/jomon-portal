@@ -808,6 +808,67 @@
     font-size: 1.25rem;
   }
 
+  /* ── 2カラムグリッド ── */
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    padding: 0 0.25rem;
+  }
+
+  .cardImageWrapper {
+    height: 120px;
+  }
+
+  .cardContent {
+    padding: 0.75rem;
+  }
+
+  .cardTag {
+    font-size: 0.62rem;
+    padding: 2px 5px;
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .cardTitle {
+    font-size: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 0.35rem;
+  }
+
+  .cardMeta {
+    gap: 0.3rem;
+    margin-bottom: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .regionTag {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+  }
+
+  .cardPref {
+    font-size: 0.68rem;
+  }
+
+  /* バッジの重なり防止 */
+  .verifiedBadge {
+    font-size: 0.55rem;
+    padding: 2px 5px;
+    max-width: calc(50% - 2.5rem); /* AIバッジと被らない幅 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .aiBadge {
+    font-size: 0.55rem;
+    padding: 2px 5px;
+  }
+
 }
 
 @media (max-width: 600px) {
