@@ -197,11 +197,6 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
             <article className={styles.article}>
                 {/* Header Section */}
                 <header className={styles.header}>
-                    <div className={styles.tags}>
-                        {facility.tags.map(tag => (
-                            <span key={tag} className={styles.tag}>{tag}</span>
-                        ))}
-                    </div>
                     <h1 className={styles.title}>{facility.name}</h1>
                     <div className={styles.regionMeta}>
                         <span
@@ -211,6 +206,9 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                             {REGION_LABELS[facility.region]}
                         </span>
                         <span className={styles.prefLabel}>{facility.prefecture}</span>
+                        {facility.tags.map(tag => (
+                            <span key={tag} className={styles.tag}>{tag}</span>
+                        ))}
                     </div>
                     <p className={styles.location}>📍 {facility.address}</p>
                 </header>
@@ -224,10 +222,8 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                         className={styles.image}
                         priority
                     />
+                    <span className={styles.aiBadge}>AI Image</span>
                 </div>
-                <p className={styles.aiAnnotationDetailed}>
-                    ※このイラストは遺跡の情報を元にAIで生成されたイメージ図です。
-                </p>
 
                 {/* Action Buttons */}
                 <div className={styles.actionButtons}>
