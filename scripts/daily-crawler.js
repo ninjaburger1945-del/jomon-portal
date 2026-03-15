@@ -179,7 +179,7 @@ async function run() {
     }
 
     const existingNames = existingData.map(d => d.name).join(", ");
-    const regions = ["関東", "中部", "近畿", "中国", "四国", "九州"];
+    const regions = ["北海道", "東北", "関東", "中部", "近畿", "中国", "四国", "九州", "沖縄"];
     const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
     const prompt = `
@@ -210,22 +210,25 @@ ${existingNames}
 {
   "id": "英数字のハイフン繋ぎ（例: uenohara-jomon）",
   "name": "施設の正式名称",
-  "region": "Chubu",
+  "region": "Hokkaido / Tohoku / Kanto / Chubu / Kinki / Chugoku / Shikoku / Kyushu / Okinawa のいずれか",
   "prefecture": "都道府県名",
   "address": "住所",
   "description": "200文字程度の魅力的な紹介文",
+  "copy": "施設の最大の特徴を表すキャッチコピー。厳密に20文字以内。体言止め推奨。句読点なし。",
   "url": "自治体(.lg.jp)の深い階層URLを優先。見つからなければ空文字",
   "thumbnail": "",
-  "tags": ["史跡", "博物館", "貝塚", "環状列石"などから1〜2個],
+  "tags": ["世界遺産","博物館","貝塚","環状列石","土器","土偶","国宝" の中から最大2個のみ],
   "lat": 緯度(数値),
   "lng": 経度(数値),
   "access": {
-    "info": "最寄り駅やバス停からのルート案内（自然な文章で）",
-    "advice": "遺跡少年からのアドバイス（元気で親しみやすい話し言葉）"
+    "train": "最寄り鉄道駅名（路線名付き）から施設まで。例: JR奥羽本線青森駅からバスで約35分",
+    "bus": "最寄りバス停名から施設まで（バス停名を必ず含める）。例: 縄文時遊館前バス停から徒歩約2分",
+    "car": "最寄りIC名（高速道路名付き）から施設まで。例: 東北道青森ICから国道7号経由で約15分",
+    "rank": "S（駅徒歩圏） / A（乗り換え1回程度） / B（バス・車が必要） / C（車必須） のいずれか"
   }
 }
-4. urlは 'http' から始まるURL形式、または空文字にしてください。
-5. thumbnail は空文字（""）にしてください。
+3. urlは 'http' から始まるURL形式、または空文字にしてください。
+4. thumbnail は空文字（""）にしてください。
 `;
 
     console.log(`[CRAWLER] Gemini AI にリクエスト (地方: ${randomRegion})...`);
