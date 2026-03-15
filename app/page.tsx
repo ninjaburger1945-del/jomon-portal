@@ -63,6 +63,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
+  const [selectedPrefecture, setSelectedPrefecture] = useState("");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortByDistance, setSortByDistance] = useState(false);
   const [locationError, setLocationError] = useState("");
@@ -73,6 +74,15 @@ export default function Home() {
   const cardWrapperRefs = useRef<(HTMLDivElement | null)[]>([]);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const visibleIndicesRef = useRef(new Set<number>());
+
+  // URLパラメータ（?region= / ?pref=）からフィルター初期化
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const region = params.get("region");
+    const pref = params.get("pref");
+    if (region && Object.keys(REGION_LABELS).includes(region)) setSelectedRegion(region);
+    if (pref) setSelectedPrefecture(pref);
+  }, []);
 
   const todayFacility = facilitiesData[facilitiesData.length - 1];
   const allTags = Array.from(new Set(facilitiesData.flatMap(f => f.tags)));
@@ -125,7 +135,8 @@ export default function Home() {
         facility.prefecture.includes(searchQuery);
       const matchType = selectedType === "" || facility.tags.includes(selectedType);
       const matchRegion = selectedRegion === "" || facility.region === selectedRegion;
-      return matchQuery && matchType && matchRegion;
+      const matchPref = selectedPrefecture === "" || facility.prefecture === selectedPrefecture;
+      return matchQuery && matchType && matchRegion && matchPref;
     });
 
     if (sortByDistance && userLocation) {
@@ -135,11 +146,11 @@ export default function Home() {
       );
     }
     return result;
-  }, [searchQuery, selectedType, selectedRegion, sortByDistance, userLocation]);
+  }, [searchQuery, selectedType, selectedRegion, selectedPrefecture, sortByDistance, userLocation]);
 
   useEffect(() => {
     setVisibleCount(30);
-  }, [searchQuery, selectedType, selectedRegion]);
+  }, [searchQuery, selectedType, selectedRegion, selectedPrefecture]);
 
   useEffect(() => {
     observerRef.current?.disconnect();
@@ -313,6 +324,16 @@ export default function Home() {
             </div>
           </div>
 
+          {selectedPrefecture && (
+            <div className={styles.prefFilterChip}>
+              <span>{selectedPrefecture}で絞り込み中</span>
+              <button
+                className={styles.prefFilterClear}
+                onClick={() => setSelectedPrefecture("")}
+                aria-label="都道府県フィルターを解除"
+              >×</button>
+            </div>
+          )}
           <p className={styles.resultCount}>
             該当件数: {filteredAndSortedFacilities.length}件 / 全{facilitiesData.length}件
           </p>

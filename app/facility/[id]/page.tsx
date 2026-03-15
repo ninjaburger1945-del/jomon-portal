@@ -104,9 +104,23 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
 
     const facilityNews = newsData.filter((news) => news.facilityId === id);
 
-    // 同じ地域の関連施設（自分を除いて最大3件）
+    // 近くの関連施設（自分を除いて距離順3件）
+    const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    };
     const relatedFacilities = (facilitiesData as Facility[])
-        .filter(f => f.region === facility.region && f.id !== facility.id)
+        .filter(f => f.id !== facility.id)
+        .sort((a, b) =>
+            haversine(facility.lat, facility.lng, a.lat, a.lng) -
+            haversine(facility.lat, facility.lng, b.lat, b.lng)
+        )
         .slice(0, 3);
 
     const BASE_URL = "https://jomon-portal.web.app";
@@ -326,7 +340,7 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
             {/* 関連遺跡セクション */}
             {relatedFacilities.length > 0 && (
                 <section className={styles.relatedSection}>
-                    <h2 className={styles.relatedTitle}>同じ地域の縄文遺跡</h2>
+                    <h2 className={styles.relatedTitle}>近くの縄文遺跡</h2>
                     <div className={styles.relatedGrid}>
                         {relatedFacilities.map(rel => (
                             <Link key={rel.id} href={`/facility/${rel.id}`} className={styles.relatedCard}>
