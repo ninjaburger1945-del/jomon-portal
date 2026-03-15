@@ -262,7 +262,15 @@ export default function Home() {
                       ? { backgroundColor: REGION_COLORS[key], borderColor: REGION_COLORS[key] }
                       : { borderColor: REGION_COLORS[key], color: REGION_COLORS[key] }
                     }
-                    onClick={() => setSelectedRegion(prev => prev === key ? "" : key)}
+                    onClick={() => {
+                      const next = selectedRegion === key ? "" : key;
+                      setSelectedRegion(next);
+                      const params = new URLSearchParams(window.location.search);
+                      if (next) params.set("region", next);
+                      else params.delete("region");
+                      const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+                      window.history.replaceState({}, "", newUrl);
+                    }}
                   >
                     <span className={styles.regionTileIcon}>{REGION_ICONS[key]}</span>
                     <span className={styles.regionTileLabel}>{label}</span>
