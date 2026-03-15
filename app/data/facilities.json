@@ -460,8 +460,7 @@
     "url": "https://wakahaku.pref.fukui.lg.jp/publication_cat/kaizuka",
     "thumbnail": "/images/facilities/torihama_ai.png",
     "tags": [
-      "貝塚",
-      "出土品"
+      "貝塚"
     ],
     "lat": 35.5686,
     "lng": 135.9188,
@@ -501,7 +500,7 @@
     "url": "https://www.museum.or.jp/museum/6769",
     "thumbnail": "/images/facilities/kamikuroiwa_ai.png",
     "tags": [
-      "洞窟遺跡"
+      "土器"
     ],
     "lat": 33.6338,
     "lng": 132.9658,
@@ -601,7 +600,7 @@
     "url": "https://sitereports.nabunken.go.jp/90345",
     "thumbnail": "/images/facilities/nabatake_ai.png",
     "tags": [
-      "水田跡"
+      "土器"
     ],
     "lat": 33.4388,
     "lng": 129.9619,
@@ -642,7 +641,7 @@
     "url": "http://www.f-shinkoukousha.or.jp/jyomopia/index.html",
     "thumbnail": "/images/facilities/jomopia-miyahata_ai.png",
     "tags": [
-      "資料館"
+      "博物館"
     ],
     "lat": 37.7925,
     "lng": 140.5097,
@@ -702,8 +701,7 @@
     "url": "https://www.city.fujimi.saitama.jp/madoguchi_shisetsu/02shisetsu/shiryoukan/mizukokaiduka/index.html",
     "thumbnail": "/images/facilities/mizuko-kaizuka_ai.png",
     "tags": [
-      "貝塚",
-      "資料館"
+      "貝塚"
     ],
     "lat": 35.8457,
     "lng": 139.5622,
