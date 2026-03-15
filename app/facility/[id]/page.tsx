@@ -115,13 +115,15 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
             Math.sin(dLon / 2) ** 2;
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     };
-    const relatedFacilities = (facilitiesData as Facility[])
-        .filter(f => f.id !== facility.id)
-        .sort((a, b) =>
-            haversine(facility.lat, facility.lng, a.lat, a.lng) -
-            haversine(facility.lat, facility.lng, b.lat, b.lng)
-        )
-        .slice(0, 3);
+    const relatedFacilities = facility.lat != null && facility.lng != null
+        ? (facilitiesData as Facility[])
+            .filter(f => f.id !== facility.id && f.lat != null && f.lng != null)
+            .sort((a, b) =>
+                haversine(facility.lat!, facility.lng!, a.lat!, a.lng!) -
+                haversine(facility.lat!, facility.lng!, b.lat!, b.lng!)
+            )
+            .slice(0, 3)
+        : [];
 
     const BASE_URL = "https://jomon-portal.web.app";
     const regionLabel = REGION_LABELS[facility.region] ?? facility.region;
