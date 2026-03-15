@@ -563,7 +563,7 @@
 /* ===== タグチップスフィルター ===== */
 .tagChipsWrapper {
   position: sticky;
-  top: 40px;
+  top: 0;
   z-index: 100;
   background: var(--bg-color);
   margin-bottom: 1.5rem;
@@ -702,7 +702,7 @@
 }
 
 .mainWithBar {
-  padding-top: 40px;
+  padding-top: 0;
 }
 
 /* ===== 2. Quick filter chips ===== */

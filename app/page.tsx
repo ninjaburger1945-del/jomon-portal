@@ -198,13 +198,6 @@ export default function Home() {
 
   return (
     <>
-      {/* Sticky bar */}
-      <div className={styles.stickyBar}>
-        <span className={styles.stickyBarText}>
-          🏺 全国 {facilitiesData.length} カ所の縄文遺跡を公開中
-        </span>
-      </div>
-
       <main className={styles.mainWithBar}>
 
         {/* ── 1. ヒーローセクション ── */}
@@ -220,7 +213,7 @@ export default function Home() {
 
         {/* ── 2. 遺跡一覧 ── */}
         <section className={`${styles.section} container`}>
-          <h2 className={styles.sectionTitle}>全国の縄文スポット</h2>
+          <h2 className={styles.sectionTitle}>全国 {facilitiesData.length} カ所の縄文遺跡を公開中</h2>
 
           {/* 検索・フィルターUI */}
           <div className={styles.searchBar}>
