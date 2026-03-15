@@ -342,7 +342,7 @@ export default function Home() {
                       </div>
                       <h3 className={styles.cardTitle}>{facility.name}</h3>
                       {(facility as { copy?: string }).copy && (
-                        <p className={styles.cardText}>{(facility as { copy?: string }).copy}</p>
+                        <p className={styles.cardText}>{((facility as { copy?: string }).copy ?? "").slice(0, 14)}</p>
                       )}
                     </div>
                   </Link>
