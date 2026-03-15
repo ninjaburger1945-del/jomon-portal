@@ -9,6 +9,7 @@
     "url": "https://sannaimaruyama.pref.aomori.jp/",
     "thumbnail": "/images/facilities/sannaimaruyama_ai.png",
     "tags": [
+      "世界遺産",
       "博物館"
     ],
     "lat": 40.8114,
@@ -29,8 +30,8 @@
     "url": "https://www.city.chino.lg.jp/site/togariishi/",
     "thumbnail": "/images/facilities/togariishi_ai.png",
     "tags": [
-      "博物館",
-      "国宝"
+      "国宝",
+      "土偶"
     ],
     "lat": 36.0089,
     "lng": 138.2144,
@@ -134,7 +135,8 @@
     "url": "https://www.nbz.or.jp/",
     "thumbnail": "/images/facilities/umaikata_ai.png",
     "tags": [
-      "博物館"
+      "博物館",
+      "土器"
     ],
     "lat": 37.4475,
     "lng": 138.7904,
@@ -278,7 +280,8 @@
     "url": "https://www.pref.aomori.lg.jp/soshiki/kyoiku/e-bunka/kinen_siseki_05.html",
     "thumbnail": "/images/facilities/kamegaoka_ai.png",
     "tags": [
-      "世界遺産"
+      "世界遺産",
+      "土偶"
     ],
     "lat": 40.8902,
     "lng": 140.3461,
@@ -298,8 +301,8 @@
     "url": "https://jomon-japan.jp/learn/jomon-sites/kitakogane",
     "thumbnail": "/images/facilities/kitakogane_ai.png",
     "tags": [
-      "貝塚",
-      "世界遺産"
+      "世界遺産",
+      "貝塚"
     ],
     "lat": 42.4047,
     "lng": 140.9161,
@@ -339,8 +342,8 @@
     "url": "https://sitereports.nabunken.go.jp/37181",
     "thumbnail": "/images/facilities/irie_takasago_ai.png",
     "tags": [
-      "貝塚",
-      "世界遺産"
+      "世界遺産",
+      "貝塚"
     ],
     "lat": 42.5458,
     "lng": 140.7686,
@@ -420,7 +423,7 @@
     "url": "https://www.town.shimosuwa.lg.jp/www/contents/1475145290897/index.html",
     "thumbnail": "/images/facilities/hoshigato_ai.png",
     "tags": [
-      "鉱山跡"
+      "土器"
     ],
     "lat": 36.1263,
     "lng": 138.1066,
@@ -580,7 +583,8 @@
     "url": "https://www.pref.chiba.lg.jp/kyouiku/bunkazai/bunkazai/n411-029.html",
     "thumbnail": "/images/facilities/soyata_ai.png",
     "tags": [
-      "貝塚"
+      "貝塚",
+      "土器"
     ],
     "lat": 35.7497,
     "lng": 139.9327,
@@ -681,7 +685,8 @@
     "url": "https://www.city.funabashi.lg.jp/shisetsu/bunka/0001/0006/0001/p036786.html",
     "thumbnail": "/images/facilities/tobinodai-museum_ai.png",
     "tags": [
-      "博物館"
+      "博物館",
+      "貝塚"
     ],
     "lat": 35.7107,
     "lng": 139.9748,
@@ -741,7 +746,8 @@
     "url": "http://www.eps4.comlink.ne.jp/~shakado/",
     "thumbnail": "/images/facilities/shakado-iseki-museum_ai.png",
     "tags": [
-      "博物館"
+      "博物館",
+      "土偶"
     ],
     "lat": 35.66051,
     "lng": 138.71852,
@@ -877,7 +883,8 @@
     "url": "https://www.city.hasuda.saitama.jp/kyoiku/bunkazai/bunkazai/kurohamakaizuka/index.html",
     "thumbnail": "/images/facilities/kurohama-kaizuka_ai.png",
     "tags": [
-      "貝塚"
+      "貝塚",
+      "土器"
     ],
     "lat": 35.98013,
     "lng": 139.66444,
