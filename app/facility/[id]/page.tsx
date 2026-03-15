@@ -53,6 +53,13 @@ interface Facility {
     };
 }
 
+/** 電車フィールドに「徒歩X分」が含まれ、X≤10 のとき true */
+function isWalkableFromStation(train?: string): boolean {
+    if (!train) return false;
+    const m = train.match(/徒歩[約]*(\d+)分/);
+    return m ? parseInt(m[1]) <= 10 : false;
+}
+
 export async function generateStaticParams() {
     return facilitiesData.map((facility) => ({
         id: facility.id,
@@ -189,7 +196,7 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                                                     <dd className={styles.accessInfoText}>{facility.access.train}</dd>
                                                 </>
                                             )}
-                                            {facility.access.bus && (
+                                            {facility.access.bus && !isWalkableFromStation(facility.access.train) && (
                                                 <>
                                                     <dt className={styles.accessMode}>🚌 バス</dt>
                                                     <dd className={styles.accessInfoText}>{facility.access.bus}</dd>
