@@ -292,23 +292,25 @@ export default function Home() {
 
           {/* 地方タイルナビゲーション */}
           <div className={styles.regionTilesGrid}>
-            {Object.entries(REGION_LABELS).map(([key, label]) =>
-              regionCounts[key] ? (
-                <button
-                  key={key}
-                  className={`${styles.regionTile} ${selectedRegion === key ? styles.regionTileActive : ""}`}
-                  style={selectedRegion === key
-                    ? { backgroundColor: REGION_COLORS[key], borderColor: REGION_COLORS[key] }
-                    : { borderColor: REGION_COLORS[key] }
-                  }
-                  onClick={() => setSelectedRegion(prev => prev === key ? "" : key)}
-                >
-                  <span className={styles.regionTileIcon}>{REGION_ICONS[key]}</span>
-                  <span className={styles.regionTileLabel}>{label}</span>
-                  <span className={styles.regionTileCount}>{regionCounts[key]}</span>
-                </button>
-              ) : null
-            )}
+            <div className={styles.regionTilesInner}>
+              {Object.entries(REGION_LABELS).map(([key, label]) =>
+                regionCounts[key] ? (
+                  <button
+                    key={key}
+                    className={`${styles.regionTile} ${selectedRegion === key ? styles.regionTileActive : ""}`}
+                    style={selectedRegion === key
+                      ? { backgroundColor: REGION_COLORS[key], borderColor: REGION_COLORS[key] }
+                      : { borderColor: REGION_COLORS[key] }
+                    }
+                    onClick={() => setSelectedRegion(prev => prev === key ? "" : key)}
+                  >
+                    <span className={styles.regionTileIcon}>{REGION_ICONS[key]}</span>
+                    <span className={styles.regionTileLabel}>{label}</span>
+                    <span className={styles.regionTileCount}>{regionCounts[key]}</span>
+                  </button>
+                ) : null
+              )}
+            </div>
           </div>
 
           <p className={styles.resultCount}>

@@ -179,52 +179,80 @@
 
 /* ===== 地方タイルナビゲーション ===== */
 .regionTilesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 0.65rem;
+  position: relative;
   margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.regionTilesGrid::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3.5rem;
+  height: 100%;
+  background: linear-gradient(to right, transparent, var(--bg-color));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.regionTilesInner {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem;
+  padding-right: 3.5rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.regionTilesInner::-webkit-scrollbar {
+  display: none;
 }
 
 .regionTile {
+  flex-shrink: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.75rem 0.4rem;
-  border-radius: 14px;
-  border: 2px solid transparent;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  border: 1.5px solid transparent;
   background: var(--bg-card);
   cursor: pointer;
-  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  transition: background 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
   font-family: var(--font-base);
+  white-space: nowrap;
 }
 
 .regionTile:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   background: rgba(255, 255, 255, 0.7);
 }
 
 .regionTileActive {
   color: #fff !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
 }
 
 .regionTileIcon {
-  font-size: 1.4rem;
+  font-size: 1rem;
   line-height: 1;
 }
 
 .regionTileLabel {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: inherit;
 }
 
 .regionTileCount {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 600;
   background: rgba(0, 0, 0, 0.08);
   border-radius: 10px;
