@@ -40,12 +40,12 @@ interface Facility {
     url: string;
     thumbnail: string;
     tags: string[];
+    lat?: number;
+    lng?: number;
     twitter?: string;
     access?: {
-        // 旧形式
         info?: string;
         advice?: string;
-        // 新形式
         train?: string;
         bus?: string;
         car?: string;
@@ -178,6 +178,41 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                     ※このイラストは遺跡の情報を元にAIで生成されたイメージ図です。
                 </p>
 
+                {/* Action Buttons */}
+                <div className={styles.actionButtons}>
+                    {facility.url ? (
+                        <a
+                            href={facility.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.actionBtn}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                            公式サイト
+                        </a>
+                    ) : (
+                        <span className={styles.actionBtnDisabled}>公式サイト（準備中）</span>
+                    )}
+                    {facility.lat && facility.lng ? (
+                        <a
+                            href={`https://maps.google.com/?q=${facility.lat},${facility.lng}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`${styles.actionBtn} ${styles.actionBtnMap}`}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            地図アプリで開く
+                        </a>
+                    ) : null}
+                </div>
+
                 {/* Main Content */}
                 <div className={styles.contentGrid}>
                     <section className={styles.mainInfo}>
@@ -189,31 +224,22 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                                 <h2 className={styles.sectionTitle}>アクセス情報</h2>
                                 <div className={styles.accessBox}>
                                     {facility.access.train ? (
-                                        <dl className={styles.accessGrid}>
-                                            {(() => {
-                                                const walkable = isWalkableFromStation(facility.access.train);
-                                                if (!walkable && facility.access.bus) {
-                                                    return (
-                                                        <>
-                                                            <dt className={styles.accessMode}>🚃🚌</dt>
-                                                            <dd className={styles.accessInfoText}>{facility.access.train}。{facility.access.bus}</dd>
-                                                        </>
-                                                    );
-                                                }
-                                                return (
-                                                    <>
-                                                        <dt className={styles.accessMode}>🚃</dt>
-                                                        <dd className={styles.accessInfoText}>{facility.access.train}</dd>
-                                                    </>
-                                                );
-                                            })()}
+                                        <div className={styles.accessSections}>
+                                            <div className={styles.accessRow}>
+                                                <span className={styles.accessModeLabel}>🚌 公共交通機関</span>
+                                                <p className={styles.accessInfoText}>
+                                                    {isWalkableFromStation(facility.access.train) || !facility.access.bus
+                                                        ? facility.access.train
+                                                        : `${facility.access.train}。${facility.access.bus}`}
+                                                </p>
+                                            </div>
                                             {facility.access.car && (
-                                                <>
-                                                    <dt className={styles.accessMode}>🚗</dt>
-                                                    <dd className={styles.accessInfoText}>{facility.access.car}</dd>
-                                                </>
+                                                <div className={styles.accessRow}>
+                                                    <span className={styles.accessModeLabel}>🚗 車</span>
+                                                    <p className={styles.accessInfoText}>{facility.access.car}</p>
+                                                </div>
                                             )}
-                                        </dl>
+                                        </div>
                                     ) : (
                                         <p className={styles.accessInfoText}>{facility.access.info}</p>
                                     )}
@@ -226,27 +252,6 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                             </div>
                         )}
 
-                        <div className={styles.linkBox}>
-                            {facility.url ? (
-                                <a
-                                    href={facility.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={styles.officialBtn}
-                                >
-                                    <span>公式サイトを見る（外部サイト）</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                        <polyline points="15 3 21 3 21 9"></polyline>
-                                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                                    </svg>
-                                </a>
-                            ) : (
-                                <div className={styles.officialBtnDisabled}>
-                                    <span>公式サイト：準備中</span>
-                                </div>
-                            )}
-                        </div>
                     </section>
 
                     <aside className={styles.sidebar}>
