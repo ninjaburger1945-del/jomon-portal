@@ -361,11 +361,9 @@ export default function Home() {
                           {distance !== null && ` ・ ${distance.toFixed(1)} km`}
                         </span>
                       </div>
-                      <p className={styles.cardText}>
-                        {facility.description && facility.description.length > 60
-                          ? facility.description.substring(0, 60) + "..."
-                          : facility.description || ""}
-                      </p>
+                      {(facility as { copy?: string }).copy && (
+                        <p className={styles.cardText}>{(facility as { copy?: string }).copy}</p>
+                      )}
                     </div>
                   </Link>
                 </div>

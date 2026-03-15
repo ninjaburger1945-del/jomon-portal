@@ -36,14 +36,20 @@ interface Facility {
     prefecture: string;
     address: string;
     description: string;
+    copy?: string;
     url: string;
     thumbnail: string;
     tags: string[];
     twitter?: string;
     access?: {
-        info: string;
-        rank: "S" | "A" | "B";
-        advice: string;
+        // 旧形式
+        info?: string;
+        advice?: string;
+        // 新形式
+        train?: string;
+        bus?: string;
+        car?: string;
+        rank: "S" | "A" | "B" | "C";
     };
 }
 
@@ -175,13 +181,30 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                             <div className={styles.accessSection}>
                                 <h2 className={styles.sectionTitle}>アクセス情報</h2>
                                 <div className={styles.accessBox}>
-                                    <div className={styles.accessHeader}>
+                                    {facility.access.train ? (
+                                        <dl className={styles.accessGrid}>
+                                            {facility.access.train && (
+                                                <>
+                                                    <dt className={styles.accessMode}>🚃 電車</dt>
+                                                    <dd className={styles.accessInfoText}>{facility.access.train}</dd>
+                                                </>
+                                            )}
+                                            {facility.access.bus && (
+                                                <>
+                                                    <dt className={styles.accessMode}>🚌 バス</dt>
+                                                    <dd className={styles.accessInfoText}>{facility.access.bus}</dd>
+                                                </>
+                                            )}
+                                            {facility.access.car && (
+                                                <>
+                                                    <dt className={styles.accessMode}>🚗 車</dt>
+                                                    <dd className={styles.accessInfoText}>{facility.access.car}</dd>
+                                                </>
+                                            )}
+                                        </dl>
+                                    ) : (
                                         <p className={styles.accessInfoText}>{facility.access.info}</p>
-                                    </div>
-                                    <div className={styles.adviceBubble}>
-                                        <div className={styles.senpaiIcon}>👦 遺跡少年</div>
-                                        <p className={styles.adviceText}>{facility.access.advice}</p>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         ) : (
