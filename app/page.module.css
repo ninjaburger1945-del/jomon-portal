@@ -518,6 +518,29 @@
   border-radius: 4px;
 }
 
+/* ===== NEWバッジ ===== */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.newBadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: var(--accent-terracotta);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 3px 9px;
+  border-radius: 20px;
+  z-index: 3;
+  pointer-events: none;
+  animation: pulse 2s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(200, 90, 23, 0.5);
+}
+
 /* ===== AI画像バッジ ===== */
 .aiBadge {
   position: absolute;
@@ -539,9 +562,13 @@
 
 /* ===== タグチップスフィルター ===== */
 .tagChipsWrapper {
-  position: relative;
+  position: sticky;
+  top: 40px;
+  z-index: 100;
+  background: var(--bg-color);
   margin-bottom: 1.5rem;
   overflow: hidden;
+  padding-bottom: 0.25rem;
 }
 
 .tagChipsWrapper::after {

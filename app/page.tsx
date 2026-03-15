@@ -84,7 +84,7 @@ export default function Home() {
     if (pref) setSelectedPrefecture(pref);
   }, []);
 
-  const todayFacility = facilitiesData[facilitiesData.length - 1];
+  const newestFacilityId = facilitiesData[facilitiesData.length - 1]?.id;
   const allTags = Array.from(new Set(facilitiesData.flatMap(f => f.tags)));
 
   const regionCounts = useMemo(() => {
@@ -144,6 +144,8 @@ export default function Home() {
         calculateDistance(userLocation.lat, userLocation.lng, a.lat, a.lng) -
         calculateDistance(userLocation.lat, userLocation.lng, b.lat, b.lng)
       );
+    } else {
+      result = [...result].reverse();
     }
     return result;
   }, [searchQuery, selectedType, selectedRegion, selectedPrefecture, sortByDistance, userLocation]);
@@ -216,53 +218,7 @@ export default function Home() {
           </div>
         </header>
 
-        {/* ── 2. 今日の1件 ── */}
-        {todayFacility && (
-          <section className={`${styles.todaySection} container`}>
-            <div className={styles.todaySectionHeader}>
-              <span className={styles.todayBadge}>NEW</span>
-              <h2 className={styles.todaySectionTitle}>今日の1件</h2>
-            </div>
-            <Link href={`/facility/${todayFacility.id}`} className={styles.todayCard}>
-              <div className={styles.todayCardImage}>
-                <Image
-                  src={getImageUrl(todayFacility)}
-                  alt={`${todayFacility.name} のAI生成イメージイラスト`}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className={styles.todayCardImageInner}
-                />
-                {isVerifiedUrl(todayFacility.url) && (
-                  <span className={`${styles.verifiedBadge}${isLgJpUrl(todayFacility.url) ? ` ${styles.verifiedBadgeLg}` : ''}`}>
-                    {isLgJpUrl(todayFacility.url) ? '✓ 自治体公式' : '✓ 公式リンク確認済'}
-                  </span>
-                )}
-              </div>
-              <div className={styles.todayCardContent}>
-                <div className={styles.todayCardTags}>
-                  {todayFacility.tags.map(tag => (
-                    <span key={tag} className={styles.cardTag}>{tag}</span>
-                  ))}
-                </div>
-                <h3 className={styles.todayCardTitle}>{todayFacility.name}</h3>
-                <div className={styles.cardMeta}>
-                  <span className={styles.regionTag} style={{ backgroundColor: REGION_COLORS[todayFacility.region] ?? '#666' }}>
-                    {REGION_LABELS[todayFacility.region]}
-                  </span>
-                  <span className={styles.cardPref}>📍 {todayFacility.prefecture}</span>
-                </div>
-                <p className={styles.todayCardDesc}>
-                  {todayFacility.description
-                    ? todayFacility.description.substring(0, 120) + "..."
-                    : ""}
-                </p>
-                <span className={styles.todayCardLink}>詳しく見る →</span>
-              </div>
-            </Link>
-          </section>
-        )}
-
-        {/* ── 3. 遺跡一覧 ── */}
+        {/* ── 2. 遺跡一覧 ── */}
         <section className={`${styles.section} container`}>
           <h2 className={styles.sectionTitle}>全国の縄文スポット</h2>
 
@@ -364,7 +320,10 @@ export default function Home() {
                           {isLgJpUrl(facility.url) ? '✓ 自治体公式' : '✓ 公式リンク確認済'}
                         </span>
                       )}
-                      <span className={styles.aiBadge}>AI</span>
+                      {facility.id === newestFacilityId && (
+                        <span className={styles.newBadge}>NEW</span>
+                      )}
+                      <span className={styles.aiBadge}>AI Image</span>
                     </div>
                     <div className={styles.cardContent}>
                       <div>
