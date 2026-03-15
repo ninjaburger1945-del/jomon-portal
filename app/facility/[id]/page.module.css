@@ -5,7 +5,7 @@
 }
 
 .nav {
-    margin-bottom: 2rem;
+    margin-bottom: 0.5rem;
 }
 
 .backLink {
@@ -16,6 +16,56 @@
 
 .backLink:hover {
     color: var(--accent-terracotta);
+}
+
+/* ===== パンくずリスト ===== */
+.breadcrumb {
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumbList {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.breadcrumbItem {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.breadcrumbItem:not(:last-child)::after {
+    content: "›";
+    color: var(--text-secondary);
+    opacity: 0.5;
+    margin-left: 0.25rem;
+}
+
+.breadcrumbLink {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.breadcrumbLink:hover {
+    color: var(--accent-terracotta);
+    text-decoration: underline;
+}
+
+.breadcrumbCurrent {
+    color: var(--text-primary);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 18ch;
 }
 
 .article {
@@ -391,4 +441,116 @@
     font-weight: bold;
     letter-spacing: 0.05em;
     border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ===== 関連遺跡セクション ===== */
+.relatedSection {
+    margin-top: 2.5rem;
+}
+
+.relatedTitle {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-forest);
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid var(--accent-terracotta);
+    display: inline-block;
+}
+
+.relatedGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.relatedCard {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.relatedCard:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.relatedImageWrapper {
+    position: relative;
+    width: 100%;
+    height: 110px;
+    overflow: hidden;
+}
+
+.relatedImage {
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.relatedCard:hover .relatedImage {
+    transform: scale(1.05);
+}
+
+.relatedCardBody {
+    padding: 0.75rem;
+}
+
+.relatedTags {
+    margin-bottom: 0.3rem;
+}
+
+.relatedTag {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--accent-terracotta);
+    background: rgba(200, 90, 23, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 0.3rem;
+}
+
+.relatedName {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 0.2rem;
+}
+
+.relatedPref {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .relatedGrid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.6rem;
+    }
+
+    .relatedImageWrapper {
+        height: 80px;
+    }
+
+    .relatedCardBody {
+        padding: 0.5rem;
+    }
+
+    .relatedName {
+        font-size: 0.78rem;
+    }
+
+    .relatedPref {
+        font-size: 0.68rem;
+    }
 }

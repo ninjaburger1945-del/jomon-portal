@@ -71,15 +71,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const facility = facilitiesData.find((f) => f.id === id);
     if (!facility) return { title: '施設が見つかりません' };
 
-    const tagStr = facility.tags.join('・');
-    const descBase = facility.description ? facility.description.substring(0, 90) : '';
+    const descBase = facility.description ? facility.description.substring(0, 120) : '';
+    const metaDesc = `${descBase}（${facility.prefecture}）`;
     return {
-        title: `${facility.name}【${facility.prefecture}の縄文遺跡】| JOMON PORTAL`,
-        description: `${facility.prefecture}の${tagStr}「${facility.name}」。アクセス情報・施設概要・公式リンクを掲載。${descBase}`,
+        title: `${facility.name}の見どころ・アクセス情報｜JOMON PORTAL`,
+        description: metaDesc,
         keywords: [facility.name, facility.prefecture, ...facility.tags, '縄文', '遺跡', '博物館', '縄文時代', 'JOMON PORTAL'],
         openGraph: {
-            title: `${facility.name} | JOMON PORTAL`,
-            description: `${facility.prefecture}の縄文遺跡・${tagStr}。${descBase}`,
+            title: `${facility.name}の見どころ・アクセス情報｜JOMON PORTAL`,
+            description: metaDesc,
             url: `https://jomon-portal.web.app/facility/${facility.id}/`,
             siteName: 'JOMON PORTAL',
             images: facility.thumbnail ? [{ url: `https://jomon-portal.web.app${facility.thumbnail}`, alt: facility.name }] : [],
@@ -88,8 +88,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         },
         twitter: {
             card: 'summary_large_image',
-            title: `${facility.name} | JOMON PORTAL`,
-            description: `${facility.prefecture}の縄文遺跡・${tagStr}`,
+            title: `${facility.name}の見どころ・アクセス情報｜JOMON PORTAL`,
+            description: metaDesc,
         },
     };
 }
@@ -104,30 +104,50 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
 
     const facilityNews = newsData.filter((news) => news.facilityId === id);
 
+    // 同じ地域の関連施設（自分を除いて最大3件）
+    const relatedFacilities = (facilitiesData as Facility[])
+        .filter(f => f.region === facility.region && f.id !== facility.id)
+        .slice(0, 3);
+
+    const BASE_URL = "https://jomon-portal.web.app";
+    const regionLabel = REGION_LABELS[facility.region] ?? facility.region;
+
     const schemaType = facility.tags.some(t => ["博物館", "資料館"].includes(t))
         ? "Museum"
         : "LandmarksOrHistoricalBuildings";
 
-    const jsonLd = {
-        "@context": "https://schema.org",
-        "@type": [schemaType, "TouristAttraction"],
-        "name": facility.name,
-        "description": facility.description,
-        "url": facility.url || undefined,
-        "image": facility.thumbnail || undefined,
-        "address": {
-            "@type": "PostalAddress",
-            "addressLocality": facility.prefecture,
-            "streetAddress": facility.address,
-            "addressCountry": "JP"
+    const jsonLd = [
+        {
+            "@context": "https://schema.org",
+            "@type": [schemaType, "TouristAttraction"],
+            "name": facility.name,
+            "description": facility.description,
+            "url": facility.url || `${BASE_URL}/facility/${facility.id}/`,
+            "image": facility.thumbnail ? `${BASE_URL}${facility.thumbnail}` : undefined,
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": facility.prefecture,
+                "streetAddress": facility.address,
+                "addressCountry": "JP"
+            },
+            "geo": facility.lat && facility.lng ? {
+                "@type": "GeoCoordinates",
+                "latitude": facility.lat,
+                "longitude": facility.lng,
+            } : undefined,
+            "touristType": "縄文時代の歴史・文化に関心がある方",
         },
-        "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": (facility as any).lat,
-            "longitude": (facility as any).lng,
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "ホーム", "item": BASE_URL },
+                { "@type": "ListItem", "position": 2, "name": `${regionLabel}の縄文遺跡`, "item": `${BASE_URL}/?region=${facility.region}` },
+                { "@type": "ListItem", "position": 3, "name": facility.prefecture, "item": `${BASE_URL}/?pref=${encodeURIComponent(facility.prefecture)}` },
+                { "@type": "ListItem", "position": 4, "name": facility.name, "item": `${BASE_URL}/facility/${facility.id}/` },
+            ],
         },
-        "touristType": "縄文時代の歴史・文化に関心がある方",
-    };
+    ];
 
     return (
         <main className={styles.container}>
@@ -136,11 +156,26 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
-            {/* Navigation */}
-            <nav className={styles.nav}>
-                <Link href="/" className={styles.backLink}>
-                    &larr; トップページに戻る
-                </Link>
+            {/* パンくずリスト */}
+            <nav aria-label="パンくずリスト" className={styles.breadcrumb}>
+                <ol className={styles.breadcrumbList}>
+                    <li className={styles.breadcrumbItem}>
+                        <Link href="/" className={styles.breadcrumbLink}>ホーム</Link>
+                    </li>
+                    <li className={styles.breadcrumbItem}>
+                        <Link href={`/?region=${facility.region}`} className={styles.breadcrumbLink}>
+                            {regionLabel}
+                        </Link>
+                    </li>
+                    <li className={styles.breadcrumbItem}>
+                        <Link href={`/?pref=${encodeURIComponent(facility.prefecture)}`} className={styles.breadcrumbLink}>
+                            {facility.prefecture}
+                        </Link>
+                    </li>
+                    <li className={styles.breadcrumbItem} aria-current="page">
+                        <span className={styles.breadcrumbCurrent}>{facility.name}</span>
+                    </li>
+                </ol>
             </nav>
 
             <article className={styles.article}>
@@ -287,6 +322,37 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                     </aside>
                 </div>
             </article>
+
+            {/* 関連遺跡セクション */}
+            {relatedFacilities.length > 0 && (
+                <section className={styles.relatedSection}>
+                    <h2 className={styles.relatedTitle}>同じ地域の縄文遺跡</h2>
+                    <div className={styles.relatedGrid}>
+                        {relatedFacilities.map(rel => (
+                            <Link key={rel.id} href={`/facility/${rel.id}`} className={styles.relatedCard}>
+                                <div className={styles.relatedImageWrapper}>
+                                    <Image
+                                        src={rel.thumbnail || ''}
+                                        alt={rel.name}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, 320px"
+                                        className={styles.relatedImage}
+                                    />
+                                </div>
+                                <div className={styles.relatedCardBody}>
+                                    <div className={styles.relatedTags}>
+                                        {rel.tags.slice(0, 2).map(tag => (
+                                            <span key={tag} className={styles.relatedTag}>{tag}</span>
+                                        ))}
+                                    </div>
+                                    <p className={styles.relatedName}>{rel.name}</p>
+                                    <p className={styles.relatedPref}>{rel.prefecture}</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+            )}
         </main>
     );
 }
