@@ -300,7 +300,7 @@ export default function Home() {
                     className={`${styles.regionTile} ${selectedRegion === key ? styles.regionTileActive : ""}`}
                     style={selectedRegion === key
                       ? { backgroundColor: REGION_COLORS[key], borderColor: REGION_COLORS[key] }
-                      : { borderColor: REGION_COLORS[key] }
+                      : { borderColor: REGION_COLORS[key], color: REGION_COLORS[key] }
                     }
                     onClick={() => setSelectedRegion(prev => prev === key ? "" : key)}
                   >
