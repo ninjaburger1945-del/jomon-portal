@@ -352,13 +352,13 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                                     />
                                 </div>
                                 <div className={styles.relatedCardBody}>
-                                    <div className={styles.relatedTags}>
+                                    <p className={styles.relatedName}>{rel.name}</p>
+                                    <div className={styles.relatedMeta}>
+                                        <span className={styles.relatedPref}>{rel.prefecture}</span>
                                         {rel.tags.slice(0, 2).map(tag => (
                                             <span key={tag} className={styles.relatedTag}>{tag}</span>
                                         ))}
                                     </div>
-                                    <p className={styles.relatedName}>{rel.name}</p>
-                                    <p className={styles.relatedPref}>{rel.prefecture}</p>
                                 </div>
                             </Link>
                         ))}

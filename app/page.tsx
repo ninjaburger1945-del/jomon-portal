@@ -314,11 +314,6 @@ export default function Home() {
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className={styles.cardImage}
                       />
-                      {isVerifiedUrl(facility.url) && (
-                        <span className={`${styles.verifiedBadge}${isLgJpUrl(facility.url) ? ` ${styles.verifiedBadgeLg}` : ''}`}>
-                          {isLgJpUrl(facility.url) ? '✓ 自治体公式' : '✓ 公式リンク確認済'}
-                        </span>
-                      )}
                       {facility.id === newestFacilityId && (
                         <span className={styles.newBadge}>NEW</span>
                       )}
