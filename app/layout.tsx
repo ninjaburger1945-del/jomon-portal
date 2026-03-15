@@ -22,7 +22,7 @@ const shipporiMincho = Shippori_Mincho({
 });
 
 export const metadata: Metadata = {
-  title: "縄文博物館・資料館ポータル | JOMON PORTAL",
+  title: "JOMON PORTAL",
   description: "日本全国の縄文遺跡・博物館・資料館を網羅するポータルサイト。",
 };
 

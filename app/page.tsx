@@ -196,7 +196,9 @@ export default function Home() {
         <header className={styles.hero}>
           <div className={styles.heroContent}>
             <p className={styles.heroEyebrow}>縄文時代 — 1万年の記憶</p>
-            <h1 className={styles.heroTitle}>JOMON PORTAL</h1>
+            <h1 className={styles.heroTitle}>
+              <ruby>JOMON<rt>ジョウモン</rt></ruby>{" "}<ruby>PORTAL<rt>ポータル</rt></ruby>
+            </h1>
             <p className={styles.heroSubtitle}>時を越えて、日本の原風景に出会う</p>
           </div>
         </header>
