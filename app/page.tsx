@@ -325,12 +325,6 @@ export default function Home() {
                       <span className={styles.aiBadge}>AI Image</span>
                     </div>
                     <div className={styles.cardContent}>
-                      <div>
-                        {facility.tags.map(tag => (
-                          <span key={tag} className={styles.cardTag}>{tag}</span>
-                        ))}
-                      </div>
-                      <h3 className={styles.cardTitle}>{facility.name}</h3>
                       <div className={styles.cardMeta}>
                         <span className={styles.regionTag} style={{ backgroundColor: REGION_COLORS[facility.region] ?? '#666' }}>
                           {REGION_LABELS[facility.region]}
@@ -339,7 +333,11 @@ export default function Home() {
                           {facility.prefecture}
                           {distance !== null && ` ・ ${distance.toFixed(1)} km`}
                         </span>
+                        {facility.tags.slice(0, 2).map(tag => (
+                          <span key={tag} className={styles.cardTag}>{tag}</span>
+                        ))}
                       </div>
+                      <h3 className={styles.cardTitle}>{facility.name}</h3>
                       {(facility as { copy?: string }).copy && (
                         <p className={styles.cardText}>{(facility as { copy?: string }).copy}</p>
                       )}
