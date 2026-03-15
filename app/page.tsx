@@ -162,7 +162,11 @@ export default function Home() {
   }, [filteredAndSortedFacilities, visibleCount]);
 
   useEffect(() => {
-    const onScroll = () => setShowFloating(window.scrollY > 500);
+    const onScroll = () => {
+      const distFromBottom =
+        document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
+      setShowFloating(window.scrollY > 500 && distFromBottom > 160);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
