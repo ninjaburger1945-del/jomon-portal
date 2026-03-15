@@ -278,7 +278,13 @@ export default function Home() {
               <span>{selectedPrefecture}で絞り込み中</span>
               <button
                 className={styles.prefFilterClear}
-                onClick={() => setSelectedPrefecture("")}
+                onClick={() => {
+                  setSelectedPrefecture("");
+                  const params = new URLSearchParams(window.location.search);
+                  params.delete("pref");
+                  const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+                  window.history.replaceState({}, "", newUrl);
+                }}
                 aria-label="都道府県フィルターを解除"
               >×</button>
             </div>
