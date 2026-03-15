@@ -42,6 +42,8 @@ const REGION_ICONS: Record<string, string> = {
   "Okinawa":  "🌺",
 };
 
+const PRIORITY_TAGS = new Set(["世界遺産", "国宝", "重要文化財", "特別史跡", "特別名勝"]);
+
 const PLACEHOLDER_PATTERNS = [
   /google\.com\/search/i,
   /bing\.com\/search/i,
@@ -262,20 +264,29 @@ export default function Home() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className={styles.searchInput}
             />
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className={styles.searchSelect}
-            >
-              <option value="">すべての施設・種別</option>
-              {allTags.map(tag => (
-                <option key={tag} value={tag}>{tag}</option>
-              ))}
-            </select>
             <label className={styles.locationLabel}>
               <input type="checkbox" checked={sortByDistance} onChange={handleLocationSort} />
               現在地から近い順
             </label>
+          </div>
+          <div className={styles.tagChipsWrapper}>
+            <div className={styles.tagChips}>
+              <button
+                className={`${styles.tagChip} ${selectedType === "" ? styles.tagChipActive : ""}`}
+                onClick={() => setSelectedType("")}
+              >
+                すべて
+              </button>
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  className={`${styles.tagChip} ${PRIORITY_TAGS.has(tag) ? styles.tagChipPriority : ""} ${selectedType === tag ? styles.tagChipActive : ""}`}
+                  onClick={() => setSelectedType(prev => prev === tag ? "" : tag)}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
           </div>
           {locationError && <p className={styles.errorText}>{locationError}</p>}
 
@@ -302,7 +313,6 @@ export default function Home() {
 
           <p className={styles.resultCount}>
             該当件数: {filteredAndSortedFacilities.length}件 / 全{facilitiesData.length}件
-            <span className={styles.aiNote}>※画像はAI生成のイメージ図です</span>
           </p>
 
           <div className={styles.grid}>
@@ -331,6 +341,7 @@ export default function Home() {
                           {isLgJpUrl(facility.url) ? '✓ 自治体公式' : '✓ 公式リンク確認済'}
                         </span>
                       )}
+                      <span className={styles.aiBadge}>AI</span>
                     </div>
                     <div className={styles.cardContent}>
                       <div>

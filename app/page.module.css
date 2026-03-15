@@ -464,12 +464,103 @@
   border-radius: 4px;
 }
 
-.aiNote {
-  margin-left: 0.75rem;
-  font-size: 0.75rem;
+/* ===== AI画像バッジ ===== */
+.aiBadge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(20, 15, 8, 0.52);
+  color: rgba(255, 255, 255, 0.78);
+  padding: 2px 7px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  pointer-events: none;
+}
+
+/* ===== タグチップスフィルター ===== */
+.tagChipsWrapper {
+  position: relative;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.tagChipsWrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3.5rem;
+  height: 100%;
+  background: linear-gradient(to right, transparent, var(--bg-color));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tagChips {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-right: 3.5rem;
+}
+
+.tagChips::-webkit-scrollbar {
+  display: none;
+}
+
+.tagChip {
+  flex-shrink: 0;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  border: 1.5px solid var(--glass-border);
+  background: var(--bg-card);
   color: var(--text-secondary);
-  opacity: 0.7;
-  font-weight: 400;
+  font-family: var(--font-base);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+  white-space: nowrap;
+}
+
+.tagChip:hover {
+  background: rgba(184, 64, 26, 0.08);
+  border-color: var(--accent-terracotta);
+  color: var(--accent-terracotta);
+  transform: translateY(-1px);
+}
+
+.tagChipPriority {
+  border-color: rgba(180, 120, 20, 0.45);
+  background: rgba(200, 150, 30, 0.08);
+  color: #9a6a10;
+}
+
+.tagChipPriority:hover {
+  background: rgba(200, 150, 30, 0.18);
+  border-color: #b8860b;
+  color: #7a5208;
+}
+
+.tagChipActive {
+  background: var(--accent-terracotta) !important;
+  color: #fff !important;
+  border-color: var(--accent-terracotta) !important;
+  box-shadow: 0 3px 10px rgba(184, 64, 26, 0.35);
+}
+
+.tagChipPriority.tagChipActive {
+  background: #b8860b !important;
+  border-color: #b8860b !important;
+  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.35);
 }
 
 .loadMoreContainer {
