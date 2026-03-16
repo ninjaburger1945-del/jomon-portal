@@ -902,6 +902,7 @@
   .cardMeta {
     gap: 0.25rem;
     margin-bottom: 0.4rem;
+    flex-wrap: wrap;
   }
 
   .regionTag {
