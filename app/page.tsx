@@ -296,9 +296,6 @@ export default function Home() {
               >×</button>
             </div>
           )}
-          <p className={styles.resultCount}>
-            該当件数: {filteredAndSortedFacilities.length}件 / 全{facilitiesData.length}件
-          </p>
 
           <div className={styles.grid}>
             {displayedFacilities.map((facility, index) => {
