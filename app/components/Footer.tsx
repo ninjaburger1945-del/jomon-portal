@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import styles from "./Footer.module.css";
 
@@ -10,10 +11,18 @@ export default function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
-        <p className={styles.copyright}>&copy; 2026 JOMON PORTAL All rights reserved.</p>
-        <button className={styles.aiPolicyLink} onClick={() => { setIsExpanded(false); setIsModalOpen(true); }}>
-          このサイトについて
-        </button>
+        <nav className={styles.links}>
+          <button className={styles.linkBtn} onClick={() => { setIsExpanded(false); setIsModalOpen(true); }}>
+            このサイトについて
+          </button>
+          <span className={styles.sep}>|</span>
+          <Link href="/privacy-policy" className={styles.linkBtn}>
+            プライバシーポリシー
+          </Link>
+        </nav>
+        <p className={styles.copyright}>
+          &copy; 2026 JOMON PORTAL &nbsp;·&nbsp; jomon-portal.jp
+        </p>
       </div>
 
       {isModalOpen && (
