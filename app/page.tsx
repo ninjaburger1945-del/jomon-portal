@@ -203,52 +203,16 @@ export default function Home() {
         {/* ── 1. ヒーローセクション ── */}
         <header className={styles.hero}>
           <div className={styles.heroContent}>
-            <p className={styles.heroEyebrow}>縄文時代 — 1万年の記憶</p>
             <h1 className={styles.heroTitle}>
               <ruby>JOMON<rt>ジョウモン</rt></ruby>{" "}<ruby>PORTAL<rt>ポータル</rt></ruby>
             </h1>
-            <p className={styles.heroSubtitle}>時を越えて、日本の原風景に出会う</p>
+            <p className={styles.heroSubtitle}>縄文1万年の入口</p>
           </div>
         </header>
 
         {/* ── 2. 遺跡一覧 ── */}
         <section className={`${styles.section} container`}>
           <h2 className={styles.sectionTitle}>全国 {facilitiesData.length} カ所の縄文遺跡を公開中</h2>
-
-          {/* 検索・フィルターUI */}
-          <div className={styles.searchBar}>
-            <input
-              type="text"
-              placeholder="名称・説明・都道府県で検索..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={styles.searchInput}
-            />
-            <label className={styles.locationLabel}>
-              <input type="checkbox" checked={sortByDistance} onChange={handleLocationSort} />
-              現在地から近い順
-            </label>
-          </div>
-          <div className={styles.tagChipsWrapper}>
-            <div className={styles.tagChips}>
-              <button
-                className={`${styles.tagChip} ${selectedType === "" ? styles.tagChipActive : ""}`}
-                onClick={() => setSelectedType("")}
-              >
-                すべて
-              </button>
-              {allTags.map(tag => (
-                <button
-                  key={tag}
-                  className={`${styles.tagChip} ${PRIORITY_TAGS.has(tag) ? styles.tagChipPriority : ""} ${selectedType === tag ? styles.tagChipActive : ""}`}
-                  onClick={() => setSelectedType(prev => prev === tag ? "" : tag)}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-          {locationError && <p className={styles.errorText}>{locationError}</p>}
 
           {/* 地方タイルナビゲーション */}
           <div className={styles.regionTilesGrid}>
@@ -280,6 +244,41 @@ export default function Home() {
               )}
             </div>
           </div>
+
+          {/* タグ・検索・フィルターUI */}
+          <div className={styles.tagChipsWrapper}>
+            <div className={styles.tagChips}>
+              <button
+                className={`${styles.tagChip} ${selectedType === "" ? styles.tagChipActive : ""}`}
+                onClick={() => setSelectedType("")}
+              >
+                すべて
+              </button>
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  className={`${styles.tagChip} ${PRIORITY_TAGS.has(tag) ? styles.tagChipPriority : ""} ${selectedType === tag ? styles.tagChipActive : ""}`}
+                  onClick={() => setSelectedType(prev => prev === tag ? "" : tag)}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={styles.searchBar}>
+            <input
+              type="text"
+              placeholder="名称・説明・都道府県で検索..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.searchInput}
+            />
+            <label className={styles.locationLabel}>
+              <input type="checkbox" checked={sortByDistance} onChange={handleLocationSort} />
+              現在地から近い順
+            </label>
+          </div>
+          {locationError && <p className={styles.errorText}>{locationError}</p>}
 
           {selectedPrefecture && (
             <div className={styles.prefFilterChip}>

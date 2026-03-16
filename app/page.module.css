@@ -15,7 +15,8 @@
 
 .heroContent {
   animation: fadeInUp 1s ease-out;
-  padding: 3rem 3.5rem;
+  padding: 2rem 3rem;
+  max-width: 480px;
   /* 縄目テクスチャ：2本の位相反転サイン波が交差し、縄の撚りを表現 */
   background-color: rgba(10, 7, 2, 0.70);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Cpath d='M0 10 C5 4 10 4 15 10 C20 16 25 16 30 10 C35 4 40 4 45 10' stroke='%23c8a040' stroke-width='1.6' fill='none' opacity='0.60'/%3E%3Cpath d='M0 10 C5 16 10 16 15 10 C20 4 25 4 30 10 C35 16 40 16 45 10' stroke='%23d4aa50' stroke-width='1.0' fill='none' opacity='0.42'/%3E%3C/svg%3E");
@@ -48,7 +49,7 @@
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(0, 0, 0, 0.4);
   position: relative;
   display: inline-block;
-  padding-top: 1.4rem;
+  padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
 
