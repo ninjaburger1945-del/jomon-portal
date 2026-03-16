@@ -53,6 +53,10 @@
   padding-bottom: 0.5rem;
 }
 
+.heroTitle ruby {
+  ruby-align: center;
+}
+
 .heroTitle rt {
   font-size: 0.22em;
   font-family: var(--font-noto-sans-jp);

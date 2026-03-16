@@ -9,6 +9,18 @@ const REDIRECT_TRAP_PATTERNS = [
   /\/tourism\/?(\?.*)?$/i,
   /\/sightseeing\/?(\?.*)?$/i,
   /\/spot\/?(\?.*)?$/i,
+];
+
+// 自治体・政府系ドメインかどうかを判定
+// 施設専用ドメイン（museum.jp 等）のトップURLは正当なので除外しない
+function isGovernmentDomain(url) {
+  return /\.(lg|go)\.jp/i.test(url) ||
+    /^https?:\/\/(?:www\.)?(?:city|town|village|machi|mura)\.[^.]+\.[^.]+\.jp/i.test(url) ||
+    /\.pref\.[^.]+\.jp/i.test(url);
+}
+
+// 自治体ドメインのみに適用するリダイレクトトラップ（ドメイントップ・浅い階層）
+const GOVERNMENT_REDIRECT_TRAP_PATTERNS = [
   // ドメイントップ（パスなし）
   /^https?:\/\/[^/]+\/?(\?.*)?$/,
   // 浅い1階層（/xxx/ のみ）
@@ -55,11 +67,21 @@ async function validateUrlStrict(url, facilityName) {
 
     const finalUrl = res.url || url;
 
-    // リダイレクトトラップ検知
+    // リダイレクトトラップ検知（観光ページ系は全ドメイン対象）
     for (const pattern of REDIRECT_TRAP_PATTERNS) {
       if (pattern.test(finalUrl)) {
         console.warn(`[REDIRECT_TRAP] ${url} → ${finalUrl}`);
         return { valid: false, url: "", verified: false };
+      }
+    }
+    // ドメイントップ・浅い階層チェックは自治体ドメインのみに適用
+    // 施設専用ドメイン（tokamachi-museum.jp 等）はトップURLが公式サイトのため除外しない
+    if (isGovernmentDomain(finalUrl)) {
+      for (const pattern of GOVERNMENT_REDIRECT_TRAP_PATTERNS) {
+        if (pattern.test(finalUrl)) {
+          console.warn(`[REDIRECT_TRAP] 自治体ドメインのトップ/浅い階層: ${url} → ${finalUrl}`);
+          return { valid: false, url: "", verified: false };
+        }
       }
     }
 
