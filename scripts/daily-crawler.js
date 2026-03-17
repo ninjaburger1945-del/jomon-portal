@@ -109,8 +109,10 @@ async function validateUrlStrict(url, facilityName) {
     // タイトル一致確認: <title> or <h1> に施設名のキーワードが含まれるか
     if (html && facilityName) {
       const keyword = facilityName
+        .replace(/[（(][\s\S]*$/, '')  // 括弧以降（補足説明）を除去
         .replace(/^(特別|国|県|市|町|村)(指定)?(史跡|遺跡)?\s*/g, '')
         .replace(/^(特別史跡|史跡|遺跡群|縄文遺跡)\s*/g, '')
+        .replace(/^[\u3000-\u9fff]{1,8}?[市区町村]\s*/, '')  // 先頭の地名（〇〇市等）を除去
         .replace(/(遺跡|貝塚|遺跡群|縄文遺跡|縄文館|博物館|資料館|記念館|センター|公園|学習館)$/, '')
         .trim()
         .split(/[\s　]/)[0];
@@ -130,9 +132,10 @@ async function validateUrlStrict(url, facilityName) {
       }
     }
 
-    // .lg.jp / .go.jp、または city/town/village.xxx.pref.jp（旧来の自治体形式）は verified=true
+    // .lg.jp / .go.jp、または city/town/village.xxx.pref.jp（旧来・サブドメイン形式含む）は verified=true
+    // museum.city.nagaoka.niigata.jp のようなサブドメイン形式にも対応
     const verified = /\.(lg|go)\.jp/i.test(finalUrl) ||
-      /^https?:\/\/(?:www\.)?(?:city|town|village|machi|mura)\.[^.]+\.[^.]+\.jp/i.test(finalUrl);
+      /^https?:\/\/(?:[^./]+\.)*(?:city|town|village|machi|mura)\.[^.]+\.[^.]+\.jp/i.test(finalUrl);
     console.log(`[VALID] ${finalUrl}${verified ? ' ✓ (公式自治体)' : ''}`);
     return { valid: true, url: finalUrl, verified };
 
