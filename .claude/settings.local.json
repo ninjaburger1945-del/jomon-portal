@@ -89,7 +89,9 @@
       "Bash(python:*)",
       "Bash(__NEW_LINE_ef9508fd64b4d14b__ ls:*)",
       "Bash(__NEW_LINE_4473d71056fbfe1f__ ls:*)",
-      "Bash(curl -s http://localhost:3000)"
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(xargs kill:*)",
+      "Bash(rm -f .next/lock)"
     ]
   }
 }
