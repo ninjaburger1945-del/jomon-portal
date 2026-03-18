@@ -1059,5 +1059,29 @@
       "rank": "B"
     },
     "verified": false
+  },
+  {
+    "id": "ogido-kaizuka",
+    "name": "荻堂貝塚",
+    "region": "Okinawa",
+    "prefecture": "沖縄県",
+    "address": "沖縄県中頭郡北中城村字荻堂",
+    "description": "沖縄本島中部に位置する、縄文時代前期から後期にかけての国指定史跡の貝塚です。沖縄の貝塚文化前期の標式遺跡として知られ、特徴的な文様を持つ「荻堂式土器」が発見されました。住居跡や貝層も良好な状態で保存されており、当時の人々の生活様式や九州地方との交流をうかがい知ることができる学術的価値の高い遺跡です。",
+    "copy": "沖縄縄文前期を映す標式遺跡",
+    "url": "https://kunishitei.bunka.go.jp/heritage/detail/401/3022",
+    "thumbnail": "/images/facilities/ogido-kaizuka_ai.png",
+    "tags": [
+      "貝塚",
+      "土器"
+    ],
+    "lat": 26.292889,
+    "lng": 127.798694,
+    "access": {
+      "train": "ゆいレールてだこ浦西駅から車で約20分",
+      "bus": "荻堂バス停から徒歩約5分",
+      "car": "沖縄自動車道北中城ICから約10分",
+      "rank": "B"
+    },
+    "verified": true
   }
 ]
