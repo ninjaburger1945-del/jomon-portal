@@ -357,6 +357,12 @@ export default function Home() {
               </button>
             </div>
           )}
+
+          <div className={styles.contactSection}>
+            <p className={styles.contactText}>
+              縄文ポータルへのご意見・お問い合わせは、<a href="https://forms.gle/tU9VMU4mLtGBstrf7" target="_blank" rel="noopener noreferrer" className={styles.contactLink}>こちらのフォーム</a>からお寄せください。
+            </p>
+          </div>
         </section>
       </main>
 

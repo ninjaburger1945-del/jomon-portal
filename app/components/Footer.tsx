@@ -13,6 +13,15 @@ export default function Footer() {
           <Link href="/privacy-policy" className={styles.linkBtn}>
             プライバシーポリシー
           </Link>
+          <span className={styles.sep}>|</span>
+          <a
+            href="https://forms.gle/tU9VMU4mLtGBstrf7"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.linkBtn}
+          >
+            お問い合わせ
+          </a>
         </nav>
         <p className={styles.copyright}>
           &copy; 2026 JOMON PORTAL &nbsp;·&nbsp; jomon-portal.jp

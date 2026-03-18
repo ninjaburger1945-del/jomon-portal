@@ -45,7 +45,7 @@ export default function AboutPage() {
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>AIイラストの役割</h2>
             <p>掲載しているイラストは、遺跡の情報を元にAIが当時の情景を再解釈したイメージ図です。多くの遺跡では実写写真の利用に著作権や許諾の壁がありますが、AI生成を活用することで、それらをクリアしつつ「当時の空気感」を視覚的に補完する更新スタイルを採用しています。</p>
-            <p className={styles.note}>※関係機関の皆様へ：実写写真への差し替えや内容の修正、掲載の取り下げ等のご要望がございましたら、お問い合わせフォームよりご連絡ください。真摯に対応させていただきます。</p>
+            <p className={styles.note}>※関係機関の皆様へ：実写写真への差し替えや内容の修正、掲載の取り下げ等のご要望がございましたら、<a href="https://forms.gle/tU9VMU4mLtGBstrf7" target="_blank" rel="noopener noreferrer">お問い合わせフォーム</a>よりご連絡ください。真摯に対応させていただきます。</p>
           </section>
 
           <section className={styles.section}>
