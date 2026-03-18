@@ -40,6 +40,25 @@ export default function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9282110631520988"
           crossOrigin="anonymous"
         ></script>
+        {/* Google Analytics 4 */}
+        {process.env.NEXT_PUBLIC_GA4_ID ? (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA4_ID}`}
+            ></script>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${process.env.NEXT_PUBLIC_GA4_ID}');
+                `,
+              }}
+            ></script>
+          </>
+        ) : null}
       </head>
       <body className={`${notoSansJP.variable} ${notoSerifJP.variable} ${shipporiMincho.variable}`}>
         {children}
