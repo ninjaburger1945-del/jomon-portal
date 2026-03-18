@@ -319,7 +319,7 @@ ${existingNames}
   "region": "Hokkaido / Tohoku / Kanto / Chubu / Kinki / Chugoku / Shikoku / Kyushu / Okinawa のいずれか",
   "prefecture": "都道府県名",
   "address": "住所",
-  "description": "200文字程度の魅力的な紹介文",
+  "description": "200文字以上300文字程度の魅力的な紹介文",
   "copy": "施設の最大の特徴を表すキャッチコピー。厳密に14文字以内。体言止め推奨。句読点なし。",
   "url": "自治体(.lg.jp)の深い階層URLを優先。見つからなければ空文字",
   "thumbnail": "",
@@ -385,6 +385,40 @@ ${existingNames}
       } else {
         nf.url = validation.url;
         nf.verified = validation.verified;
+      }
+
+      // description 文字数バリデーション（200文字以上必須）
+      const descCharCount = (nf.description || "").length;
+      if (descCharCount < 200) {
+        console.warn(`[DESC_WARN] ${nf.name}: ${descCharCount}文字。200文字以上300文字への拡充を要求します...`);
+        // Gemini に description を拡充させる
+        const expandPrompt = `以下の縄文遺跡の説明文を、200文字以上300文字程度の読み応えのある内容に拡充してください。元の情報は保持しつつ、歴史的価値や考古学的意義を補完してください。
+
+施設名: ${nf.name}
+都道府県: ${nf.prefecture}
+住所: ${nf.address}
+現在の説明文: ${nf.description}
+タグ: ${(nf.tags || []).join(', ')}
+
+**要件:**
+- 200文字以上300文字程度
+- 原情報を保持
+- 歴史的価値・魅力を補完
+- 日本語として自然な表現
+
+拡充後の説明文のみを出力してください。`;
+        try {
+          const expandResult = await model.generateContent(expandPrompt);
+          const expandedDesc = expandResult.response.text().trim();
+          if (expandedDesc.length >= 200) {
+            nf.description = expandedDesc;
+            console.log(`[DESC_EXPAND] 拡充成功: ${expandedDesc.length}文字`);
+          } else {
+            console.warn(`[DESC_EXPAND] 拡充失敗: ${expandedDesc.length}文字に留まりました。手動対応が必要です。`);
+          }
+        } catch (descErr) {
+          console.error(`[DESC_ERROR] ${descErr.message}`);
+        }
       }
 
       // AIイメージ生成（Imagen API → 失敗時はランダムコピーにフォールバック）
