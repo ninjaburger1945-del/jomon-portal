@@ -4,7 +4,7 @@ export async function POST(request: NextRequest) {
   try {
     const { facilities } = await request.json();
 
-    const token = process.env.GITHUB_TOKEN;
+    const token = process.env.JOMON_GITHUB_TOKEN;
     const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
 
     if (!token || !repo) {
@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[API] Saving facilities to GitHub:', repo);
+    console.log('[API] Token configured:', !!token);
 
     // 1. Get current SHA
     const getRes = await fetch(
