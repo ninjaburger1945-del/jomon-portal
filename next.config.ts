@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 // v1.0.1 - 42 entries
 const nextConfig: NextConfig = {
-  output: "export",
+  // output: "export",  // Disabled to allow API routes for admin dashboard
   trailingSlash: true,
   images: {
     remotePatterns: [

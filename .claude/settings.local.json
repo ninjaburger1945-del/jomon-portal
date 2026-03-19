@@ -91,7 +91,8 @@
       "Bash(__NEW_LINE_4473d71056fbfe1f__ ls:*)",
       "Bash(curl -s http://localhost:3000)",
       "Bash(xargs kill:*)",
-      "Bash(rm -f .next/lock)"
+      "Bash(rm -f .next/lock)",
+      "Bash(explorer.exe \"C:\\\\Users\\\\ninja\\\\.gemini\\\\antigravity\\\\scratch\\\\jomon-portal\")"
     ]
   }
 }

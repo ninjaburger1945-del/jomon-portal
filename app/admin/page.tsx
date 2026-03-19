@@ -1,671 +1,478 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styles from "./page.module.css";
 
 interface Facility {
   id: string;
   name: string;
-  region: string;
   prefecture: string;
-  address: string;
   description: string;
-  copy?: string;
-  url: string;
-  thumbnail?: string;
-  tags: string[];
-  lat: number;
-  lng: number;
-  access: {
-    train: string;
-    bus: string;
-    car: string;
-    rank: string;
-  };
-  verified?: boolean;
+  [key: string]: any;
 }
 
 export default function AdminPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState("");
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState("");
-
-  // Check if already authenticated
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const auth = sessionStorage.getItem("adminAuth");
-      if (auth === "1") {
-        setIsAuthenticated(true);
-        loadFacilities();
-      }
-    }
-  }, []);
+  const [availableImages, setAvailableImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   const handleLogin = () => {
-    const correctPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-    if (!correctPassword) {
-      setError("Admin password not configured");
-      return;
-    }
+    const correctPassword = "jomon2026";
     if (password === correctPassword) {
-      sessionStorage.setItem("adminAuth", "1");
       setIsAuthenticated(true);
       setPassword("");
       setError("");
-      loadFacilities();
     } else {
       setError("Incorrect password");
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("adminAuth");
-    setIsAuthenticated(false);
-    setFacilities([]);
-    setSaveMessage("");
-  };
-
   const loadFacilities = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        "https://api.github.com/repos/" +
-          process.env.NEXT_PUBLIC_GITHUB_REPO +
-          "/contents/app/data/facilities.json",
-        {
-          headers: {
-            Authorization: `token ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
-            Accept: "application/vnd.github.v3+json",
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch facilities");
-      }
+      const response = await fetch("/facilities.json");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      const decodedContent = Buffer.from(data.content, "base64").toString();
-      const facilitiesData = JSON.parse(decodedContent);
-      setFacilities(facilitiesData);
+      setFacilities(data);
       setError("");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load facilities"
-      );
+      console.error("Error loading facilities:", err);
+      setError(err instanceof Error ? err.message : "Failed to load facilities");
     } finally {
       setLoading(false);
     }
   };
 
-  const saveFacilities = async (updatedFacilities: Facility[]) => {
-    setIsSaving(true);
-    setSaveMessage("");
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadFacilities();
+    }
+  }, [isAuthenticated]);
+
+  const loadAvailableImages = async () => {
     try {
-      const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
-      const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
-
-      // 1. Get current SHA
-      const getRes = await fetch(
-        `https://api.github.com/repos/${repo}/contents/app/data/facilities.json`,
-        {
-          headers: {
-            Authorization: `token ${token}`,
-            Accept: "application/vnd.github.v3+json",
-          },
-        }
-      );
-      if (!getRes.ok) throw new Error("Failed to get current file");
-      const fileData = await getRes.json();
-
-      // 2. PUT updated content
-      const newContent = JSON.stringify(updatedFacilities, null, 2);
-      const encodedContent = Buffer.from(newContent).toString("base64");
-
-      const putRes = await fetch(
-        `https://api.github.com/repos/${repo}/contents/app/data/facilities.json`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `token ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: "chore(admin): update facilities.json via admin dashboard",
-            content: encodedContent,
-            sha: fileData.sha,
-            branch: "main",
-          }),
-        }
-      );
-
-      if (!putRes.ok) throw new Error("Failed to save to GitHub");
-
-      setFacilities(updatedFacilities);
-      setSaveMessage(
-        "✓ Saved and deployed! GitHub Actions will update the site in ~1 minute."
-      );
-      setTimeout(() => setSaveMessage(""), 5000);
-      setShowEditModal(false);
-      setEditingFacility(null);
+      const response = await fetch("/api/images");
+      if (response.ok) {
+        const images = await response.json();
+        setAvailableImages(images);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save");
-    } finally {
-      setIsSaving(false);
+      console.error("Failed to load images:", err);
     }
   };
 
-  const handleEditFacility = (facility: Facility) => {
+  const handleEditClick = (facility: Facility) => {
+    console.log("Edit clicked for:", facility.id);
     setEditingFacility({ ...facility });
     setShowEditModal(true);
+    loadAvailableImages();
   };
 
-  const handleAddFacility = () => {
-    const newId = `jomon-facility-${Date.now()}`;
-    setEditingFacility({
-      id: newId,
-      name: "",
-      region: "Tohoku",
-      prefecture: "",
-      address: "",
-      description: "",
-      copy: "",
-      url: "",
-      tags: [],
-      lat: 0,
-      lng: 0,
-      access: {
-        train: "",
-        bus: "",
-        car: "",
-        rank: "C",
-      },
-    });
-    setShowEditModal(true);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const data = await response.json();
+      setEditingFacility({
+        ...editingFacility!,
+        thumbnail: data.path
+      });
+      setError("✓ Image uploaded successfully");
+      await loadAvailableImages();
+    } catch (err) {
+      console.error("Upload error:", err);
+      setError("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const handleSaveEdit = () => {
+  const handleDeleteClick = async (id: string) => {
+    console.log("Delete clicked for:", id);
+    if (confirm("Are you sure you want to delete this facility?")) {
+      const updated = facilities.filter((f) => f.id !== id);
+      try {
+        await saveFacilitiesToGithub(updated);
+        setFacilities(updated);
+        setError("✓ Deleted and deployed!");
+      } catch (err) {
+        console.error("Delete error:", err);
+        setError(`Failed to delete: ${err instanceof Error ? err.message : "Unknown error"}`);
+      }
+    }
+  };
+
+  const saveFacilitiesToGithub = async (updatedFacilities: Facility[]) => {
+    try {
+      console.log("Calling save-facilities API...");
+      const response = await fetch("/api/save-facilities", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ facilities: updatedFacilities }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to save");
+      }
+
+      console.log("Successfully saved to GitHub!");
+      return true;
+    } catch (err) {
+      console.error("GitHub save error:", err);
+      throw err;
+    }
+  };
+
+  const handleSaveEdit = async () => {
     if (!editingFacility) return;
-
-    // Validation
-    if (!editingFacility.name.trim()) {
-      setError("Name is required");
-      return;
-    }
-    if (editingFacility.description.length < 200) {
-      setError(
-        `Description must be at least 200 characters (current: ${editingFacility.description.length})`
-      );
-      return;
-    }
+    console.log("Saving facility:", editingFacility.id);
 
     const updated = facilities.map((f) =>
       f.id === editingFacility.id ? editingFacility : f
     );
 
-    // If it's a new facility
-    if (!facilities.find((f) => f.id === editingFacility.id)) {
-      updated.push(editingFacility);
+    try {
+      await saveFacilitiesToGithub(updated);
+      setFacilities(updated);
+      setShowEditModal(false);
+      setEditingFacility(null);
+      setError("✓ Saved and deployed! Changes pushed to GitHub.");
+    } catch (err) {
+      console.error("Save error:", err);
+      setError(
+        `Failed to save: ${err instanceof Error ? err.message : "Unknown error"}`
+      );
     }
-
-    saveFacilities(updated);
-  };
-
-  const handleDeleteFacility = (id: string) => {
-    if (!confirm("Are you sure you want to delete this facility?")) return;
-    const updated = facilities.filter((f) => f.id !== id);
-    saveFacilities(updated);
   };
 
   if (!isAuthenticated) {
     return (
-      <div className={styles.loginContainer}>
-        <div className={styles.loginBox}>
-          <h1>JOMON PORTAL — Admin</h1>
-          <p className={styles.subtitle}>Management Dashboard</p>
-          {error && <div className={styles.errorAlert}>{error}</div>}
-          <input
-            type="password"
-            placeholder="Enter admin password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleLogin()}
-            className={styles.passwordInput}
-            autoFocus
-          />
-          <button
-            onClick={handleLogin}
-            className={styles.loginButton}
-            disabled={!password}
-          >
-            Login
-          </button>
-        </div>
+      <div style={{ maxWidth: "400px", margin: "100px auto", padding: "20px", border: "1px solid #ccc" }}>
+        <h1>Admin Login</h1>
+        {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyPress={(e) => e.key === "Enter" && handleLogin()}
+          placeholder="Enter password"
+          style={{ width: "100%", padding: "8px", marginBottom: "10px", boxSizing: "border-box" }}
+          autoFocus
+        />
+        <button onClick={handleLogin} style={{ width: "100%", padding: "10px", cursor: "pointer" }}>
+          Login
+        </button>
       </div>
     );
   }
 
   return (
-    <div className={styles.dashboardContainer}>
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
+    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
+      <header style={{ marginBottom: "20px", borderBottom: "1px solid #ccc", paddingBottom: "10px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h1>Admin Dashboard</h1>
-          <div className={styles.headerActions}>
-            <div className={styles.ga4Info}>
-              GA4 ID:{" "}
-              <code>{process.env.NEXT_PUBLIC_GA4_ID || "Not configured"}</code>
-            </div>
-            <button
-              onClick={handleLogout}
-              className={styles.logoutButton}
-              title="Logout"
-            >
-              ↪ Logout
-            </button>
-          </div>
+          <button onClick={() => setIsAuthenticated(false)} style={{ padding: "8px 16px", cursor: "pointer" }}>
+            Logout
+          </button>
         </div>
       </header>
 
       {error && (
-        <div className={styles.errorAlert}>
-          <strong>Error:</strong> {error}
+        <div style={{ backgroundColor: "#fee", padding: "10px", marginBottom: "20px", borderRadius: "4px", color: error.includes("✓") ? "green" : "red" }}>
+          {error}
         </div>
       )}
 
-      {saveMessage && (
-        <div className={styles.successAlert}>{saveMessage}</div>
-      )}
+      <section>
+        <h2>Facilities ({facilities.length})</h2>
 
-      <main className={styles.main}>
-        <section className={styles.facilitiesSection}>
-          <div className={styles.sectionHeader}>
-            <h2>Facilities ({facilities.length})</h2>
-            <button
-              onClick={handleAddFacility}
-              className={styles.addButton}
-              title="Add new facility"
-            >
-              + Add Facility
-            </button>
-          </div>
-
-          {loading ? (
-            <p className={styles.loading}>Loading facilities...</p>
-          ) : facilities.length === 0 ? (
-            <p className={styles.empty}>No facilities loaded</p>
-          ) : (
-            <div className={styles.facilitiesTable}>
-              <div className={styles.tableHeader}>
-                <div className={styles.colId}>ID</div>
-                <div className={styles.colName}>Name</div>
-                <div className={styles.colPref}>Prefecture</div>
-                <div className={styles.colDesc}>Description</div>
-                <div className={styles.colActions}>Actions</div>
-              </div>
+        {loading ? (
+          <p>Loading...</p>
+        ) : facilities.length === 0 ? (
+          <p>No facilities loaded</p>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
+            <thead>
+              <tr style={{ backgroundColor: "#f5f5f5", borderBottom: "2px solid #ccc" }}>
+                <th style={{ padding: "10px", textAlign: "left" }}>ID</th>
+                <th style={{ padding: "10px", textAlign: "left" }}>Name</th>
+                <th style={{ padding: "10px", textAlign: "left" }}>Prefecture</th>
+                <th style={{ padding: "10px", textAlign: "left" }}>Description</th>
+                <th style={{ padding: "10px", textAlign: "center" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
               {facilities.map((facility) => (
-                <div key={facility.id} className={styles.tableRow}>
-                  <div className={styles.colId}>
-                    <code>{facility.id}</code>
-                  </div>
-                  <div className={styles.colName}>{facility.name}</div>
-                  <div className={styles.colPref}>{facility.prefecture}</div>
-                  <div
-                    className={
-                      facility.description.length < 200
-                        ? styles.colDescWarning
-                        : styles.colDesc
-                    }
-                  >
-                    {facility.description.length} chars
-                  </div>
-                  <div className={styles.colActions}>
-                    <button
-                      onClick={() => handleEditFacility(facility)}
-                      className={styles.editButton}
-                      title="Edit"
-                    >
+                <tr key={facility.id} style={{ borderBottom: "1px solid #eee" }}>
+                  <td style={{ padding: "10px" }}><code>{facility.id}</code></td>
+                  <td style={{ padding: "10px" }}>{facility.name}</td>
+                  <td style={{ padding: "10px" }}>{facility.prefecture}</td>
+                  <td style={{ padding: "10px" }}>{facility.description.substring(0, 50)}...</td>
+                  <td style={{ padding: "10px", textAlign: "center" }}>
+                    <button onClick={() => handleEditClick(facility)} style={{ padding: "4px 8px", marginRight: "4px", cursor: "pointer", backgroundColor: "#0066cc", color: "white", border: "none", borderRadius: "4px" }}>
                       ✎ Edit
                     </button>
-                    <button
-                      onClick={() => handleDeleteFacility(facility.id)}
-                      className={styles.deleteButton}
-                      title="Delete"
-                    >
+                    <button onClick={() => handleDeleteClick(facility.id)} style={{ padding: "4px 8px", cursor: "pointer", backgroundColor: "#cc0000", color: "white", border: "none", borderRadius: "4px" }}>
                       🗑 Delete
                     </button>
-                  </div>
-                </div>
+                  </td>
+                </tr>
               ))}
-            </div>
-          )}
-        </section>
-
-        {/* GA4 Analytics Section */}
-        <section className={styles.analyticsSection}>
-          <h2>Analytics Integration</h2>
-          <p>
-            GA4 measurement ID: <code>{process.env.NEXT_PUBLIC_GA4_ID}</code>
-          </p>
-          <p className={styles.analyticsNote}>
-            Future analytics dashboard integration will be added here.
-          </p>
-        </section>
-      </main>
+            </tbody>
+          </table>
+        )}
+      </section>
 
       {/* Edit Modal */}
       {showEditModal && editingFacility && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h2>
-                {facilities.find((f) => f.id === editingFacility.id)
-                  ? "Edit Facility"
-                  : "Add New Facility"}
-              </h2>
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingFacility(null);
-                }}
-                className={styles.closeButton}
-                title="Close"
-              >
-                ✕
-              </button>
-            </div>
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: "white",
+            padding: "20px",
+            borderRadius: "8px",
+            maxWidth: "600px",
+            width: "90%",
+            maxHeight: "90vh",
+            overflow: "auto"
+          }}>
+            <h2>Edit Facility: {editingFacility.name}</h2>
 
-            <div className={styles.modalBody}>
-              {error && (
-                <div className={styles.errorAlert}>
-                  <strong>Error:</strong> {error}
-                </div>
-              )}
-
-              <div className={styles.formGroup}>
-                <label>ID (slug)</label>
-                <input
-                  type="text"
-                  value={editingFacility.id}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      id: e.target.value,
-                    })
-                  }
-                  placeholder="e.g., sannaimaruyama"
-                  disabled={facilities.some(
-                    (f) => f.id === editingFacility.id
-                  )}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>
-                  Name * <span className={styles.required}>(required)</span>
-                </label>
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Name:</strong>
                 <input
                   type="text"
                   value={editingFacility.name}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      name: e.target.value,
-                    })
-                  }
-                  placeholder="Facility name"
+                  onChange={(e) => setEditingFacility({ ...editingFacility, name: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
                 />
-              </div>
+              </label>
+            </div>
 
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>Region</label>
-                  <select
-                    value={editingFacility.region}
-                    onChange={(e) =>
-                      setEditingFacility({
-                        ...editingFacility,
-                        region: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="Hokkaido">北海道</option>
-                    <option value="Tohoku">東北</option>
-                    <option value="Kanto">関東</option>
-                    <option value="Chubu">中部</option>
-                    <option value="Kinki">近畿</option>
-                    <option value="Chugoku">中国</option>
-                    <option value="Shikoku">四国</option>
-                    <option value="Kyushu">九州</option>
-                    <option value="Okinawa">沖縄</option>
-                  </select>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Prefecture</label>
-                  <input
-                    type="text"
-                    value={editingFacility.prefecture}
-                    onChange={(e) =>
-                      setEditingFacility({
-                        ...editingFacility,
-                        prefecture: e.target.value,
-                      })
-                    }
-                    placeholder="e.g., 青森県"
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Address</label>
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Prefecture:</strong>
                 <input
                   type="text"
-                  value={editingFacility.address}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      address: e.target.value,
-                    })
-                  }
-                  placeholder="Full address"
+                  value={editingFacility.prefecture}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, prefecture: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
                 />
-              </div>
+              </label>
+            </div>
 
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>Latitude</label>
-                  <input
-                    type="number"
-                    step="0.0001"
-                    value={editingFacility.lat}
-                    onChange={(e) =>
-                      setEditingFacility({
-                        ...editingFacility,
-                        lat: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                  />
-                </div>
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Description:</strong>
+                <textarea
+                  value={editingFacility.description}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, description: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "100px" }}
+                />
+              </label>
+            </div>
 
-                <div className={styles.formGroup}>
-                  <label>Longitude</label>
-                  <input
-                    type="number"
-                    step="0.0001"
-                    value={editingFacility.lng}
-                    onChange={(e) =>
-                      setEditingFacility({
-                        ...editingFacility,
-                        lng: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                  />
-                </div>
-              </div>
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Address:</strong>
+                <input
+                  type="text"
+                  value={editingFacility.address || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, address: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                />
+              </label>
+            </div>
 
-              <div className={styles.formGroup}>
-                <label>URL</label>
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>URL:</strong>
                 <input
                   type="url"
-                  value={editingFacility.url}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      url: e.target.value,
-                    })
-                  }
-                  placeholder="https://..."
+                  value={editingFacility.url || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, url: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
                 />
-              </div>
+              </label>
+            </div>
 
-              <div className={styles.formGroup}>
-                <label>Copy (short tagline)</label>
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Copy (Tagline):</strong>
                 <input
                   type="text"
                   value={editingFacility.copy || ""}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      copy: e.target.value,
-                    })
-                  }
+                  onChange={(e) => setEditingFacility({ ...editingFacility, copy: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
                   placeholder="e.g., 日本最大級縄文集落跡"
                 />
-              </div>
+              </label>
+            </div>
 
-              <div className={styles.formGroup}>
-                <label>
-                  Description *{" "}
-                  <span
-                    className={
-                      editingFacility.description.length < 200
-                        ? styles.charCountWarning
-                        : styles.charCount
-                    }
-                  >
-                    {editingFacility.description.length} / 200 chars (min)
-                  </span>
-                </label>
-                <textarea
-                  value={editingFacility.description}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      description: e.target.value,
-                    })
-                  }
-                  placeholder="Detailed description (minimum 200 characters)"
-                  rows={6}
-                />
-              </div>
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Region:</strong>
+                <select
+                  value={editingFacility.region || "Tohoku"}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, region: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                >
+                  <option value="Hokkaido">北海道</option>
+                  <option value="Tohoku">東北</option>
+                  <option value="Kanto">関東</option>
+                  <option value="Chubu">中部</option>
+                  <option value="Kinki">近畿</option>
+                  <option value="Chugoku">中国</option>
+                  <option value="Shikoku">四国</option>
+                  <option value="Kyushu">九州</option>
+                  <option value="Okinawa">沖縄</option>
+                </select>
+              </label>
+            </div>
 
-              <div className={styles.formGroup}>
-                <label>Tags (comma-separated)</label>
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Tags (comma-separated):</strong>
                 <input
                   type="text"
-                  value={editingFacility.tags.join(", ")}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      tags: e.target.value
-                        .split(",")
-                        .map((t) => t.trim())
-                        .filter(Boolean),
-                    })
-                  }
+                  value={(editingFacility.tags || []).join(", ")}
+                  onChange={(e) => setEditingFacility({
+                    ...editingFacility,
+                    tags: e.target.value.split(",").map(t => t.trim()).filter(Boolean)
+                  })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
                   placeholder="e.g., 世界遺産, 博物館"
                 />
-              </div>
+              </label>
+            </div>
 
-              <div className={styles.formGroup}>
-                <label>Access - Train</label>
+            <div style={{ marginBottom: "15px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              <label>
+                <strong>Latitude:</strong>
                 <input
-                  type="text"
-                  value={editingFacility.access.train}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      access: { ...editingFacility.access, train: e.target.value },
-                    })
-                  }
-                  placeholder="Train access info"
+                  type="number"
+                  step="0.0001"
+                  value={editingFacility.lat || 0}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, lat: parseFloat(e.target.value) || 0 })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
                 />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Access - Bus</label>
+              </label>
+              <label>
+                <strong>Longitude:</strong>
                 <input
-                  type="text"
-                  value={editingFacility.access.bus}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      access: { ...editingFacility.access, bus: e.target.value },
-                    })
-                  }
-                  placeholder="Bus access info"
+                  type="number"
+                  step="0.0001"
+                  value={editingFacility.lng || 0}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, lng: parseFloat(e.target.value) || 0 })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
                 />
+              </label>
+            </div>
+
+            <hr style={{ margin: "20px 0" }} />
+
+            <div style={{ marginBottom: "15px" }}>
+              <strong>Thumbnail Image</strong>
+              {editingFacility.thumbnail && (
+                <div style={{ marginTop: "10px", marginBottom: "10px" }}>
+                  <img
+                    src={editingFacility.thumbnail}
+                    alt="Current thumbnail"
+                    style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "4px" }}
+                  />
+                  <div style={{ marginTop: "8px" }}>
+                    <a
+                      href={editingFacility.thumbnail}
+                      download
+                      style={{ color: "#0066cc", textDecoration: "none", marginRight: "10px" }}
+                    >
+                      ⬇ Download Current Image
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ marginTop: "10px", marginBottom: "10px" }}>
+                <label>
+                  <strong>Select from existing images:</strong>
+                  <select
+                    value={editingFacility.thumbnail || ""}
+                    onChange={(e) => setEditingFacility({ ...editingFacility, thumbnail: e.target.value })}
+                    style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                  >
+                    <option value="">-- None --</option>
+                    {availableImages.map((img) => (
+                      <option key={img} value={`/images/facilities/${img}`}>
+                        {img}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Access - Car</label>
-                <input
-                  type="text"
-                  value={editingFacility.access.car}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      access: { ...editingFacility.access, car: e.target.value },
-                    })
-                  }
-                  placeholder="Car access info"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Access Difficulty Rank</label>
-                <select
-                  value={editingFacility.access.rank}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      access: {
-                        ...editingFacility.access,
-                        rank: e.target.value,
-                      },
-                    })
-                  }
-                >
-                  <option value="S">S (Very Easy)</option>
-                  <option value="A">A (Easy)</option>
-                  <option value="B">B (Moderate)</option>
-                  <option value="C">C (Difficult)</option>
-                </select>
+              <div style={{ marginTop: "10px" }}>
+                <label style={{ display: "block" }}>
+                  <strong>Upload new image:</strong>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    style={{ marginTop: "5px" }}
+                  />
+                </label>
+                {uploading && <p style={{ color: "#666", marginTop: "5px" }}>Uploading...</p>}
               </div>
             </div>
 
-            <div className={styles.modalFooter}>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
               <button
                 onClick={() => {
                   setShowEditModal(false);
                   setEditingFacility(null);
-                  setError("");
                 }}
-                className={styles.cancelButton}
-                disabled={isSaving}
+                style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#ccc", border: "none", borderRadius: "4px" }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveEdit}
-                className={styles.saveButton}
-                disabled={isSaving}
+                style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#0066cc", color: "white", border: "none", borderRadius: "4px" }}
               >
-                {isSaving ? "Saving..." : "Save & Deploy"}
+                Save
               </button>
             </div>
           </div>
