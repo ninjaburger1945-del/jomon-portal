@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 
 // v1.0.1 - 42 entries
 const nextConfig: NextConfig = {
-  output: "export",
   trailingSlash: true,
   images: {
     remotePatterns: [
