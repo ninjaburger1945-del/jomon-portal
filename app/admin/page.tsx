@@ -106,6 +106,11 @@ export default function AdminPage() {
       description_en: "",
       location_en: "",
       address: "",
+      address_en: "",
+      access_public: "",
+      access_public_en: "",
+      access_car: "",
+      access_car_en: "",
       url: "",
       thumbnail: "",
       region: "Tohoku",
@@ -630,13 +635,76 @@ export default function AdminPage() {
               </label>
             </div>
 
+            <hr style={{ margin: "20px 0" }} />
+
             <div style={{ marginBottom: "15px" }}>
               <label>
-                <strong>Address:</strong>
+                <strong>🚌 Access by Public Transport (Japanese):</strong>
+                <textarea
+                  value={editingFacility.access_public || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, access_public: e.target.value })}
+                  placeholder="e.g., JR奥羽本線青森駅からバスで約35分。縄文時遊館前バス停から徒歩約2分"
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "60px" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>🚌 Access by Public Transport (English):</strong>
+                <textarea
+                  value={editingFacility.access_public_en || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, access_public_en: e.target.value })}
+                  placeholder="e.g., About 35 minutes by bus from JR Aomori Station. About 2 minutes on foot from Jomon Yūkan bus stop."
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "60px" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>🚗 Access by Car (Japanese):</strong>
+                <textarea
+                  value={editingFacility.access_car || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, access_car: e.target.value })}
+                  placeholder="e.g., 東北道青森ICから国道7号経由で約15分"
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "60px" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>🚗 Access by Car (English):</strong>
+                <textarea
+                  value={editingFacility.access_car_en || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, access_car_en: e.target.value })}
+                  placeholder="e.g., About 15 minutes via Route 7 from Aomori IC on the Tohoku Expressway"
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "60px" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Address (Japanese):</strong>
                 <input
                   type="text"
                   value={editingFacility.address || ""}
                   onChange={(e) => setEditingFacility({ ...editingFacility, address: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Address (English):</strong>
+                <input
+                  type="text"
+                  value={editingFacility.address_en || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, address_en: e.target.value })}
+                  placeholder="e.g., 1-1 Sannai, Aomori City, Aomori Prefecture"
                   style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
                 />
               </label>

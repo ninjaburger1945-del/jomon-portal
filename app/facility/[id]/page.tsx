@@ -36,6 +36,7 @@ interface Facility {
     region: string;
     prefecture: string;
     address: string;
+    address_en?: string;
     description: string;
     description_en?: string;
     location_en?: string;
@@ -46,6 +47,10 @@ interface Facility {
     lat?: number;
     lng?: number;
     twitter?: string;
+    access_public?: string;
+    access_public_en?: string;
+    access_car?: string;
+    access_car_en?: string;
     access?: {
         info?: string;
         advice?: string;

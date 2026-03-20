@@ -450,22 +450,34 @@ ${existingNames}
         }
       }
 
-      // 既存の英語フィールドを保持してマージ
+      // 既存の編集フィールドを保持してマージ
       const existingFacility = existingData.find(f => f.id === nf.id);
       if (existingFacility) {
-        // 既存データがある場合は部分更新（英語フィールドを保持）
+        // 既存データがある場合は部分更新（管理画面で編集されたフィールドを保持）
         nf = Object.assign({}, existingFacility, nf, {
+          // 英語フィールド（管理画面で編集）
           name_en: existingFacility.name_en || nf.name_en || "",
           description_en: existingFacility.description_en || nf.description_en || "",
-          location_en: existingFacility.location_en || nf.location_en || ""
+          location_en: existingFacility.location_en || nf.location_en || "",
+          address_en: existingFacility.address_en || nf.address_en || "",
+          // アクセス情報（管理画面で編集）
+          access_public: existingFacility.access_public || nf.access_public || "",
+          access_public_en: existingFacility.access_public_en || nf.access_public_en || "",
+          access_car: existingFacility.access_car || nf.access_car || "",
+          access_car_en: existingFacility.access_car_en || nf.access_car_en || ""
         });
         const idx = existingData.findIndex(f => f.id === nf.id);
         existingData[idx] = nf;
       } else {
-        // 新規追加時も英語フィールドを初期化
+        // 新規追加時も全フィールドを初期化
         nf.name_en = nf.name_en || "";
         nf.description_en = nf.description_en || "";
         nf.location_en = nf.location_en || "";
+        nf.address_en = nf.address_en || "";
+        nf.access_public = nf.access_public || "";
+        nf.access_public_en = nf.access_public_en || "";
+        nf.access_car = nf.access_car || "";
+        nf.access_car_en = nf.access_car_en || "";
         existingData.push(nf);
       }
       addedCount++;
@@ -477,15 +489,22 @@ ${existingNames}
       process.exit(0);
     }
 
-    // 英語フィールドを保持したままファイルを保存
+    // 編集フィールド（英語・アクセス情報）を保持したままファイルを保存
     const dataToSave = existingData.map(f => ({
       ...f,
+      // 英語フィールド
       name_en: f.name_en || "",
       description_en: f.description_en || "",
-      location_en: f.location_en || ""
+      location_en: f.location_en || "",
+      address_en: f.address_en || "",
+      // アクセス情報
+      access_public: f.access_public || "",
+      access_public_en: f.access_public_en || "",
+      access_car: f.access_car || "",
+      access_car_en: f.access_car_en || ""
     }));
     fs.writeFileSync(filePath, JSON.stringify(dataToSave, null, 2));
-    console.log(`[RESULT] 合計 ${existingData.length} 件（英語フィールド保護済み）`);
+    console.log(`[RESULT] 合計 ${existingData.length} 件（編集フィールド保護済み）`);
     console.log('[CRAWLER] 完了。');
 
   } catch (error) {
