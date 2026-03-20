@@ -5,8 +5,11 @@ import { useState, useEffect } from "react";
 interface Facility {
   id: string;
   name: string;
+  name_en?: string;
   prefecture: string;
   description: string;
+  description_en?: string;
+  location_en?: string;
   [key: string]: any;
 }
 
@@ -17,9 +20,11 @@ export default function AdminPage() {
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
+  const [isNewFacility, setIsNewFacility] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [availableImages, setAvailableImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [postToX, setPostToX] = useState(false);
 
   const handleLogin = () => {
     const correctPassword = "jomon2026";
@@ -66,10 +71,43 @@ export default function AdminPage() {
     }
   };
 
+  const generateIdFromName = (name: string): string => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+  };
+
+  const handleAddNewFacility = () => {
+    const newFacility: Facility = {
+      id: "",
+      name: "",
+      name_en: "",
+      prefecture: "",
+      description: "",
+      description_en: "",
+      location_en: "",
+      address: "",
+      url: "",
+      thumbnail: "",
+      region: "Tohoku",
+      tags: [],
+      lat: 0,
+      lng: 0,
+    };
+    setEditingFacility(newFacility);
+    setIsNewFacility(true);
+    setShowEditModal(true);
+    setPostToX(false);
+    loadAvailableImages();
+  };
+
   const handleEditClick = (facility: Facility) => {
     console.log("Edit clicked for:", facility.id);
     setEditingFacility({ ...facility });
+    setIsNewFacility(false);
     setShowEditModal(true);
+    setPostToX(false);
     loadAvailableImages();
   };
 
@@ -145,20 +183,84 @@ export default function AdminPage() {
     }
   };
 
-  const handleSaveEdit = async () => {
-    if (!editingFacility) return;
-    console.log("Saving facility:", editingFacility.id);
+  const postToXApi = async (facility: Facility) => {
+    try {
+      const message = `${facility.name}を紹介しています | JOMON PORTAL #縄文`;
+      const response = await fetch("/api/x-post", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          facilityName: facility.name,
+          facilityId: facility.id,
+          message,
+        }),
+      });
 
-    const updated = facilities.map((f) =>
-      f.id === editingFacility.id ? editingFacility : f
-    );
+      if (!response.ok) {
+        throw new Error("Failed to post to X");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error("X post error:", err);
+      throw err;
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingFacility || !editingFacility.name) {
+      setError("Please fill in the facility name");
+      return;
+    }
+
+    const facilityToSave = { ...editingFacility };
+
+    // If new facility, generate ID from name
+    if (isNewFacility) {
+      if (!facilityToSave.id) {
+        facilityToSave.id = generateIdFromName(facilityToSave.name);
+      }
+      // Check if ID already exists
+      if (facilities.some(f => f.id === facilityToSave.id)) {
+        setError("A facility with this ID already exists. Please modify the ID.");
+        return;
+      }
+    }
+
+    console.log("Saving facility:", facilityToSave.id);
+
+    const updated = isNewFacility
+      ? [...facilities, facilityToSave]
+      : facilities.map((f) =>
+        f.id === facilityToSave.id ? facilityToSave : f
+      );
 
     try {
       await saveFacilitiesToGithub(updated);
       setFacilities(updated);
       setShowEditModal(false);
       setEditingFacility(null);
-      setError("✓ Saved and deployed! Changes pushed to GitHub.");
+      setIsNewFacility(false);
+
+      // Post to X if checkbox is enabled
+      if (postToX) {
+        try {
+          const xResponse = await postToXApi(facilityToSave);
+          if (xResponse.posted) {
+            setError("✓ Saved and deployed! 📱 Posted to X!");
+          } else {
+            setError(`✓ Saved and deployed! ${xResponse.reason}`);
+          }
+        } catch (xErr) {
+          setError("✓ Saved and deployed! (X post failed)");
+        }
+      } else {
+        setError("✓ Saved and deployed! Changes pushed to GitHub.");
+      }
+      setPostToX(false);
     } catch (err) {
       console.error("Save error:", err);
       setError(
@@ -205,8 +307,96 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* Analytics Section */}
+      <section style={{ marginBottom: "30px", backgroundColor: "#f9f9f9", padding: "20px", borderRadius: "8px" }}>
+        <h2>📊 分析</h2>
+
+        {/* PV Trend Mini Chart */}
+        <div style={{ marginBottom: "20px" }}>
+          <h3>過去7日間のPV推移</h3>
+          <svg viewBox="0 0 400 150" style={{ width: "100%", maxWidth: "100%", height: "auto" }} xmlns="http://www.w3.org/2000/svg">
+            {/* Background */}
+            <rect width="400" height="150" fill="#fff" stroke="#ddd" strokeWidth="1" />
+
+            {/* Grid lines */}
+            <line x1="40" y1="20" x2="40" y2="120" stroke="#ddd" />
+            <line x1="40" y1="120" x2="380" y2="120" stroke="#ddd" />
+
+            {/* Dummy bars (7 days) */}
+            <rect x="50" y="90" width="35" height="30" fill="#4CAF50" />
+            <rect x="90" y="75" width="35" height="45" fill="#4CAF50" />
+            <rect x="130" y="80" width="35" height="40" fill="#4CAF50" />
+            <rect x="170" y="60" width="35" height="60" fill="#4CAF50" />
+            <rect x="210" y="70" width="35" height="50" fill="#4CAF50" />
+            <rect x="250" y="85" width="35" height="35" fill="#4CAF50" />
+            <rect x="290" y="65" width="35" height="55" fill="#4CAF50" />
+
+            {/* Labels */}
+            <text x="67" y="135" fontSize="12" textAnchor="middle">日</text>
+            <text x="107" y="135" fontSize="12" textAnchor="middle">月</text>
+            <text x="147" y="135" fontSize="12" textAnchor="middle">火</text>
+            <text x="187" y="135" fontSize="12" textAnchor="middle">水</text>
+            <text x="227" y="135" fontSize="12" textAnchor="middle">木</text>
+            <text x="267" y="135" fontSize="12" textAnchor="middle">金</text>
+            <text x="307" y="135" fontSize="12" textAnchor="middle">土</text>
+          </svg>
+        </div>
+
+        {/* KPI Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "15px" }}>
+          <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
+            <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>月間PV</div>
+            <div style={{ fontSize: "28px", fontWeight: "bold", color: "#2196f3" }}>2,847</div>
+            <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>↑ 12% from last month</div>
+          </div>
+          <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
+            <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>ユニーク訪問者</div>
+            <div style={{ fontSize: "28px", fontWeight: "bold", color: "#4CAF50" }}>1,234</div>
+            <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>↑ 8% from last month</div>
+          </div>
+          <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
+            <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>平均滞在時間</div>
+            <div style={{ fontSize: "28px", fontWeight: "bold", color: "#FF9800" }}>2分35秒</div>
+            <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>↑ 5% from last month</div>
+          </div>
+        </div>
+
+        {/* Popular Facilities */}
+        <div style={{ marginTop: "20px" }}>
+          <h3>🏆 人気施設 TOP 3</h3>
+          <ol style={{ margin: 0, paddingLeft: "20px" }}>
+            <li style={{ padding: "8px 0", borderBottom: "1px solid #eee" }}>
+              特別史跡 三内丸山遺跡 <span style={{ color: "#666", marginLeft: "10px" }}>→ 842 PV</span>
+            </li>
+            <li style={{ padding: "8px 0", borderBottom: "1px solid #eee" }}>
+              大湯環状列石 <span style={{ color: "#666", marginLeft: "10px" }}>→ 645 PV</span>
+            </li>
+            <li style={{ padding: "8px 0" }}>
+              吉野ヶ里遺跡 <span style={{ color: "#666", marginLeft: "10px" }}>→ 521 PV</span>
+            </li>
+          </ol>
+        </div>
+      </section>
+
       <section>
-        <h2>Facilities ({facilities.length})</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+          <h2>Facilities ({facilities.length})</h2>
+          <button
+            onClick={handleAddNewFacility}
+            style={{
+              padding: "10px 16px",
+              cursor: "pointer",
+              backgroundColor: "#4CAF50",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              fontSize: "14px",
+              fontWeight: "500"
+            }}
+          >
+            ➕ 新規追加
+          </button>
+        </div>
 
         {loading ? (
           <p>Loading...</p>
@@ -245,7 +435,7 @@ export default function AdminPage() {
         )}
       </section>
 
-      {/* Edit Modal */}
+      {/* Edit/Create Modal */}
       {showEditModal && editingFacility && (
         <div style={{
           position: "fixed",
@@ -268,15 +458,43 @@ export default function AdminPage() {
             maxHeight: "90vh",
             overflow: "auto"
           }}>
-            <h2>Edit Facility: {editingFacility.name}</h2>
+            <h2>{isNewFacility ? "新規施設追加" : "Edit Facility"}: {editingFacility.name || "(no name)"}</h2>
+
+            {/* ID Field (editable only for new facilities) */}
+            {isNewFacility && (
+              <div style={{ marginBottom: "15px" }}>
+                <label>
+                  <strong>ID (English, alphanumeric & hyphens):</strong>
+                  <input
+                    type="text"
+                    value={editingFacility.id}
+                    onChange={(e) => setEditingFacility({ ...editingFacility, id: e.target.value })}
+                    placeholder="Auto-generated from name"
+                    style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                  />
+                </label>
+              </div>
+            )}
 
             <div style={{ marginBottom: "15px" }}>
               <label>
-                <strong>Name:</strong>
+                <strong>Name (Japanese):</strong>
                 <input
                   type="text"
                   value={editingFacility.name}
                   onChange={(e) => setEditingFacility({ ...editingFacility, name: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Name (English):</strong>
+                <input
+                  type="text"
+                  value={editingFacility.name_en || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, name_en: e.target.value })}
                   style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
                 />
               </label>
@@ -296,11 +514,35 @@ export default function AdminPage() {
 
             <div style={{ marginBottom: "15px" }}>
               <label>
-                <strong>Description:</strong>
+                <strong>Description (Japanese):</strong>
                 <textarea
                   value={editingFacility.description}
                   onChange={(e) => setEditingFacility({ ...editingFacility, description: e.target.value })}
                   style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "100px" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Description (English):</strong>
+                <textarea
+                  value={editingFacility.description_en || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, description_en: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "100px" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Location (English):</strong>
+                <input
+                  type="text"
+                  value={editingFacility.location_en || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, location_en: e.target.value })}
+                  placeholder="e.g., Aomori Prefecture, Tohoku"
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
                 />
               </label>
             </div>
@@ -458,11 +700,25 @@ export default function AdminPage() {
               </div>
             </div>
 
+            <div style={{ marginBottom: "15px", padding: "10px", backgroundColor: "#f5f5f5", borderRadius: "4px" }}>
+              <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={postToX}
+                  onChange={(e) => setPostToX(e.target.checked)}
+                  style={{ marginRight: "10px", cursor: "pointer" }}
+                />
+                <span>📱 Xに投稿する (Post to X when saved)</span>
+              </label>
+            </div>
+
             <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
               <button
                 onClick={() => {
                   setShowEditModal(false);
                   setEditingFacility(null);
+                  setIsNewFacility(false);
+                  setPostToX(false);
                 }}
                 style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#ccc", border: "none", borderRadius: "4px" }}
               >

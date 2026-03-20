@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,6 +62,11 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[API] Successfully saved to GitHub!');
+
+    // Revalidate cache after successful save
+    revalidatePath('/');
+    revalidatePath('/facility/[id]', 'page');
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('[API] Save error:', error);

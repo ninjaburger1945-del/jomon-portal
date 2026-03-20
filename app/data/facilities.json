@@ -20,7 +20,10 @@
       "car": "東北道青森ICから国道7号経由で約15分",
       "rank": "B"
     },
-    "copy": "日本最大級縄文集落跡"
+    "copy": "日本最大級縄文集落跡",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "togariishi",
@@ -43,7 +46,10 @@
       "car": "中央自動車道諏訪ICから国道152号経由で約30分",
       "rank": "B"
     },
-    "copy": "国宝土偶二体。八ヶ岳縄文の美"
+    "copy": "国宝土偶二体。八ヶ岳縄文の美",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "kasori",
@@ -66,7 +72,10 @@
       "car": "京葉道路穴川ICから約10分",
       "rank": "B"
     },
-    "copy": "世界最大貝塚で縄文人の暮らし"
+    "copy": "世界最大貝塚で縄文人の暮らし",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "korekawa",
@@ -89,7 +98,10 @@
       "car": "八戸自動車道八戸ICから約20分",
       "rank": "B"
     },
-    "copy": "国宝合掌土偶と漆器の縄文美"
+    "copy": "国宝合掌土偶と漆器の縄文美",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "idojiri",
@@ -112,7 +124,10 @@
       "car": "中央自動車道諏訪南ICから約10分",
       "rank": "B"
     },
-    "copy": "井戸尻式土器 縄文芸術の極み"
+    "copy": "井戸尻式土器 縄文芸術の極み",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "jomon-museum",
@@ -135,7 +150,10 @@
       "car": "舞鶴若狭道若狭三方ICから約5分",
       "rank": "B"
     },
-    "copy": "鳥浜貝塚 縄文の海利用と漆器"
+    "copy": "鳥浜貝塚 縄文の海利用と漆器",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "umaikata",
@@ -158,7 +176,10 @@
       "car": "関越自動車道長岡ICから国道8号経由で約5分",
       "rank": "B"
     },
-    "copy": "信濃川流域火焔型土器の殿堂"
+    "copy": "信濃川流域火焔型土器の殿堂",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "uenohara",
@@ -180,7 +201,10 @@
       "car": "東九州自動車道国分ICから県道2号経由で約15分",
       "rank": "B"
     },
-    "copy": "日本最古級縄文大集落の記憶"
+    "copy": "日本最古級縄文大集落の記憶",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "maibun",
@@ -203,7 +227,10 @@
       "car": "中央道甲府南ICから約5分",
       "rank": "B"
     },
-    "copy": "山梨縄文、水煙文土器と土偶"
+    "copy": "山梨縄文、水煙文土器と土偶",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "ofune",
@@ -225,7 +252,10 @@
       "car": "函館新道函館ICから国道278号経由で約1時間",
       "rank": "B"
     },
-    "copy": "世界遺産大船の巨大竪穴建物跡"
+    "copy": "世界遺産大船の巨大竪穴建物跡",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "oyu",
@@ -248,7 +278,10 @@
       "car": "東北道鹿角八幡平ICから約10分",
       "rank": "B"
     },
-    "copy": "縄文の世界遺産大規模配石遺構"
+    "copy": "縄文の世界遺産大規模配石遺構",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "isedotai",
@@ -271,7 +304,10 @@
       "car": "日本海沿岸東北自動車道鷹巣ICから国道105号経由で約10分",
       "rank": "B"
     },
-    "copy": "環状列石が集う縄文の聖域"
+    "copy": "環状列石が集う縄文の聖域",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "komakino",
@@ -294,7 +330,10 @@
       "car": "東北自動車道青森中央ICから約15分",
       "rank": "B"
     },
-    "copy": "斜面に築かれし異形の環状列石"
+    "copy": "斜面に築かれし異形の環状列石",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "kamegaoka",
@@ -317,7 +356,10 @@
       "car": "東北道 浪岡ICから国道101号経由で約40分",
       "rank": "B"
     },
-    "copy": "遮光器土偶の里、世界遺産"
+    "copy": "遮光器土偶の里、世界遺産",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "kitakogane",
@@ -340,7 +382,10 @@
       "car": "道央自動車道伊達ICから国道37号経由で約15分",
       "rank": "B"
     },
-    "copy": "内浦湾望む祭祀跡残る世界遺産"
+    "copy": "内浦湾望む祭祀跡残る世界遺産",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "kakinoshima",
@@ -362,7 +407,10 @@
       "car": "函館新外環状道路函館空港ICから国道278号経由で約30分",
       "rank": "B"
     },
-    "copy": "縄文早期の巨大集落と大土坑"
+    "copy": "縄文早期の巨大集落と大土坑",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "irie-takasago",
@@ -385,7 +433,10 @@
       "car": "道央自動車道虻田洞爺湖ICから国道230号経由で約15分",
       "rank": "B"
     },
-    "copy": "豊富な海産物と埋葬装身具"
+    "copy": "豊富な海産物と埋葬装身具",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "goshono",
@@ -407,7 +458,10 @@
       "car": "東北自動車道一戸ICから車で約5分",
       "rank": "B"
     },
-    "copy": "植物と土屋根の世界遺産"
+    "copy": "植物と土屋根の世界遺産",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "hiraide",
@@ -429,7 +483,10 @@
       "car": "中央道塩尻ICから県道25号経由で約10分",
       "rank": "B"
     },
-    "copy": "美しい公園の複合縄文史跡"
+    "copy": "美しい公園の複合縄文史跡",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "oomori",
@@ -451,7 +508,10 @@
       "car": "首都高速1号羽田線平和島ICから約10分",
       "rank": "S"
     },
-    "copy": "日本考古学発祥地縄文名誕生"
+    "copy": "日本考古学発祥地縄文名誕生",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "hoshigato",
@@ -473,7 +533,10 @@
       "car": "中央道諏訪ICから県道254号経由で約40分",
       "rank": "C"
     },
-    "copy": "縄文最大級 黒曜石採掘場跡"
+    "copy": "縄文最大級 黒曜石採掘場跡",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "yoshigo",
@@ -495,7 +558,10 @@
       "car": "東名高速道路豊川ICから国道23号・259号経由で約60分",
       "rank": "B"
     },
-    "copy": "縄文後期晩期人骨研究の標準"
+    "copy": "縄文後期晩期人骨研究の標準",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "torihama",
@@ -517,7 +583,10 @@
       "car": "舞鶴若狭自動車道若狭三方ICから国道27号経由で約10分",
       "rank": "B"
     },
-    "copy": "奇跡の縄文タイムカプセル"
+    "copy": "奇跡の縄文タイムカプセル",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "tsugumo",
@@ -539,7 +608,10 @@
       "car": "山陽道笠岡ICから国道2号経由で約20分",
       "rank": "B"
     },
-    "copy": "抜歯風習解明の縄文聖地"
+    "copy": "抜歯風習解明の縄文聖地",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "kamikuroiwa",
@@ -561,7 +633,10 @@
       "car": "松山自動車道久万高原スマートICから国道33号線・県道12号線経由で約20分",
       "rank": "C"
     },
-    "copy": "最古級犬墓 線刻礫の岩陰"
+    "copy": "最古級犬墓 線刻礫の岩陰",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "satohama",
@@ -583,7 +658,10 @@
       "car": "三陸自動車道鳴瀬奥松島ICから県道27号経由で約15分",
       "rank": "B"
     },
-    "copy": "国内最大級 縄文海浜生活の証"
+    "copy": "国内最大級 縄文海浜生活の証",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "aku",
@@ -605,7 +683,10 @@
       "car": "中央道諏訪南ICから県道17号経由で約15分",
       "rank": "B"
     },
-    "copy": "縄文前期大規模集石列石祭祀"
+    "copy": "縄文前期大規模集石列石祭祀",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "ubayama",
@@ -627,7 +708,10 @@
       "car": "京葉道路原木ICから県道180号経由で約15分",
       "rank": "B"
     },
-    "copy": "家族構成を語る国の史跡"
+    "copy": "家族構成を語る国の史跡",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "soyata",
@@ -650,7 +734,10 @@
       "car": "京葉道路市川ICから約15分",
       "rank": "B"
     },
-    "copy": "馬蹄形貝塚と曽谷式土器"
+    "copy": "馬蹄形貝塚と曽谷式土器",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "nabatake",
@@ -672,7 +759,10 @@
       "car": "西九州自動車道唐津ICから約10分",
       "rank": "S"
     },
-    "copy": "最古の水稲跡 弥生の夜明け"
+    "copy": "最古の水稲跡 弥生の夜明け",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "jomon-culture-center",
@@ -695,7 +785,10 @@
       "car": "函館新外環状道路函館空港ICから国道278号経由で約40分",
       "rank": "B"
     },
-    "copy": "北海道唯一の国宝中空土偶"
+    "copy": "北海道唯一の国宝中空土偶",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "jomopia-miyahata",
@@ -717,7 +810,10 @@
       "car": "東北自動車道福島西ICから約15分",
       "rank": "B"
     },
-    "copy": "縄文巨大集落 記憶と復元"
+    "copy": "縄文巨大集落 記憶と復元",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "mawaki-jomon",
@@ -739,7 +835,10 @@
       "car": "能越自動車道のと里山空港ICから国道249号経由で約40分",
       "rank": "C"
     },
-    "copy": "イルカと巨大環状木柱根"
+    "copy": "イルカと巨大環状木柱根",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "tobinodai-museum",
@@ -762,7 +861,10 @@
       "car": "京葉道路花輪ICから国道14号経由で約10分",
       "rank": "B"
     },
-    "copy": "縄文早期の暮らしと炉穴・貝塚"
+    "copy": "縄文早期の暮らしと炉穴・貝塚",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "mizuko-kaizuka",
@@ -784,7 +886,10 @@
       "car": "関越自動車道所沢ICから県道266号経由で約15分",
       "rank": "B"
     },
-    "copy": "縄文前期 水子貝塚のムラ復元"
+    "copy": "縄文前期 水子貝塚のムラ復元",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "katsusaka-iseki",
@@ -806,7 +911,10 @@
       "car": "圏央道相模原愛川ICから約15分",
       "rank": "B"
     },
-    "copy": "勝坂式土器標式集落"
+    "copy": "勝坂式土器標式集落",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "shakado-iseki-museum",
@@ -829,7 +937,10 @@
       "car": "中央道一宮御坂ICから国道137号経由で約5分",
       "rank": "B"
     },
-    "copy": "縄文土偶日本最多の聖地"
+    "copy": "縄文土偶日本最多の聖地",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "taishakukyo-isekigun",
@@ -851,7 +962,10 @@
       "car": "中国道東城ICから県道25号経由で約20分",
       "rank": "B"
     },
-    "copy": "帝釈峡岩陰群 数万年の生活史"
+    "copy": "帝釈峡岩陰群 数万年の生活史",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "ichikawa-horinouchi",
@@ -874,7 +988,10 @@
       "car": "京葉道路市川ICから約15分",
       "rank": "B"
     },
-    "copy": "関東後期縄文の馬蹄形貝塚"
+    "copy": "関東後期縄文の馬蹄形貝塚",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "okadaira-kaizuka",
@@ -896,7 +1013,10 @@
       "car": "圏央道稲敷ICから県道5号線経由で約20分",
       "rank": "B"
     },
-    "copy": "日本考古学の原点 縄文集落"
+    "copy": "日本考古学の原点 縄文集落",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "hikosaki-kaizuka",
@@ -918,7 +1038,10 @@
       "car": "瀬戸中央自動車道早島ICから県道21号経由で約15分",
       "rank": "B"
     },
-    "copy": "西日本屈指の縄文文化"
+    "copy": "西日本屈指の縄文文化",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "asanebana-kaizuka",
@@ -940,7 +1063,10 @@
       "car": "山陽道岡山ICから国道53号経由で約15分",
       "rank": "B"
     },
-    "copy": "日本最古級イネ細胞化石発見地"
+    "copy": "日本最古級イネ細胞化石発見地",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "awazu-kotei-iseki",
@@ -963,7 +1089,10 @@
       "rank": "S"
     },
     "verified": false,
-    "copy": "淡水貝塚日本最大縄文の食"
+    "copy": "淡水貝塚日本最大縄文の食",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "kurohama-kaizuka",
@@ -987,7 +1116,10 @@
       "rank": "B"
     },
     "verified": true,
-    "copy": "黒浜式土器 縄文前期の証"
+    "copy": "黒浜式土器 縄文前期の証",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "hirajo-kaizuka",
@@ -1010,7 +1142,10 @@
       "rank": "B"
     },
     "verified": true,
-    "copy": "西日本代表 平城式土器遺跡"
+    "copy": "西日本代表 平城式土器遺跡",
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "tokamachi-city-museum",
@@ -1034,7 +1169,10 @@
       "car": "関越自動車道 六日町ICから国道253号経由で約25分",
       "rank": "B"
     },
-    "verified": false
+    "verified": false,
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "umataka-sanjyuinaba",
@@ -1058,7 +1196,10 @@
       "car": "関越自動車道長岡ICから約5分",
       "rank": "B"
     },
-    "verified": false
+    "verified": false,
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "ogido-kaizuka",
@@ -1082,7 +1223,10 @@
       "car": "沖縄自動車道北中城ICから約10分",
       "rank": "B"
     },
-    "verified": true
+    "verified": true,
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   },
   {
     "id": "funagata-rekimin",
@@ -1106,6 +1250,9 @@
       "rank": "B"
     },
     "copy": "国宝縄文の女神レプリカ展示",
-    "verified": false
+    "verified": false,
+    "name_en": "",
+    "description_en": "",
+    "location_en": ""
   }
 ]

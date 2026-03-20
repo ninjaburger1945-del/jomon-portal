@@ -32,10 +32,13 @@ const REGION_COLORS: Record<string, string> = {
 interface Facility {
     id: string;
     name: string;
+    name_en?: string;
     region: string;
     prefecture: string;
     address: string;
     description: string;
+    description_en?: string;
+    location_en?: string;
     copy?: string;
     url: string;
     thumbnail: string;
