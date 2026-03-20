@@ -332,9 +332,38 @@ export default function AdminPage() {
 
       {/* Analytics Section */}
       <section style={{ marginBottom: "30px", backgroundColor: "#f9f9f9", padding: "20px", borderRadius: "8px" }}>
-        <h2>📊 分析 {statsLoading && <span style={{ fontSize: "12px", color: "#999" }}>(更新中...)</span>}</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+          <h2 style={{ margin: 0 }}>📊 分析</h2>
+          {statsLoading && (
+            <span style={{ fontSize: "12px", color: "#999", fontWeight: "normal" }}>
+              🔄 データ取得中...
+            </span>
+          )}
+        </div>
 
-        {statsData?.error ? (
+        {statsLoading && !statsData ? (
+          // ローディング状態（データまだなし）
+          <div style={{
+            backgroundColor: "#e7f3ff",
+            border: "1px solid #2196f3",
+            borderRadius: "6px",
+            padding: "30px",
+            color: "#0d47a1",
+            textAlign: "center",
+            minHeight: "200px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <div>
+              <div style={{ fontSize: "24px", marginBottom: "10px" }}>⏳</div>
+              <strong>Vercel Analytics からデータを取得中です...</strong>
+              <p style={{ margin: "8px 0 0 0", fontSize: "12px" }}>
+                数秒お待ちください
+              </p>
+            </div>
+          </div>
+        ) : statsData?.error ? (
           // エラー状態
           <div style={{
             backgroundColor: "#fff3cd",
@@ -343,38 +372,22 @@ export default function AdminPage() {
             padding: "15px",
             color: "#856404"
           }}>
-            <strong>⚠️ {statsData.message}</strong>
-            <p style={{ margin: "10px 0 0 0", fontSize: "12px" }}>
-              {statsData.status === 'no_credentials' && (
-                <>
-                  環境変数 <code>VERCEL_AUTH_TOKEN</code> と <code>NEXT_PUBLIC_VERCEL_PROJECT_ID</code> を設定してください。
-                </>
-              )}
-              {statsData.status === 'auth_failed' && (
-                <>
-                  Vercel API トークンが無効または期限切れです。新しいトークンを設定してください。
-                </>
-              )}
-              {statsData.status === 'api_error' && (
-                <>
-                  Vercel API エラー。後でもう一度試してください。
-                </>
-              )}
+            <strong>⚠️ 統計データを読み込めませんでした</strong>
+            <p style={{ margin: "8px 0 0 0", fontSize: "12px" }}>
+              <strong>原因:</strong> {statsData.error}
+            </p>
+            <p style={{ margin: "8px 0 0 0", fontSize: "12px" }}>
+              <strong>対策:</strong> 環境変数を確認してください：
+              <br />
+              • <code>PROJECT_ID</code> — Vercel プロジェクトID
+              <br />
+              • <code>VERCEL_AUTH_TOKEN</code> — Vercel API トークン（スコープ: analytics）
+              <br />
+              <br />
+              詳細は Vercel ダッシュボード → Settings → API Tokens を参照してください。
             </p>
           </div>
-        ) : statsLoading ? (
-          // ローディング状態
-          <div style={{
-            backgroundColor: "#e7f3ff",
-            border: "1px solid #2196f3",
-            borderRadius: "6px",
-            padding: "15px",
-            color: "#0d47a1",
-            textAlign: "center"
-          }}>
-            <strong>🔄 Vercel API からデータ取得中...</strong>
-          </div>
-        ) : statsData && !statsData.error && (
+        ) : statsData && statsData.pageviews >= 0 ? (
           // 成功状態
           <>
             <div style={{
@@ -428,39 +441,26 @@ export default function AdminPage() {
               <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
                 <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>7日間のPV</div>
                 <div style={{ fontSize: "28px", fontWeight: "bold", color: "#2196f3" }}>
-                  {statsData.summary?.totalViews?.toLocaleString() || '—'}
+                  {statsData.pageviews?.toLocaleString() || '—'}
                 </div>
                 <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>from Vercel Analytics</div>
               </div>
               <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
                 <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>ユニーク訪問者</div>
                 <div style={{ fontSize: "28px", fontWeight: "bold", color: "#4CAF50" }}>
-                  {statsData.summary?.totalVisitors?.toLocaleString() || '—'}
+                  {statsData.visitors?.toLocaleString() || '—'}
                 </div>
                 <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>from Vercel Analytics</div>
               </div>
               <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
-                <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>平均滞在時間</div>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>平均PV（日均）</div>
                 <div style={{ fontSize: "28px", fontWeight: "bold", color: "#FF9800" }}>
-                  {statsData.summary?.avgTimeOnPage || '—'}
+                  {statsData.daily && statsData.daily.length > 0
+                    ? Math.round(statsData.pageviews / statsData.daily.length).toLocaleString()
+                    : '—'}
                 </div>
-                <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>estimated</div>
+                <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>7日間の平均</div>
               </div>
-            </div>
-
-            {/* Popular Facilities */}
-            <div style={{ marginTop: "20px" }}>
-              <h3>🏆 人気施設 TOP 3</h3>
-              <ol style={{ margin: 0, paddingLeft: "20px" }}>
-                {statsData.topFacilities && statsData.topFacilities.map((facility: any, idx: number) => (
-                  <li key={idx} style={{ padding: "8px 0", borderBottom: idx < 2 ? "1px solid #eee" : "none" }}>
-                    {facility.name}
-                    <span style={{ color: "#666", marginLeft: "10px" }}>
-                      → {Math.round(facility.views).toLocaleString()} PV
-                    </span>
-                  </li>
-                ))}
-              </ol>
             </div>
           </>
         )}

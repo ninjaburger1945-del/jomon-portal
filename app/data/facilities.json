@@ -1499,5 +1499,37 @@
     "access_public_en": "",
     "access_car": "東北中央自動車道舟形ICから約5分",
     "access_car_en": ""
+  },
+  {
+    "id": "ogushi-kaizuka-fureai-koen",
+    "name": "大串貝塚ふれあい公園（国指定史跡 大串貝塚）",
+    "region": "Kanto",
+    "prefecture": "茨城県",
+    "address": "茨城県水戸市塩崎町1064-1",
+    "description": "「常陸国風土記」に記された巨人「ダイダラボウ」伝説が残る、世界で最も古く文献に記録された縄文時代前期の貝塚です。 公園のシンボルとして、伝説にちなんだ高さ15m超のダイダラボウ像が立ち、その内部は展望台になっています。 像の足元には貝層の断面を間近で観察できる施設や、出土品を展示する埋蔵文化財センター、復元住居などが整備されています。 神話と歴史が融合したユニークな空間で、古代人の暮らしや壮大な伝説を体感できるのが大きな魅力です。遊びながら学べるため、家族連れにも人気のスポットです。",
+    "copy": "巨人伝説が息づく貝塚",
+    "url": "https://www.city.mito.lg.jp/site/kyoiku/1628.html",
+    "thumbnail": "/images/facilities/ogushi-kaizuka-fureai-koen_ai.png",
+    "tags": [
+      "貝塚",
+      "博物館"
+    ],
+    "lat": 36.33383877,
+    "lng": 140.54586563,
+    "access": {
+      "train": "JR常磐線水戸駅からバスで約25分",
+      "bus": "大串公園バス停から徒歩約2分",
+      "car": "北関東自動車道水戸大洗ICから約5分",
+      "rank": "B"
+    },
+    "verified": false,
+    "name_en": "",
+    "description_en": "",
+    "location_en": "",
+    "address_en": "",
+    "access_public": "",
+    "access_public_en": "",
+    "access_car": "",
+    "access_car_en": ""
   }
 ]

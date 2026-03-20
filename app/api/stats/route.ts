@@ -1,200 +1,222 @@
 import { NextResponse, NextRequest } from 'next/server';
 
-interface VercelAnalyticsResponse {
-  pageviews: Array<{ timestamp: number; count: number }>;
-  visitors: Array<{ timestamp: number; count: number }>;
+interface VercelStatsResponse {
+  data?: {
+    total?: number;
+    archives?: Array<{ timestamp: number; count: number }>;
+  };
 }
 
 interface StatsData {
-  daily?: Array<{
-    date: string;
-    views: number;
-    visitors: number;
-  }>;
-  summary?: {
-    totalViews: number;
-    totalVisitors: number;
-    avgTimeOnPage: string;
-  };
-  topFacilities?: Array<{
-    name: string;
-    views: number;
-  }>;
-  error?: boolean;
-  message?: string;
-  status?: string;
-  source?: string;
+  pageviews: number;
+  visitors: number;
+  daily: Array<{ date: string; views: number; visitors: number }>;
+  error?: string;
 }
 
 /**
- * Vercel Analytics API から過去7日間の統計データを取得
+ * Vercel Analytics API から統計データを取得
  * GET /api/stats
  */
 export async function GET(request: NextRequest) {
+  const projectId = process.env.PROJECT_ID;
+  const token = process.env.VERCEL_AUTH_TOKEN;
+
+  console.log('[STATS] API request started');
+  console.log(`  PROJECT_ID: ${projectId ? '✓ set' : '✗ missing'}`);
+  console.log(`  VERCEL_AUTH_TOKEN: ${token ? '✓ set' : '✗ missing'}`);
+
+  // 認証情報チェック
+  if (!projectId || !token) {
+    console.warn('[STATS] Missing Vercel credentials');
+    return NextResponse.json({
+      pageviews: 0,
+      visitors: 0,
+      daily: [],
+      error: 'Vercel credentials not configured'
+    }, { status: 200 });
+  }
+
   try {
-    const token = process.env.VERCEL_AUTH_TOKEN;
-    const projectId = process.env.NEXT_PUBLIC_VERCEL_PROJECT_ID;
-
-    // 認証情報チェック
-    if (!token || !projectId) {
-      console.warn('[STATS] ⚠️ Vercel credentials not configured');
-      console.warn(`   VERCEL_AUTH_TOKEN: ${token ? '✓ set' : '✗ missing'}`);
-      console.warn(`   NEXT_PUBLIC_VERCEL_PROJECT_ID: ${projectId ? '✓ set' : '✗ missing'}`);
-      return NextResponse.json({
-        error: true,
-        message: 'API未接続: Vercel認証情報が設定されていません',
-        status: 'no_credentials',
-      }, { status: 503 });
-    }
-
     // 過去7日間のタイムスタンプを計算
     const now = new Date();
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const since = Math.floor(sevenDaysAgo.getTime() / 1000);
     const until = Math.floor(now.getTime() / 1000);
 
-    console.log(`[STATS] Fetching real Vercel analytics...`);
-    console.log(`   projectId: ${projectId}`);
-    console.log(`   period: ${since} → ${until} (7 days)`);
+    console.log('[STATS] Fetching Vercel Analytics...');
+    console.log(`  Period: ${new Date(since * 1000).toISOString()} to ${new Date(until * 1000).toISOString()}`);
 
-    // Vercel Analytics API を呼び出し
-    // ドキュメント: https://vercel.com/docs/rest-api#endpoints/analytics/get-analytics-stats
-    const analyticsUrl = `https://api.vercel.com/v1/analytics/stats?projectId=${projectId}&since=${since}&until=${until}`;
+    // Pageviews データ取得
+    console.log('[STATS] Fetching pageviews...');
+    const pageviewsUrl = `https://api.vercel.com/v1/analytics/stats?projectId=${projectId}&since=${since}&until=${until}`;
+    console.log(`  URL: ${pageviewsUrl.split('?')[0]}?...`);
 
-    console.log(`[STATS] Calling Vercel API: ${analyticsUrl}`);
-
-    const response = await fetch(analyticsUrl, {
-      method: 'GET',
+    const pageviewsRes = await fetch(pageviewsUrl, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
 
-    console.log(`[STATS] Vercel API response: HTTP ${response.status}`);
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error(`[STATS] ✗ Vercel API error ${response.status}:`);
-      console.error(`   ${errText.substring(0, 200)}`);
-
-      // 認証エラー（401/403）
-      if (response.status === 401 || response.status === 403) {
-        return NextResponse.json({
-          error: true,
-          message: 'API未接続: Vercel認証失敗（トークンが無効または期限切れ）',
-          status: 'auth_failed',
-          statusCode: response.status,
-        }, { status: 503 });
-      }
-
-      // その他のエラー
-      return NextResponse.json({
-        error: true,
-        message: `API未接続: Vercel API エラー (HTTP ${response.status})`,
-        status: 'api_error',
-        statusCode: response.status,
-      }, { status: 503 });
+    if (!pageviewsRes.ok) {
+      const errText = await pageviewsRes.text();
+      console.error(`[STATS] Pageviews API error: HTTP ${pageviewsRes.status}`);
+      console.error(`  Response: ${errText.substring(0, 300)}`);
+      throw new Error(`Vercel API error: ${pageviewsRes.status}`);
     }
 
-    const analyticsData: VercelAnalyticsResponse = await response.json();
+    const pageviewsData = await pageviewsRes.json();
+    console.log('[STATS] Pageviews response received');
+    console.log(`  Data structure:`, Object.keys(pageviewsData));
 
-    console.log(`[STATS] ✓ Successfully fetched real data`);
-    console.log(`   pageviews: ${analyticsData.pageviews?.length || 0} records`);
-    console.log(`   visitors: ${analyticsData.visitors?.length || 0} records`);
+    // Visitors データ取得
+    console.log('[STATS] Fetching visitors...');
+    const visitorsUrl = `https://api.vercel.com/v1/analytics/stats?projectId=${projectId}&since=${since}&until=${until}&metric=visitors`;
+    const visitorsRes = await fetch(visitorsUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-    // レスポンスデータを処理して統計情報を生成
-    const statsData = processAnalyticsData(analyticsData);
-    statsData.source = 'vercel_api_live';
+    if (!visitorsRes.ok) {
+      const errText = await visitorsRes.text();
+      console.error(`[STATS] Visitors API error: HTTP ${visitorsRes.status}`);
+      console.error(`  Response: ${errText.substring(0, 300)}`);
+      throw new Error(`Vercel API error: ${visitorsRes.status}`);
+    }
 
-    return NextResponse.json(statsData);
+    const visitorsData = await visitorsRes.json();
+    console.log('[STATS] Visitors response received');
+
+    // データをパース
+    const stats = parseVercelResponse(pageviewsData, visitorsData);
+
+    console.log('[STATS] ✓ Successfully parsed data');
+    console.log(`  Total pageviews: ${stats.pageviews}`);
+    console.log(`  Total visitors: ${stats.visitors}`);
+    console.log(`  Daily data points: ${stats.daily.length}`);
+
+    return NextResponse.json(stats);
   } catch (error) {
-    console.error('[STATS] ✗ Exception while fetching analytics:');
-    console.error(`   ${error instanceof Error ? error.message : String(error)}`);
+    console.error('[STATS] ✗ Exception in stats API:');
+    console.error(`  ${error instanceof Error ? error.message : String(error)}`);
+    console.error(`  Stack: ${error instanceof Error ? error.stack : 'N/A'}`);
 
+    // エラー時も正常な JSON を返す
     return NextResponse.json({
-      error: true,
-      message: `API未接続: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      status: 'exception',
-    }, { status: 503 });
+      pageviews: 0,
+      visitors: 0,
+      daily: [],
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 200 });
   }
 }
 
 /**
- * Vercel APIレスポンスを処理して見やすいフォーマットに変換
+ * Vercel API レスポンスをパース
  */
-function processAnalyticsData(data: VercelAnalyticsResponse): StatsData {
+function parseVercelResponse(pageviewsData: any, visitorsData: any): StatsData {
+  console.log('[STATS] Parsing Vercel response...');
+
+  // データ構造の確認
+  console.log(`  Pageviews data type: ${typeof pageviewsData}`);
+  console.log(`  Pageviews keys: ${pageviewsData ? Object.keys(pageviewsData).join(', ') : 'null'}`);
+
+  // 複数のデータ構造パターンに対応
+  const pageviewsTotal = extractTotal(pageviewsData);
+  const pageviewsArchives = extractArchives(pageviewsData);
+  const visitorsTotal = extractTotal(visitorsData);
+  const visitorsArchives = extractArchives(visitorsData);
+
+  console.log(`  Pageviews total: ${pageviewsTotal}`);
+  console.log(`  Pageviews archives: ${pageviewsArchives.length} points`);
+  console.log(`  Visitors total: ${visitorsTotal}`);
+  console.log(`  Visitors archives: ${visitorsArchives.length} points`);
+
+  // 日ごとのデータを構築
   const daily: StatsData['daily'] = [];
-  const viewsByDate = new Map<string, number>();
-  const visitorsByDate = new Map<string, number>();
+  const dateMap = new Map<string, { views: number; visitors: number }>();
 
-  // ページビュー データの処理
-  if (data.pageviews && Array.isArray(data.pageviews)) {
-    data.pageviews.forEach((item) => {
-      const date = new Date(item.timestamp * 1000).toISOString().split('T')[0];
-      viewsByDate.set(date, (viewsByDate.get(date) || 0) + item.count);
-    });
-  }
+  // ページビューデータを追加
+  pageviewsArchives.forEach(({ timestamp, count }) => {
+    const date = new Date(timestamp * 1000).toISOString().split('T')[0];
+    if (!dateMap.has(date)) {
+      dateMap.set(date, { views: 0, visitors: 0 });
+    }
+    dateMap.get(date)!.views += count;
+  });
 
-  // ビジター データの処理
-  if (data.visitors && Array.isArray(data.visitors)) {
-    data.visitors.forEach((item) => {
-      const date = new Date(item.timestamp * 1000).toISOString().split('T')[0];
-      visitorsByDate.set(date, (visitorsByDate.get(date) || 0) + item.count);
-    });
-  }
+  // ビジターデータを追加
+  visitorsArchives.forEach(({ timestamp, count }) => {
+    const date = new Date(timestamp * 1000).toISOString().split('T')[0];
+    if (!dateMap.has(date)) {
+      dateMap.set(date, { views: 0, visitors: 0 });
+    }
+    dateMap.get(date)!.visitors += count;
+  });
 
-  // 日ごとのデータをマージ
-  const dateSet = new Set([...viewsByDate.keys(), ...visitorsByDate.keys()]);
-  Array.from(dateSet)
-    .sort()
-    .forEach((date) => {
+  // ソートして daily に追加
+  Array.from(dateMap.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .forEach(([date, data]) => {
       daily.push({
         date,
-        views: viewsByDate.get(date) || 0,
-        visitors: visitorsByDate.get(date) || 0,
+        views: data.views,
+        visitors: data.visitors,
       });
     });
 
-  // サマリー統計
-  const totalViews = daily.reduce((sum, d) => sum + d.views, 0);
-  const totalVisitors = daily.reduce((sum, d) => sum + d.visitors, 0);
-  const avgTimeOnPage = calculateAvgTime(totalViews);
-
-  // ダミーの人気施設（実装: 今後Vercelから取得可能になれば更新）
-  const topFacilities: StatsData['topFacilities'] = [
-    { name: '特別史跡 三内丸山遺跡', views: totalViews * 0.3 },
-    { name: '大湯環状列石', views: totalViews * 0.25 },
-    { name: '吉野ヶ里遺跡', views: totalViews * 0.18 },
-  ];
-
   return {
+    pageviews: pageviewsTotal,
+    visitors: visitorsTotal,
     daily,
-    summary: {
-      totalViews,
-      totalVisitors,
-      avgTimeOnPage,
-    },
-    topFacilities,
   };
 }
 
 /**
- * エラー状態を表す StatsData を返す
+ * レスポンスから total を抽出（複数のパターンに対応）
  */
-function getErrorStats(message: string, status: string): StatsData {
-  return {
-    error: true,
-    message,
-    status,
-    source: 'error',
-  };
+function extractTotal(data: any): number {
+  if (!data) return 0;
+
+  // パターン1: data.total
+  if (typeof data.total === 'number') {
+    return data.total;
+  }
+
+  // パターン2: data.data.total
+  if (data.data && typeof data.data.total === 'number') {
+    return data.data.total;
+  }
+
+  // パターン3: archives から集計
+  const archives = extractArchives(data);
+  return archives.reduce((sum, item) => sum + item.count, 0);
 }
 
-function calculateAvgTime(totalViews: number): string {
-  // ページビュー数から平均滞在時間を推定（ダミー計算）
-  const avgSeconds = Math.max(60, Math.floor(totalViews / 50));
-  const minutes = Math.floor(avgSeconds / 60);
-  const seconds = avgSeconds % 60;
-  return `${minutes}分${seconds}秒`;
+/**
+ * レスポンスから archives を抽出（複数のパターンに対応）
+ */
+function extractArchives(
+  data: any
+): Array<{ timestamp: number; count: number }> {
+  if (!data) return [];
+
+  // パターン1: data.archives
+  if (Array.isArray(data.archives)) {
+    return data.archives.filter(
+      (item) => typeof item.timestamp === 'number' && typeof item.count === 'number'
+    );
+  }
+
+  // パターン2: data.data.archives
+  if (data.data && Array.isArray(data.data.archives)) {
+    return data.data.archives.filter(
+      (item) => typeof item.timestamp === 'number' && typeof item.count === 'number'
+    );
+  }
+
+  return [];
 }
