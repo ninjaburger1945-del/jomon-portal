@@ -1,6 +1,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require("fs");
 const path = require("path");
+const { execSync } = require("child_process");
 
 // 観光トップページ・浅い階層へのリダイレクト検知パターン
 const REDIRECT_TRAP_PATTERNS = [
@@ -278,10 +279,19 @@ async function run() {
       tools: [{ googleSearch: {} }],
     });
 
-    const filePath = path.join(__dirname, "../app/data/facilities.json");
+    // 確実なパスを設定（repo root を基準）
+    const repoRoot = path.resolve(__dirname, "..");
+    const filePath = path.join(repoRoot, "app/data/facilities.json");
+
+    console.log(`[CRAWLER] Loading from: ${filePath}`);
+
     let existingData = [];
     if (fs.existsSync(filePath)) {
       existingData = JSON.parse(fs.readFileSync(filePath, "utf-8") || "[]");
+      console.log(`[CRAWLER] Loaded ${existingData.length} existing facilities`);
+    } else {
+      console.error(`[CRAWLER] ERROR: File not found at ${filePath}`);
+      process.exit(1);
     }
 
     const existingNames = existingData.map(d => d.name).join(", ");
@@ -505,6 +515,31 @@ ${existingNames}
     }));
     fs.writeFileSync(filePath, JSON.stringify(dataToSave, null, 2));
     console.log(`[RESULT] 合計 ${existingData.length} 件（編集フィールド保護済み）`);
+    console.log('[CRAWLER] ファイル保存完了。');
+
+    // Git に自動コミット
+    try {
+      console.log('[GIT] Git にコミット中...');
+      const cwd = repoRoot;
+
+      // facilities.json を add
+      execSync('git add app/data/facilities.json', { cwd, stdio: 'pipe' });
+      console.log('[GIT] ✓ git add completed');
+
+      // コミット
+      const commitMsg = `chore(crawler): add new facility - ${existingData[existingData.length - 1].name}`;
+      execSync(`git commit -m "${commitMsg}"`, { cwd, stdio: 'pipe' });
+      console.log(`[GIT] ✓ commit: "${commitMsg}"`);
+
+      // push
+      execSync('git push origin main', { cwd, stdio: 'pipe' });
+      console.log('[GIT] ✓ push completed');
+    } catch (gitErr) {
+      console.warn('[GIT] ⚠️  Git操作エラー:', gitErr.message);
+      console.warn('[GIT] ファイルは保存されていますが、自動pushに失敗しました。');
+      console.warn('[GIT] 手動で git add / commit / push してください。');
+    }
+
     console.log('[CRAWLER] 完了。');
 
   } catch (error) {
