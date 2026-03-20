@@ -450,7 +450,24 @@ ${existingNames}
         }
       }
 
-      existingData.push(nf);
+      // 既存の英語フィールドを保持してマージ
+      const existingFacility = existingData.find(f => f.id === nf.id);
+      if (existingFacility) {
+        // 既存データがある場合は部分更新（英語フィールドを保持）
+        nf = Object.assign({}, existingFacility, nf, {
+          name_en: existingFacility.name_en || nf.name_en || "",
+          description_en: existingFacility.description_en || nf.description_en || "",
+          location_en: existingFacility.location_en || nf.location_en || ""
+        });
+        const idx = existingData.findIndex(f => f.id === nf.id);
+        existingData[idx] = nf;
+      } else {
+        // 新規追加時も英語フィールドを初期化
+        nf.name_en = nf.name_en || "";
+        nf.description_en = nf.description_en || "";
+        nf.location_en = nf.location_en || "";
+        existingData.push(nf);
+      }
       addedCount++;
       console.log(`[ADDED] ${nf.name} | verified: ${nf.verified} | url: ${nf.url}`);
     }
@@ -460,8 +477,15 @@ ${existingNames}
       process.exit(0);
     }
 
-    fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
-    console.log(`[RESULT] 合計 ${existingData.length} 件`);
+    // 英語フィールドを保持したままファイルを保存
+    const dataToSave = existingData.map(f => ({
+      ...f,
+      name_en: f.name_en || "",
+      description_en: f.description_en || "",
+      location_en: f.location_en || ""
+    }));
+    fs.writeFileSync(filePath, JSON.stringify(dataToSave, null, 2));
+    console.log(`[RESULT] 合計 ${existingData.length} 件（英語フィールド保護済み）`);
     console.log('[CRAWLER] 完了。');
 
   } catch (error) {

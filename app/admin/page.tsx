@@ -25,6 +25,8 @@ export default function AdminPage() {
   const [availableImages, setAvailableImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [postToX, setPostToX] = useState(false);
+  const [statsData, setStatsData] = useState<any>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
   const handleLogin = () => {
     const correctPassword = "jomon2026";
@@ -53,9 +55,25 @@ export default function AdminPage() {
     }
   };
 
+  const loadStats = async () => {
+    setStatsLoading(true);
+    try {
+      const response = await fetch("/api/stats");
+      if (response.ok) {
+        const data = await response.json();
+        setStatsData(data);
+      }
+    } catch (err) {
+      console.error("Failed to load stats:", err);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       loadFacilities();
+      loadStats();
     }
   }, [isAuthenticated]);
 
@@ -309,73 +327,86 @@ export default function AdminPage() {
 
       {/* Analytics Section */}
       <section style={{ marginBottom: "30px", backgroundColor: "#f9f9f9", padding: "20px", borderRadius: "8px" }}>
-        <h2>📊 分析</h2>
+        <h2>📊 分析 {statsLoading && <span style={{ fontSize: "12px", color: "#999" }}>(更新中...)</span>}</h2>
 
-        {/* PV Trend Mini Chart */}
-        <div style={{ marginBottom: "20px" }}>
-          <h3>過去7日間のPV推移</h3>
-          <svg viewBox="0 0 400 150" style={{ width: "100%", maxWidth: "100%", height: "auto" }} xmlns="http://www.w3.org/2000/svg">
-            {/* Background */}
-            <rect width="400" height="150" fill="#fff" stroke="#ddd" strokeWidth="1" />
+        {statsData && (
+          <>
+            {/* PV Trend Mini Chart */}
+            <div style={{ marginBottom: "20px" }}>
+              <h3>過去7日間のPV推移</h3>
+              <svg viewBox="0 0 400 150" style={{ width: "100%", maxWidth: "100%", height: "auto" }} xmlns="http://www.w3.org/2000/svg">
+                {/* Background */}
+                <rect width="400" height="150" fill="#fff" stroke="#ddd" strokeWidth="1" />
 
-            {/* Grid lines */}
-            <line x1="40" y1="20" x2="40" y2="120" stroke="#ddd" />
-            <line x1="40" y1="120" x2="380" y2="120" stroke="#ddd" />
+                {/* Grid lines */}
+                <line x1="40" y1="20" x2="40" y2="120" stroke="#ddd" />
+                <line x1="40" y1="120" x2="380" y2="120" stroke="#ddd" />
 
-            {/* Dummy bars (7 days) */}
-            <rect x="50" y="90" width="35" height="30" fill="#4CAF50" />
-            <rect x="90" y="75" width="35" height="45" fill="#4CAF50" />
-            <rect x="130" y="80" width="35" height="40" fill="#4CAF50" />
-            <rect x="170" y="60" width="35" height="60" fill="#4CAF50" />
-            <rect x="210" y="70" width="35" height="50" fill="#4CAF50" />
-            <rect x="250" y="85" width="35" height="35" fill="#4CAF50" />
-            <rect x="290" y="65" width="35" height="55" fill="#4CAF50" />
+                {/* Dynamic bars from API data */}
+                {statsData.daily && statsData.daily.map((day: any, idx: number) => {
+                  const maxViews = Math.max(...statsData.daily.map((d: any) => d.views), 1);
+                  const barHeight = (day.views / maxViews) * 100;
+                  const x = 50 + idx * 48;
+                  const y = 120 - barHeight;
+                  return (
+                    <rect key={idx} x={x} y={y} width="35" height={barHeight} fill="#4CAF50" />
+                  );
+                })}
 
-            {/* Labels */}
-            <text x="67" y="135" fontSize="12" textAnchor="middle">日</text>
-            <text x="107" y="135" fontSize="12" textAnchor="middle">月</text>
-            <text x="147" y="135" fontSize="12" textAnchor="middle">火</text>
-            <text x="187" y="135" fontSize="12" textAnchor="middle">水</text>
-            <text x="227" y="135" fontSize="12" textAnchor="middle">木</text>
-            <text x="267" y="135" fontSize="12" textAnchor="middle">金</text>
-            <text x="307" y="135" fontSize="12" textAnchor="middle">土</text>
-          </svg>
-        </div>
+                {/* Labels */}
+                {statsData.daily && statsData.daily.map((day: any, idx: number) => {
+                  const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][new Date(day.date + 'T00:00:00').getDay()];
+                  const x = 67 + idx * 48;
+                  return (
+                    <text key={`label-${idx}`} x={x} y="135" fontSize="12" textAnchor="middle">
+                      {dayOfWeek}
+                    </text>
+                  );
+                })}
+              </svg>
+            </div>
 
-        {/* KPI Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "15px" }}>
-          <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
-            <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>月間PV</div>
-            <div style={{ fontSize: "28px", fontWeight: "bold", color: "#2196f3" }}>2,847</div>
-            <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>↑ 12% from last month</div>
-          </div>
-          <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
-            <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>ユニーク訪問者</div>
-            <div style={{ fontSize: "28px", fontWeight: "bold", color: "#4CAF50" }}>1,234</div>
-            <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>↑ 8% from last month</div>
-          </div>
-          <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
-            <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>平均滞在時間</div>
-            <div style={{ fontSize: "28px", fontWeight: "bold", color: "#FF9800" }}>2分35秒</div>
-            <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>↑ 5% from last month</div>
-          </div>
-        </div>
+            {/* KPI Cards */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "15px" }}>
+              <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>7日間のPV</div>
+                <div style={{ fontSize: "28px", fontWeight: "bold", color: "#2196f3" }}>
+                  {statsData.summary?.totalViews?.toLocaleString() || '—'}
+                </div>
+                <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>from Vercel Analytics</div>
+              </div>
+              <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>ユニーク訪問者</div>
+                <div style={{ fontSize: "28px", fontWeight: "bold", color: "#4CAF50" }}>
+                  {statsData.summary?.totalVisitors?.toLocaleString() || '—'}
+                </div>
+                <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>from Vercel Analytics</div>
+              </div>
+              <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>平均滞在時間</div>
+                <div style={{ fontSize: "28px", fontWeight: "bold", color: "#FF9800" }}>
+                  {statsData.summary?.avgTimeOnPage || '—'}
+                </div>
+                <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>estimated</div>
+              </div>
+            </div>
 
-        {/* Popular Facilities */}
-        <div style={{ marginTop: "20px" }}>
-          <h3>🏆 人気施設 TOP 3</h3>
-          <ol style={{ margin: 0, paddingLeft: "20px" }}>
-            <li style={{ padding: "8px 0", borderBottom: "1px solid #eee" }}>
-              特別史跡 三内丸山遺跡 <span style={{ color: "#666", marginLeft: "10px" }}>→ 842 PV</span>
-            </li>
-            <li style={{ padding: "8px 0", borderBottom: "1px solid #eee" }}>
-              大湯環状列石 <span style={{ color: "#666", marginLeft: "10px" }}>→ 645 PV</span>
-            </li>
-            <li style={{ padding: "8px 0" }}>
-              吉野ヶ里遺跡 <span style={{ color: "#666", marginLeft: "10px" }}>→ 521 PV</span>
-            </li>
-          </ol>
-        </div>
+            {/* Popular Facilities */}
+            <div style={{ marginTop: "20px" }}>
+              <h3>🏆 人気施設 TOP 3</h3>
+              <ol style={{ margin: 0, paddingLeft: "20px" }}>
+                {statsData.topFacilities && statsData.topFacilities.map((facility: any, idx: number) => (
+                  <li key={idx} style={{ padding: "8px 0", borderBottom: idx < 2 ? "1px solid #eee" : "none" }}>
+                    {facility.name}
+                    <span style={{ color: "#666", marginLeft: "10px" }}>
+                      → {Math.round(facility.views).toLocaleString()} PV
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </>
+        )}
       </section>
 
       <section>
