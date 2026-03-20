@@ -6,20 +6,24 @@ interface VercelAnalyticsResponse {
 }
 
 interface StatsData {
-  daily: Array<{
+  daily?: Array<{
     date: string;
     views: number;
     visitors: number;
   }>;
-  summary: {
+  summary?: {
     totalViews: number;
     totalVisitors: number;
     avgTimeOnPage: string;
   };
-  topFacilities: Array<{
+  topFacilities?: Array<{
     name: string;
     views: number;
   }>;
+  error?: boolean;
+  message?: string;
+  status?: string;
+  source?: string;
 }
 
 /**
@@ -31,10 +35,16 @@ export async function GET(request: NextRequest) {
     const token = process.env.VERCEL_AUTH_TOKEN;
     const projectId = process.env.NEXT_PUBLIC_VERCEL_PROJECT_ID;
 
+    // 認証情報チェック
     if (!token || !projectId) {
-      // 認証情報がない場合はダミーデータを返す
-      console.warn('[STATS] Vercel credentials not configured, using dummy data');
-      return NextResponse.json(getDummyStats());
+      console.warn('[STATS] ⚠️ Vercel credentials not configured');
+      console.warn(`   VERCEL_AUTH_TOKEN: ${token ? '✓ set' : '✗ missing'}`);
+      console.warn(`   NEXT_PUBLIC_VERCEL_PROJECT_ID: ${projectId ? '✓ set' : '✗ missing'}`);
+      return NextResponse.json({
+        error: true,
+        message: 'API未接続: Vercel認証情報が設定されていません',
+        status: 'no_credentials',
+      }, { status: 503 });
     }
 
     // 過去7日間のタイムスタンプを計算
@@ -43,34 +53,70 @@ export async function GET(request: NextRequest) {
     const since = Math.floor(sevenDaysAgo.getTime() / 1000);
     const until = Math.floor(now.getTime() / 1000);
 
-    console.log(`[STATS] Fetching Vercel analytics: projectId=${projectId}, since=${since}, until=${until}`);
+    console.log(`[STATS] Fetching real Vercel analytics...`);
+    console.log(`   projectId: ${projectId}`);
+    console.log(`   period: ${since} → ${until} (7 days)`);
 
     // Vercel Analytics API を呼び出し
+    // ドキュメント: https://vercel.com/docs/rest-api#endpoints/analytics/get-analytics-stats
     const analyticsUrl = `https://api.vercel.com/v1/analytics/stats?projectId=${projectId}&since=${since}&until=${until}`;
 
+    console.log(`[STATS] Calling Vercel API: ${analyticsUrl}`);
+
     const response = await fetch(analyticsUrl, {
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
 
+    console.log(`[STATS] Vercel API response: HTTP ${response.status}`);
+
     if (!response.ok) {
       const errText = await response.text();
-      console.warn(`[STATS] Vercel API error ${response.status}: ${errText}`);
-      return NextResponse.json(getDummyStats());
+      console.error(`[STATS] ✗ Vercel API error ${response.status}:`);
+      console.error(`   ${errText.substring(0, 200)}`);
+
+      // 認証エラー（401/403）
+      if (response.status === 401 || response.status === 403) {
+        return NextResponse.json({
+          error: true,
+          message: 'API未接続: Vercel認証失敗（トークンが無効または期限切れ）',
+          status: 'auth_failed',
+          statusCode: response.status,
+        }, { status: 503 });
+      }
+
+      // その他のエラー
+      return NextResponse.json({
+        error: true,
+        message: `API未接続: Vercel API エラー (HTTP ${response.status})`,
+        status: 'api_error',
+        statusCode: response.status,
+      }, { status: 503 });
     }
 
     const analyticsData: VercelAnalyticsResponse = await response.json();
 
+    console.log(`[STATS] ✓ Successfully fetched real data`);
+    console.log(`   pageviews: ${analyticsData.pageviews?.length || 0} records`);
+    console.log(`   visitors: ${analyticsData.visitors?.length || 0} records`);
+
     // レスポンスデータを処理して統計情報を生成
     const statsData = processAnalyticsData(analyticsData);
+    statsData.source = 'vercel_api_live';
 
     return NextResponse.json(statsData);
   } catch (error) {
-    console.error('[STATS] Error fetching analytics:', error);
-    // エラー時もダミーデータを返す
-    return NextResponse.json(getDummyStats());
+    console.error('[STATS] ✗ Exception while fetching analytics:');
+    console.error(`   ${error instanceof Error ? error.message : String(error)}`);
+
+    return NextResponse.json({
+      error: true,
+      message: `API未接続: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      status: 'exception',
+    }, { status: 503 });
   }
 }
 
@@ -134,35 +180,14 @@ function processAnalyticsData(data: VercelAnalyticsResponse): StatsData {
 }
 
 /**
- * ダミーデータを返す（認証情報がない場合）
+ * エラー状態を表す StatsData を返す
  */
-function getDummyStats(): StatsData {
-  const now = new Date();
-  const daily: StatsData['daily'] = [];
-
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split('T')[0];
-    daily.push({
-      date,
-      views: Math.floor(Math.random() * 600) + 200,
-      visitors: Math.floor(Math.random() * 300) + 100,
-    });
-  }
-
+function getErrorStats(message: string, status: string): StatsData {
   return {
-    daily,
-    summary: {
-      totalViews: 2847,
-      totalVisitors: 1234,
-      avgTimeOnPage: '2分35秒',
-    },
-    topFacilities: [
-      { name: '特別史跡 三内丸山遺跡', views: 842 },
-      { name: '大湯環状列石', views: 645 },
-      { name: '吉野ヶ里遺跡', views: 521 },
-    ],
+    error: true,
+    message,
+    status,
+    source: 'error',
   };
 }
 

@@ -329,8 +329,60 @@ export default function AdminPage() {
       <section style={{ marginBottom: "30px", backgroundColor: "#f9f9f9", padding: "20px", borderRadius: "8px" }}>
         <h2>📊 分析 {statsLoading && <span style={{ fontSize: "12px", color: "#999" }}>(更新中...)</span>}</h2>
 
-        {statsData && (
+        {statsData?.error ? (
+          // エラー状態
+          <div style={{
+            backgroundColor: "#fff3cd",
+            border: "1px solid #ffc107",
+            borderRadius: "6px",
+            padding: "15px",
+            color: "#856404"
+          }}>
+            <strong>⚠️ {statsData.message}</strong>
+            <p style={{ margin: "10px 0 0 0", fontSize: "12px" }}>
+              {statsData.status === 'no_credentials' && (
+                <>
+                  環境変数 <code>VERCEL_AUTH_TOKEN</code> と <code>NEXT_PUBLIC_VERCEL_PROJECT_ID</code> を設定してください。
+                </>
+              )}
+              {statsData.status === 'auth_failed' && (
+                <>
+                  Vercel API トークンが無効または期限切れです。新しいトークンを設定してください。
+                </>
+              )}
+              {statsData.status === 'api_error' && (
+                <>
+                  Vercel API エラー。後でもう一度試してください。
+                </>
+              )}
+            </p>
+          </div>
+        ) : statsLoading ? (
+          // ローディング状態
+          <div style={{
+            backgroundColor: "#e7f3ff",
+            border: "1px solid #2196f3",
+            borderRadius: "6px",
+            padding: "15px",
+            color: "#0d47a1",
+            textAlign: "center"
+          }}>
+            <strong>🔄 Vercel API からデータ取得中...</strong>
+          </div>
+        ) : statsData && !statsData.error && (
+          // 成功状態
           <>
+            <div style={{
+              backgroundColor: "#d4edda",
+              border: "1px solid #28a745",
+              borderRadius: "4px",
+              padding: "8px 12px",
+              marginBottom: "15px",
+              fontSize: "12px",
+              color: "#155724"
+            }}>
+              ✓ Vercel Analytics API から取得した実データ
+            </div>
             {/* PV Trend Mini Chart */}
             <div style={{ marginBottom: "20px" }}>
               <h3>過去7日間のPV推移</h3>
