@@ -404,36 +404,46 @@ export default function AdminPage() {
             {/* PV Trend Mini Chart */}
             <div style={{ marginBottom: "20px" }}>
               <h3>過去7日間のPV推移</h3>
-              <svg viewBox="0 0 400 150" style={{ width: "100%", maxWidth: "100%", height: "auto" }} xmlns="http://www.w3.org/2000/svg">
-                {/* Background */}
-                <rect width="400" height="150" fill="#fff" stroke="#ddd" strokeWidth="1" />
+              {statsData.daily && statsData.daily.length > 0 ? (
+                <svg viewBox="0 0 400 150" style={{ width: "100%", maxWidth: "100%", height: "auto" }} xmlns="http://www.w3.org/2000/svg">
+                  {/* Background */}
+                  <rect width="400" height="150" fill="#fff" stroke="#ddd" strokeWidth="1" />
 
-                {/* Grid lines */}
-                <line x1="40" y1="20" x2="40" y2="120" stroke="#ddd" />
-                <line x1="40" y1="120" x2="380" y2="120" stroke="#ddd" />
+                  {/* Grid lines */}
+                  <line x1="40" y1="20" x2="40" y2="120" stroke="#ddd" />
+                  <line x1="40" y1="120" x2="380" y2="120" stroke="#ddd" />
 
-                {/* Dynamic bars from API data */}
-                {statsData.daily && statsData.daily.map((day: any, idx: number) => {
-                  const maxViews = Math.max(...statsData.daily.map((d: any) => d.views), 1);
-                  const barHeight = (day.views / maxViews) * 100;
-                  const x = 50 + idx * 48;
-                  const y = 120 - barHeight;
-                  return (
-                    <rect key={idx} x={x} y={y} width="35" height={barHeight} fill="#4CAF50" />
-                  );
-                })}
+                  {/* Dynamic bars from API data */}
+                  {(() => {
+                    const maxViews = Math.max(...statsData.daily.map((d: any) => d.views), 1);
+                    return statsData.daily.map((day: any, idx: number) => {
+                      const barHeight = (day.views / maxViews) * 100;
+                      const x = 50 + idx * 48;
+                      const y = 120 - barHeight;
+                      return (
+                        <rect key={idx} x={x} y={y} width="35" height={barHeight} fill="#4CAF50" />
+                      );
+                    });
+                  })()}
 
-                {/* Labels */}
-                {statsData.daily && statsData.daily.map((day: any, idx: number) => {
-                  const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][new Date(day.date + 'T00:00:00').getDay()];
-                  const x = 67 + idx * 48;
-                  return (
-                    <text key={`label-${idx}`} x={x} y="135" fontSize="12" textAnchor="middle">
-                      {dayOfWeek}
-                    </text>
-                  );
-                })}
-              </svg>
+                  {/* Labels */}
+                  {(() => {
+                    return statsData.daily.map((day: any, idx: number) => {
+                      const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][new Date(day.date + 'T00:00:00').getDay()];
+                      const x = 67 + idx * 48;
+                      return (
+                        <text key={`label-${idx}`} x={x} y="135" fontSize="12" textAnchor="middle">
+                          {dayOfWeek}
+                        </text>
+                      );
+                    });
+                  })()}
+                </svg>
+              ) : (
+                <div style={{ backgroundColor: "#f0f0f0", padding: "40px", textAlign: "center", borderRadius: "4px" }}>
+                  <p style={{ color: "#999" }}>グラフデータがありません</p>
+                </div>
+              )}
             </div>
 
             {/* KPI Cards */}
