@@ -57,6 +57,10 @@ async function retryWithBackoff(asyncFn, maxRetries = 10, initialDelayMs = 2000)
         message.includes('econnrefused') ||
         message.includes('socket hang up') ||
         message.includes('failed to fetch') ||
+        message.includes('fetch failed') ||
+        message.includes('getaddrinfo enotfound') ||
+        message.includes('connection refused') ||
+        message.includes('connection reset') ||
         message.includes('timeout') ||
         // SDK エラー形式
         errorJson.includes('503') ||
