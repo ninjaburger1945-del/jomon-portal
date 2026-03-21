@@ -48,7 +48,7 @@ jobs:
           fi
           exit $CRAWLER_EXIT
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY2026 }}
+          GEMINI_API_KEY: ${{ secrets.JOMON_GITHUB_TOKEN }}
 
       - name: Commit and Push Database and Image Updates
         run: |
