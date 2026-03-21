@@ -529,7 +529,7 @@ ${existingNames}
         continue;
       }
 
-      // 厳格URLバリデーション → 失敗時はGeminiで再検索 → それでも失敗なら url=""
+      // 【厳格URLバリデーション】URLなし施設は追加しない
       console.log(`[VALIDATE] ${nf.name}: ${nf.url}`);
       let validation = await validateUrlStrict(nf.url, nf.name);
       if (!validation.valid) {
@@ -537,12 +537,25 @@ ${existingNames}
         validation = await searchAlternativeUrl(model, nf.name, nf.prefecture);
       }
       if (!validation.valid) {
-        console.warn(`[URL_WARN] ${nf.name}: 再検索も失敗。url="" で追加します。`);
-        nf.url = "";
-        nf.verified = false;
+        // ★ 重要: URLが見つからない施設は追加しない（品質ゲート）
+        console.error(`[URL_FAIL] ✗ 施設を追加不可: URL検索失敗により除外 - ${nf.name} (${nf.prefecture})`);
+        console.error(`   → URLが見つからない施設はデータベースに加えません（整合性保全）`);
+        continue;  // ← この施設をスキップ
       } else {
         nf.url = validation.url;
         nf.verified = validation.verified;
+      }
+
+      // 【アクセス情報の完全性チェック】必須フィールド確認
+      const access = nf.access || {};
+      if (!access.train || !access.bus || !access.car || !access.rank) {
+        console.error(`[ACCESS_WARN] ⚠️  アクセス情報が不完全: ${nf.name}`);
+        console.error(`   train: ${access.train || '✗ なし'}`);
+        console.error(`   bus: ${access.bus || '✗ なし'}`);
+        console.error(`   car: ${access.car || '✗ なし'}`);
+        console.error(`   rank: ${access.rank || '✗ なし'}`);
+        console.error(`   → 追加を中止します`);
+        continue;  // ← アクセス情報が不完全なら追加しない
       }
 
       // description 文字数バリデーション（200文字以上必須）
