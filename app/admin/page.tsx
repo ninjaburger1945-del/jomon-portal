@@ -155,7 +155,13 @@ export default function AdminPage() {
 
   const handleEditClick = (facility: Facility) => {
     console.log("Edit clicked for:", facility.id);
-    setEditingFacility({ ...facility });
+    // facilities.json の access 情報を access_public/access_car に反映
+    const facilityCopy = { ...facility };
+    if (facility.access) {
+      facilityCopy.access_public = `${facility.access.train}。${facility.access.bus}`;
+      facilityCopy.access_car = facility.access.car;
+    }
+    setEditingFacility(facilityCopy);
     setIsNewFacility(false);
     setShowEditModal(true);
     setPostToX(false);
