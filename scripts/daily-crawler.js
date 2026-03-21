@@ -94,6 +94,9 @@ async function main() {
   const filePath = path.join(repoRoot, "app/data/facilities.json");
 
   console.log(`[CRAWLER] Starting crawler (timeout: 45min)`);
+  console.log(`[DEBUG] repoRoot: ${repoRoot}`);
+  console.log(`[DEBUG] filePath: ${filePath}`);
+  console.log(`[DEBUG] ファイル存在: ${fs.existsSync(filePath)}`);
 
   let existingData = [];
   if (fs.existsSync(filePath)) {
