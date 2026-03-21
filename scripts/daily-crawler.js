@@ -3,76 +3,86 @@ const fs = require("fs");
 const path = require("path");
 
 /**
- * 指数バックオフ付きリトライユーティリティ
- * 503/429 エラーに対して最大5回まで粘り強くリトライ
- * 【最強化版】すべてのエラー形式に対応
+ * 【究極のリトライユーティリティ】
+ * Gemini API の 503/429 エラーに対して最大10回まで粘り強くリトライ
+ * 指数バックオフ: 2s → 4s → 8s → 16s → 32s → 64s → 128s → 256s → 512s → 1024s
  */
-async function retryWithBackoff(asyncFn, maxRetries = 5, initialDelayMs = 1000) {
+async function retryWithBackoff(asyncFn, maxRetries = 10, initialDelayMs = 2000) {
   let lastError;
+  let totalWaitTime = 0;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`[CALL] 試行 ${attempt}/${maxRetries}`);
-      return await asyncFn();
+      console.log(`\n[ATTEMPT ${attempt}/${maxRetries}] API呼び出し開始...`);
+      const startTime = Date.now();
+      const result = await asyncFn();
+      const elapsed = Date.now() - startTime;
+      console.log(`[SUCCESS] 試行 ${attempt} で成功（${elapsed}ms）`);
+      return result;
     } catch (error) {
       lastError = error;
+      const elapsed = Date.now() - Date.now();
 
-      // ===== エラー情報の徹底的な抽出 =====
+      // ===== 極限のエラー情報抽出 =====
       const message = (error.message || '').toLowerCase();
       const errorStr = error.toString().toLowerCase();
-      const statusCode = error.status || error.statusCode || '';
+      const errorJson = JSON.stringify(error, null, 2).toLowerCase();
+      const statusCode = error.status || error.statusCode || error.code || '';
 
-      console.error(`\n[ERROR] 試行 ${attempt}/${maxRetries} が失敗`);
-      console.error(`  メッセージ: ${error.message?.substring(0, 100)}`);
-      console.error(`  ステータス: ${statusCode || 'N/A'}`);
+      console.error(`\n[FAIL ${attempt}/${maxRetries}] API呼び出し失敗`);
+      console.error(`  → ${error.message?.substring(0, 120)}`);
+      console.error(`  → ステータス: ${statusCode}`);
 
-      // ===== リトライ可能な判定（5つの条件） =====
+      // ===== リトライ可能判定（15パターン） =====
       const isTemporaryError =
-        // 1. HTTP ステータスコード
+        // HTTP ステータスコード
         statusCode === '503' || statusCode === 503 ||
         statusCode === '429' || statusCode === 429 ||
         statusCode === '500' || statusCode === 500 ||
         statusCode === '502' || statusCode === 502 ||
-        // 2. メッセージ内の文字列
-        message.includes('[503]') ||
-        message.includes('[429]') ||
-        message.includes('[500]') ||
+        statusCode === '504' || statusCode === 504 ||
+        // メッセージ内テキスト
+        message.includes('503') ||
+        message.includes('429') ||
         message.includes('service unavailable') ||
         message.includes('too many requests') ||
         message.includes('resource exhausted') ||
         message.includes('unavailable') ||
-        message.includes('timeout') ||
         message.includes('deadline exceeded') ||
         message.includes('temporarily unavailable') ||
-        // 3. ネットワークエラー
+        message.includes('overloaded') ||
+        // ネットワークエラー
         message.includes('econnreset') ||
-        message.includes('enotfound') ||
         message.includes('etimedout') ||
         message.includes('econnrefused') ||
         message.includes('socket hang up') ||
         message.includes('failed to fetch') ||
-        // 4. SDK 特有のエラー形式
-        errorStr.includes('[503]') ||
-        errorStr.includes('[429]') ||
-        errorStr.includes('RESOURCE_EXHAUSTED') ||
-        errorStr.includes('UNAVAILABLE') ||
-        errorStr.includes('DEADLINE_EXCEEDED');
+        message.includes('timeout') ||
+        // SDK エラー形式
+        errorJson.includes('503') ||
+        errorJson.includes('429') ||
+        errorJson.includes('unavailable') ||
+        errorJson.includes('resource_exhausted');
 
       if (!isTemporaryError) {
-        // 永続的なエラー（例: 404, 400, 401 など）
-        console.error(`[PERMANENT_ERROR] このエラーはリトライ不可能です`);
+        // 永続的なエラーは即座に失敗
+        console.error(`[FATAL] 永続的なエラー - リトライ不可: ${error.message}`);
         throw error;
       }
 
       if (attempt === maxRetries) {
-        // 最大リトライ回数に達した
-        console.error(`[RETRY_EXHAUSTED] ${maxRetries} 回全てのリトライが失敗しました`);
+        // 最大リトライ回数到達
+        console.error(`\n[EXHAUSTED] ${maxRetries}回全てのリトライが失敗`);
+        console.error(`[TOTAL_WAIT] 累計待機時間: ${totalWaitTime}ms (${(totalWaitTime / 1000).toFixed(1)}秒)`);
         throw error;
       }
 
-      // ===== 指数バックオフで待機 =====
+      // ===== 強化された指数バックオフ =====
       const delayMs = initialDelayMs * Math.pow(2, attempt - 1);
-      console.warn(`[RETRY] ${delayMs}ms 待機してから再試行します...`);
+      totalWaitTime += delayMs;
+
+      console.warn(`[BACKOFF] ${delayMs}ms (${(delayMs / 1000).toFixed(1)}秒) 待機中...`);
+      console.warn(`[CUMULATIVE] 累計待機: ${totalWaitTime}ms`);
 
       await new Promise(resolve => setTimeout(resolve, delayMs));
     }
