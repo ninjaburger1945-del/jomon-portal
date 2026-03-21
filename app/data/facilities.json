@@ -1531,5 +1531,36 @@
     "access_public_en": "",
     "access_car": "",
     "access_car_en": ""
+  },
+  {
+    "id": "yamaga-kaizuka",
+    "name": "国指定史跡 山鹿貝塚",
+    "region": "Kyushu",
+    "prefecture": "福岡県",
+    "address": "福岡県遠賀郡芦屋町大字山鹿1014",
+    "description": "福岡県芦屋町の響灘に面した砂丘上に位置する、縄文時代早期から晩期にかけての長期間にわたる貝塚です。 これまでに20体以上もの縄文時代の人骨が出土しており、特に貝製の腕輪やサメの歯の耳飾りなど多くの装飾品を身に着けた女性人骨は、当時の社会構造や精神文化を考察する上で非常に貴重な発見とされています。 出土した人骨や装飾品は、近くの「芦屋歴史の里（歴史民俗資料館）」で展示されており、縄文人の暮らしや文化を深く学ぶことができます。 九州北部の縄文文化を代表する遺跡の一つであり、国の史跡に指定されています。",
+    "copy": "豊かな装飾品と眠る縄文人",
+    "url": "https://www.town.ashiya.lg.jp/site/rekishinosato/31288.html",
+    "thumbnail": "/images/facilities/yamaga-kaizuka_ai.png",
+    "tags": [
+      "貝塚"
+    ],
+    "lat": 33.90994,
+    "lng": 130.667,
+    "access": {
+      "train": "JR鹿児島本線 折尾駅からバスで約30分",
+      "bus": "山鹿郵便局前バス停から徒歩約15分",
+      "car": "九州自動車道 鞍手ICから約25分",
+      "rank": "B"
+    },
+    "verified": true,
+    "name_en": "",
+    "description_en": "",
+    "location_en": "",
+    "address_en": "",
+    "access_public": "",
+    "access_public_en": "",
+    "access_car": "",
+    "access_car_en": ""
   }
 ]
