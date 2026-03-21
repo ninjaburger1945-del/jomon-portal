@@ -70,7 +70,7 @@ export default function AdminPage() {
   const loadFacilities = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/facilities.json", { cache: 'no-store' });
+      const response = await fetch("/api/facilities", { cache: 'no-store' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       setFacilities(data);
@@ -541,6 +541,7 @@ export default function AdminPage() {
           <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
             <thead>
               <tr style={{ backgroundColor: "#f5f5f5", borderBottom: "2px solid #ccc" }}>
+                <th style={{ padding: "10px", textAlign: "center", width: "50px" }}>No.</th>
                 <th
                   onClick={() => handleSort("id")}
                   style={{
@@ -597,8 +598,9 @@ export default function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {sortedFacilities.map((facility) => (
+              {sortedFacilities.map((facility, index) => (
                 <tr key={facility.id} style={{ borderBottom: "1px solid #eee" }}>
+                  <td style={{ padding: "10px", textAlign: "center", fontWeight: "bold", color: "#666" }}>{index + 1}</td>
                   <td style={{ padding: "10px" }}><code>{facility.id}</code></td>
                   <td style={{ padding: "10px" }}>{facility.name}</td>
                   <td style={{ padding: "10px" }}>{facility.prefecture}</td>
