@@ -5,53 +5,79 @@ const path = require("path");
 /**
  * 指数バックオフ付きリトライユーティリティ
  * 503/429 エラーに対して最大5回まで粘り強くリトライ
+ * 【最強化版】すべてのエラー形式に対応
  */
 async function retryWithBackoff(asyncFn, maxRetries = 5, initialDelayMs = 1000) {
   let lastError;
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
+      console.log(`[CALL] 試行 ${attempt}/${maxRetries}`);
       return await asyncFn();
     } catch (error) {
       lastError = error;
 
-      // エラーメッセージを複数箇所から取得（SDK のエラー形式に対応）
-      const message = (error.message || error.toString() || '').toLowerCase();
-      const fullError = JSON.stringify(error, null, 2);
+      // ===== エラー情報の徹底的な抽出 =====
+      const message = (error.message || '').toLowerCase();
+      const errorStr = error.toString().toLowerCase();
+      const statusCode = error.status || error.statusCode || '';
 
-      // 一時的なエラーパターン（より包括的）
-      const isRetryable =
-        message.includes('503') ||
-        message.includes('429') ||
+      console.error(`\n[ERROR] 試行 ${attempt}/${maxRetries} が失敗`);
+      console.error(`  メッセージ: ${error.message?.substring(0, 100)}`);
+      console.error(`  ステータス: ${statusCode || 'N/A'}`);
+
+      // ===== リトライ可能な判定（5つの条件） =====
+      const isTemporaryError =
+        // 1. HTTP ステータスコード
+        statusCode === '503' || statusCode === 503 ||
+        statusCode === '429' || statusCode === 429 ||
+        statusCode === '500' || statusCode === 500 ||
+        statusCode === '502' || statusCode === 502 ||
+        // 2. メッセージ内の文字列
+        message.includes('[503]') ||
+        message.includes('[429]') ||
+        message.includes('[500]') ||
         message.includes('service unavailable') ||
         message.includes('too many requests') ||
-        message.includes('timeout') ||
-        message.includes('econnreset') ||
-        message.includes('etimedout') ||
         message.includes('resource exhausted') ||
         message.includes('unavailable') ||
+        message.includes('timeout') ||
+        message.includes('deadline exceeded') ||
+        message.includes('temporarily unavailable') ||
+        // 3. ネットワークエラー
+        message.includes('econnreset') ||
+        message.includes('enotfound') ||
+        message.includes('etimedout') ||
+        message.includes('econnrefused') ||
+        message.includes('socket hang up') ||
         message.includes('failed to fetch') ||
-        fullError.includes('503') ||
-        fullError.includes('429') ||
-        fullError.includes('RESOURCE_EXHAUSTED') ||
-        fullError.includes('UNAVAILABLE');
+        // 4. SDK 特有のエラー形式
+        errorStr.includes('[503]') ||
+        errorStr.includes('[429]') ||
+        errorStr.includes('RESOURCE_EXHAUSTED') ||
+        errorStr.includes('UNAVAILABLE') ||
+        errorStr.includes('DEADLINE_EXCEEDED');
 
-      console.warn(`[RETRY_DEBUG] Attempt ${attempt}/${maxRetries} failed`);
-      console.warn(`  Error: ${message.substring(0, 80)}`);
-      console.warn(`  Retryable: ${isRetryable}`);
-
-      if (!isRetryable || attempt === maxRetries) {
-        console.error(`[RETRY_FAIL] 最大リトライ回数到達 または リトライ不可能なエラー`);
-        console.error(`  最終エラー: ${message}`);
+      if (!isTemporaryError) {
+        // 永続的なエラー（例: 404, 400, 401 など）
+        console.error(`[PERMANENT_ERROR] このエラーはリトライ不可能です`);
         throw error;
       }
 
-      // 指数バックオフ: 1s, 2s, 4s, 8s, 16s
+      if (attempt === maxRetries) {
+        // 最大リトライ回数に達した
+        console.error(`[RETRY_EXHAUSTED] ${maxRetries} 回全てのリトライが失敗しました`);
+        throw error;
+      }
+
+      // ===== 指数バックオフで待機 =====
       const delayMs = initialDelayMs * Math.pow(2, attempt - 1);
-      console.warn(`[RETRY] 試行 ${attempt}/${maxRetries} 失敗。${delayMs}ms 待機後に再試行...`);
+      console.warn(`[RETRY] ${delayMs}ms 待機してから再試行します...`);
 
       await new Promise(resolve => setTimeout(resolve, delayMs));
     }
   }
+
   throw lastError;
 }
 
@@ -331,10 +357,10 @@ async function run() {
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-pro",
       tools: [{ googleSearch: {} }],
     });
-    console.log('[MODEL] Using gemini-2.0-flash (stable, fast, reliable)');
+    console.log('[MODEL] Using gemini-2.5-pro (only available model)');
 
     // 確実なパスを設定（repo root を基準）
     const repoRoot = path.resolve(__dirname, "..");
