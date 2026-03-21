@@ -513,6 +513,7 @@ ${existingNames}
     console.log(`[CRAWLER] AI が ${candidates.length} 件の候補を返却。1件通過するまで順番に検証...`);
 
     let addedCount = 0;
+    let skippedCount = 0;
     for (const nf of candidates) {
       // 1件制限
       if (addedCount >= 1) {
@@ -526,6 +527,7 @@ ${existingNames}
       );
       if (isDuplicate) {
         console.log(`[DUPLICATE] スキップ: ${nf.name}`);
+        skippedCount++;
         continue;
       }
 
@@ -664,8 +666,12 @@ ${existingNames}
     if (addedCount === 0) {
       console.warn('[RESULT] ⚠️  新規施設の追加に失敗');
       console.warn(`  理由: 全候補が検証失敗 または 既存データと重複`);
+      console.warn(`  返却候補: ${candidates.length} 件`);
+      console.warn(`  重複でスキップ: ${skippedCount} 件`);
+      console.warn(`  URL/アクセス検証で除外: ${candidates.length - skippedCount} 件`);
       console.warn(`  既存施設数: ${existingData.length} 件（データ保護済み）`);
       console.log('[CRAWLER] ✓ 既存データを維持したまま完了。');
+      console.log('[ANALYSIS] 次回実行時の改善ポイント: Gemini プロンプトが新しい施設を返していない可能性');
       process.exit(0);
     }
 
