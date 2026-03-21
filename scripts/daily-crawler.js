@@ -90,7 +90,7 @@ async function validateUrl(url) {
 }
 
 async function main() {
-  const repoRoot = path.dirname(path.dirname(__dirname));
+  const repoRoot = process.cwd();
   const filePath = path.join(repoRoot, "app/data/facilities.json");
 
   console.log(`[CRAWLER] Starting crawler (timeout: 45min)`);
