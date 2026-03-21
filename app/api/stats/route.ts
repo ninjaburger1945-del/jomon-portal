@@ -207,14 +207,14 @@ function extractArchives(
   // パターン1: data.archives
   if (Array.isArray(data.archives)) {
     return data.archives.filter(
-      (item) => typeof item.timestamp === 'number' && typeof item.count === 'number'
+      (item: any) => typeof item.timestamp === 'number' && typeof item.count === 'number'
     );
   }
 
   // パターン2: data.data.archives
   if (data.data && Array.isArray(data.data.archives)) {
     return data.data.archives.filter(
-      (item) => typeof item.timestamp === 'number' && typeof item.count === 'number'
+      (item: any) => typeof item.timestamp === 'number' && typeof item.count === 'number'
     );
   }
 
