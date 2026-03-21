@@ -30,6 +30,16 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+      - name: "DEBUG: Check if API key is set"
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "ERROR: GEMINI_API_KEY is empty"
+          else
+            echo "✓ GEMINI_API_KEY is set (length: ${#GEMINI_API_KEY})"
+            echo "First 10 chars: ${GEMINI_API_KEY:0:10}"
+          fi
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY2026 }}
         run: |
           npm install
           npm install @google/generative-ai@latest
