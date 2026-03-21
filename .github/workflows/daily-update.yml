@@ -54,6 +54,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          git config core.hooksPath .githooks
           git add app/data/facilities.json
           git add public/images/facilities/
 
