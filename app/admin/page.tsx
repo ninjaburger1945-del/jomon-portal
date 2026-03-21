@@ -516,21 +516,39 @@ export default function AdminPage() {
       <section>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
           <h2>Facilities ({facilities.length})</h2>
-          <button
-            onClick={handleAddNewFacility}
-            style={{
-              padding: "10px 16px",
-              cursor: "pointer",
-              backgroundColor: "#4CAF50",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              fontSize: "14px",
-              fontWeight: "500"
-            }}
-          >
-            ➕ 新規追加
-          </button>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              onClick={loadFacilities}
+              title="キャッシュをクリアして最新データを再読み込み"
+              style={{
+                padding: "10px 16px",
+                cursor: "pointer",
+                backgroundColor: "#2196F3",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                fontSize: "14px",
+                fontWeight: "500"
+              }}
+            >
+              🔄 データ更新
+            </button>
+            <button
+              onClick={handleAddNewFacility}
+              style={{
+                padding: "10px 16px",
+                cursor: "pointer",
+                backgroundColor: "#4CAF50",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                fontSize: "14px",
+                fontWeight: "500"
+              }}
+            >
+              ➕ 新規追加
+            </button>
+          </div>
         </div>
 
         {loading ? (
