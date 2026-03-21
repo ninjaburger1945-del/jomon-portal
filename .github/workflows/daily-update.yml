@@ -35,8 +35,9 @@ jobs:
           npm install @google/generative-ai@latest
 
       - name: AI Crawler - Find 1 New Facilities
+        timeout-minutes: 45
         run: |
-          echo "[CRAWLER] Starting crawler..."
+          echo "[CRAWLER] Starting crawler (timeout: 45min)"
           node scripts/daily-crawler.js
           CRAWLER_EXIT=$?
           echo "[CRAWLER] Exit code: $CRAWLER_EXIT"
