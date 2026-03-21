@@ -34,6 +34,21 @@ jobs:
           npm install
           npm install @google/generative-ai@latest
 
+      - name: "DEBUG: Check directory structure"
+        run: |
+          echo "[DEBUG] Current directory: $(pwd)"
+          echo "[DEBUG] Directory listing:"
+          ls -la
+          echo "[DEBUG] app/data/ contents:"
+          ls -la app/data/ 2>/dev/null || echo "app/data/ not found!"
+          echo "[DEBUG] File existence check:"
+          if [ -f "app/data/facilities.json" ]; then
+            echo "✓ app/data/facilities.json EXISTS"
+            echo "File size: $(stat -f%z app/data/facilities.json 2>/dev/null || stat -c%s app/data/facilities.json 2>/dev/null || echo 'unknown')"
+          else
+            echo "✗ app/data/facilities.json MISSING"
+          fi
+
       - name: AI Crawler - Find 1 New Facilities
         timeout-minutes: 45
         run: |
@@ -81,4 +96,4 @@ jobs:
         run: |
           # GitHub API で Vercel に ISR リベーク信号を送信（facilities.json 更新を通知）
           # Vercel は git push を検知して自動デプロイするため、ここではスキップ
-          echo "ISR will be triggered automatically by Vercel on git push" 
+          echo "ISR will be triggered automatically by Vercel on git push"
