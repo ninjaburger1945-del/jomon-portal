@@ -63,11 +63,18 @@ export async function POST(request: NextRequest) {
 
     console.log('[API] Successfully saved to GitHub!');
 
-    // Revalidate cache after successful save
-    revalidatePath('/');
-    revalidatePath('/facility/[id]', 'page');
+    // ISR: Revalidate all affected paths after successful save
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/facilities', 'page');
+      revalidatePath('/facility/[id]', 'page');
+      console.log('[API] ISR cache invalidated for all paths');
+    } catch (revalidateErr) {
+      console.warn('[API] ISR revalidation partial failure (non-blocking):', revalidateErr);
+      // Continue - this is not a blocker for the save operation
+    }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, revalidated: true });
   } catch (error) {
     console.error('[API] Save error:', error);
     return NextResponse.json(

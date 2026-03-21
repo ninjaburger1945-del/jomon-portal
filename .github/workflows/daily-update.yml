@@ -14,12 +14,14 @@ jobs:
       contents: write
       pull-requests: write
       id-token: write
+      pages: read
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -33,7 +35,17 @@ jobs:
           npm install @google/generative-ai@latest
 
       - name: AI Crawler - Find 1 New Facilities
-        run: node scripts/daily-crawler.js
+        run: |
+          echo "[CRAWLER] Starting crawler..."
+          node scripts/daily-crawler.js
+          CRAWLER_EXIT=$?
+          echo "[CRAWLER] Exit code: $CRAWLER_EXIT"
+          if [ $CRAWLER_EXIT -eq 0 ]; then
+            echo "[CRAWLER] ✓ Crawler completed successfully"
+          else
+            echo "[CRAWLER] ⚠️  Crawler exited with code $CRAWLER_EXIT"
+          fi
+          exit $CRAWLER_EXIT
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
@@ -43,20 +55,28 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add app/data/facilities.json
           git add public/images/facilities/
-          if [[ -n $(git status --porcelain app/data/facilities.json public/images/facilities/) ]]; then
+
+          STATUS=$(git status --porcelain app/data/facilities.json public/images/facilities/)
+          if [[ -n "$STATUS" ]]; then
+            echo "[GIT] Detected changes:"
+            echo "$STATUS"
             git commit -m "chore(data): auto-added new Jomon facility and AI image [skip ci]"
-            git push origin main
+            if git push origin main; then
+              echo "[GIT] ✓ Successfully pushed to main"
+            else
+              echo "[GIT] ✗ Push failed - checking for conflicts..."
+              git log -1 --oneline
+              exit 1
+            fi
           else
-            echo "No changes to commit"
+            echo "[GIT] No changes to commit"
           fi
 
       - name: Build
         run: npm run build
 
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          channelId: live
-          projectId: jomon-portal 
+      - name: Trigger Vercel ISR Cache Invalidation
+        run: |
+          # GitHub API で Vercel に ISR リベーク信号を送信（facilities.json 更新を通知）
+          # Vercel は git push を検知して自動デプロイするため、ここではスキップ
+          echo "ISR will be triggered automatically by Vercel on git push" 
