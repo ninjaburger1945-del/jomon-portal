@@ -13,26 +13,41 @@ async function retryWithBackoff(asyncFn, maxRetries = 5, initialDelayMs = 1000) 
       return await asyncFn();
     } catch (error) {
       lastError = error;
-      const message = error.message || String(error);
 
-      // 503/429 など一時的なエラーのみリトライ対象
+      // エラーメッセージを複数箇所から取得（SDK のエラー形式に対応）
+      const message = (error.message || error.toString() || '').toLowerCase();
+      const fullError = JSON.stringify(error, null, 2);
+
+      // 一時的なエラーパターン（より包括的）
       const isRetryable =
         message.includes('503') ||
         message.includes('429') ||
-        message.includes('Service Unavailable') ||
-        message.includes('Too Many Requests') ||
+        message.includes('service unavailable') ||
+        message.includes('too many requests') ||
         message.includes('timeout') ||
-        message.includes('ECONNRESET') ||
-        message.includes('ETIMEDOUT');
+        message.includes('econnreset') ||
+        message.includes('etimedout') ||
+        message.includes('resource exhausted') ||
+        message.includes('unavailable') ||
+        message.includes('failed to fetch') ||
+        fullError.includes('503') ||
+        fullError.includes('429') ||
+        fullError.includes('RESOURCE_EXHAUSTED') ||
+        fullError.includes('UNAVAILABLE');
+
+      console.warn(`[RETRY_DEBUG] Attempt ${attempt}/${maxRetries} failed`);
+      console.warn(`  Error: ${message.substring(0, 80)}`);
+      console.warn(`  Retryable: ${isRetryable}`);
 
       if (!isRetryable || attempt === maxRetries) {
+        console.error(`[RETRY_FAIL] 最大リトライ回数到達 または リトライ不可能なエラー`);
+        console.error(`  最終エラー: ${message}`);
         throw error;
       }
 
       // 指数バックオフ: 1s, 2s, 4s, 8s, 16s
       const delayMs = initialDelayMs * Math.pow(2, attempt - 1);
-      console.warn(`[RETRY] 試行 ${attempt}/${maxRetries} 失敗: ${message.substring(0, 60)}`);
-      console.warn(`[RETRY] ${delayMs}ms 待機後、再試行します...`);
+      console.warn(`[RETRY] 試行 ${attempt}/${maxRetries} 失敗。${delayMs}ms 待機後に再試行...`);
 
       await new Promise(resolve => setTimeout(resolve, delayMs));
     }
@@ -393,8 +408,28 @@ ${existingNames}
 
     let candidates = [];
     try {
-      const result = await retryWithBackoff(() => model.generateContent(prompt));
+      let result;
+      try {
+        result = await retryWithBackoff(() => model.generateContent(prompt));
+      } catch (retryError) {
+        // リトライが全て失敗 → graceful shutdown
+        throw new Error(`AI API 最終失敗: ${retryError.message}`);
+      }
+
+      // レスポンスが存在するか確認
+      if (!result || !result.response) {
+        throw new Error("AI レスポンスが null または 無効");
+      }
+
+      // SDK のエラー応答をチェック
+      if (result.response.statusCode && result.response.statusCode >= 400) {
+        throw new Error(`API HTTP ${result.response.statusCode}: ${result.response.text()}`);
+      }
+
       const responseText = result.response.text();
+      if (!responseText || responseText.length === 0) {
+        throw new Error("AI からのレスポンステキストが空です");
+      }
 
       let jsonStr = responseText.trim();
       if (jsonStr.startsWith('```json')) jsonStr = jsonStr.slice(7);
@@ -404,19 +439,23 @@ ${existingNames}
 
       candidates = JSON.parse(jsonStr);
       if (!Array.isArray(candidates) || candidates.length === 0) {
-        throw new Error("AI が有効な配列を返しませんでした。");
+        throw new Error("JSON 解析完了だが、有効な配列ではない");
       }
       console.log(`[CRAWLER] ✓ AI が ${candidates.length} 件の候補を返却`);
     } catch (aiError) {
-      console.error(`[CRAWLER] ✗ AI リクエスト失敗: ${aiError.message}`);
-      console.log('[CRAWLER] ⚠️  既存データで正常終了します（新規施設追加はスキップ）');
+      console.error(`\n[CRAWLER_FAILURE] AI リクエスト最終失敗`);
+      console.error(`  エラー: ${aiError.message}`);
+      console.error(`  スタック: ${aiError.stack?.split('\n')[1] || 'N/A'}`);
+      console.log('\n[CRAWLER] ⚠️  既存データで正常終了します');
 
       // 部分的な失敗でもプロセスを継続 → facilities.json を保護したまま終了
       if (existingData.length > 0) {
         console.log(`[RESULT] 既存 ${existingData.length} 件のデータを維持`);
+        console.log('[EXIT] process.exit(0) - 既存データ保護の上、正常終了');
         process.exit(0);
       } else {
-        throw new Error("既存データがなく、AI も失敗したため中止");
+        console.error('[EXIT] 既存データなし、AI 失敗のため中止');
+        throw new Error("既存データなし & AI 失敗");
       }
     }
 
