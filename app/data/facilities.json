@@ -1,6 +1,6 @@
 [
   {
-    "id": "sannaimaruyama",
+    "id": "001",
     "name": "特別史跡 三内丸山遺跡",
     "region": "Tohoku",
     "prefecture": "青森県",
@@ -31,7 +31,7 @@
     "access_car_en": ""
   },
   {
-    "id": "togariishi",
+    "id": "002",
     "name": "茅野市尖石縄文考古館",
     "region": "Chubu",
     "prefecture": "長野県",
@@ -62,7 +62,7 @@
     "access_car_en": ""
   },
   {
-    "id": "kasori",
+    "id": "003",
     "name": "加曽利貝塚博物館",
     "region": "Kanto",
     "prefecture": "千葉県",
@@ -93,7 +93,7 @@
     "access_car_en": ""
   },
   {
-    "id": "korekawa",
+    "id": "004",
     "name": "八戸市埋蔵文化財センター 是川縄文館",
     "region": "Tohoku",
     "prefecture": "青森県",
@@ -124,7 +124,7 @@
     "access_car_en": ""
   },
   {
-    "id": "idojiri",
+    "id": "005",
     "name": "井戸尻考古館",
     "region": "Chubu",
     "prefecture": "長野県",
@@ -155,7 +155,7 @@
     "access_car_en": ""
   },
   {
-    "id": "jomon-museum",
+    "id": "006",
     "name": "若狭三方縄文博物館",
     "region": "Chubu",
     "prefecture": "福井県",
@@ -186,7 +186,7 @@
     "access_car_en": ""
   },
   {
-    "id": "umaikata",
+    "id": "007",
     "name": "新潟県立歴史博物館",
     "region": "Chubu",
     "prefecture": "新潟県",
@@ -217,7 +217,7 @@
     "access_car_en": ""
   },
   {
-    "id": "uenohara",
+    "id": "008",
     "name": "上野原縄文の森",
     "region": "Kyushu",
     "prefecture": "鹿児島県",
@@ -247,7 +247,7 @@
     "access_car_en": ""
   },
   {
-    "id": "maibun",
+    "id": "009",
     "name": "山梨県立考古博物館",
     "region": "Chubu",
     "prefecture": "山梨県",
@@ -278,7 +278,7 @@
     "access_car_en": ""
   },
   {
-    "id": "ofune",
+    "id": "010",
     "name": "大船遺跡",
     "region": "Hokkaido",
     "prefecture": "北海道",
@@ -308,7 +308,7 @@
     "access_car_en": ""
   },
   {
-    "id": "oyu",
+    "id": "011",
     "name": "大湯環状列石",
     "region": "Tohoku",
     "prefecture": "秋田県",
@@ -339,7 +339,7 @@
     "access_car_en": ""
   },
   {
-    "id": "isedotai",
+    "id": "012",
     "name": "伊勢堂岱遺跡",
     "region": "Tohoku",
     "prefecture": "秋田県",
@@ -370,7 +370,7 @@
     "access_car_en": ""
   },
   {
-    "id": "komakino",
+    "id": "013",
     "name": "小牧野遺跡",
     "region": "Tohoku",
     "prefecture": "青森県",
@@ -401,7 +401,7 @@
     "access_car_en": ""
   },
   {
-    "id": "kamegaoka",
+    "id": "014",
     "name": "亀ヶ岡石器時代遺跡",
     "region": "Tohoku",
     "prefecture": "青森県",
@@ -432,7 +432,7 @@
     "access_car_en": ""
   },
   {
-    "id": "kitakogane",
+    "id": "015",
     "name": "北黄金貝塚",
     "region": "Hokkaido",
     "prefecture": "北海道",
@@ -463,7 +463,7 @@
     "access_car_en": ""
   },
   {
-    "id": "kakinoshima",
+    "id": "016",
     "name": "垣ノ島遺跡",
     "region": "Hokkaido",
     "prefecture": "北海道",
@@ -493,7 +493,7 @@
     "access_car_en": ""
   },
   {
-    "id": "irie-takasago",
+    "id": "017",
     "name": "入江・高砂貝塚",
     "region": "Hokkaido",
     "prefecture": "北海道",
@@ -524,7 +524,7 @@
     "access_car_en": ""
   },
   {
-    "id": "goshono",
+    "id": "018",
     "name": "御所野遺跡",
     "region": "Tohoku",
     "prefecture": "岩手県",
@@ -554,7 +554,7 @@
     "access_car_en": ""
   },
   {
-    "id": "hiraide",
+    "id": "019",
     "name": "平出遺跡",
     "region": "Chubu",
     "prefecture": "長野県",
@@ -584,7 +584,7 @@
     "access_car_en": ""
   },
   {
-    "id": "oomori",
+    "id": "020",
     "name": "大森貝塚",
     "region": "Kanto",
     "prefecture": "東京都",
@@ -614,7 +614,7 @@
     "access_car_en": ""
   },
   {
-    "id": "hoshigato",
+    "id": "021",
     "name": "星ヶ塔黒曜石原産地遺跡",
     "region": "Chubu",
     "prefecture": "長野県",
@@ -644,7 +644,7 @@
     "access_car_en": ""
   },
   {
-    "id": "yoshigo",
+    "id": "022",
     "name": "吉胡貝塚",
     "region": "Chubu",
     "prefecture": "愛知県",
@@ -674,7 +674,7 @@
     "access_car_en": ""
   },
   {
-    "id": "torihama",
+    "id": "023",
     "name": "鳥浜貝塚",
     "region": "Chubu",
     "prefecture": "福井県",
@@ -704,7 +704,7 @@
     "access_car_en": ""
   },
   {
-    "id": "tsugumo",
+    "id": "024",
     "name": "津雲貝塚",
     "region": "Chugoku",
     "prefecture": "岡山県",
@@ -734,7 +734,7 @@
     "access_car_en": ""
   },
   {
-    "id": "kamikuroiwa",
+    "id": "025",
     "name": "上黒岩岩陰遺跡",
     "region": "Shikoku",
     "prefecture": "愛媛県",
@@ -764,7 +764,7 @@
     "access_car_en": ""
   },
   {
-    "id": "satohama",
+    "id": "026",
     "name": "里浜貝塚",
     "region": "Tohoku",
     "prefecture": "宮城県",
@@ -794,7 +794,7 @@
     "access_car_en": ""
   },
   {
-    "id": "aku",
+    "id": "027",
     "name": "阿久遺跡",
     "region": "Chubu",
     "prefecture": "長野県",
@@ -824,7 +824,7 @@
     "access_car_en": ""
   },
   {
-    "id": "ubayama",
+    "id": "028",
     "name": "姥山貝塚",
     "region": "Kanto",
     "prefecture": "千葉県",
@@ -854,7 +854,7 @@
     "access_car_en": ""
   },
   {
-    "id": "soyata",
+    "id": "029",
     "name": "曽谷貝塚",
     "region": "Kanto",
     "prefecture": "千葉県",
@@ -885,7 +885,7 @@
     "access_car_en": ""
   },
   {
-    "id": "nabatake",
+    "id": "030",
     "name": "菜畑遺跡",
     "region": "Kyushu",
     "prefecture": "佐賀県",
@@ -915,7 +915,7 @@
     "access_car_en": ""
   },
   {
-    "id": "jomon-culture-center",
+    "id": "031",
     "name": "函館市縄文文化交流センター",
     "region": "Hokkaido",
     "prefecture": "北海道",
@@ -946,7 +946,7 @@
     "access_car_en": ""
   },
   {
-    "id": "jomopia-miyahata",
+    "id": "032",
     "name": "じょーもぴあ宮畑",
     "region": "Tohoku",
     "prefecture": "福島県",
@@ -976,7 +976,7 @@
     "access_car_en": ""
   },
   {
-    "id": "mawaki-jomon",
+    "id": "033",
     "name": "真脇遺跡縄文館",
     "region": "Chubu",
     "prefecture": "石川県",
@@ -1006,7 +1006,7 @@
     "access_car_en": ""
   },
   {
-    "id": "tobinodai-museum",
+    "id": "034",
     "name": "飛ノ台史跡公園博物館",
     "region": "Kanto",
     "prefecture": "千葉県",
@@ -1037,7 +1037,7 @@
     "access_car_en": ""
   },
   {
-    "id": "mizuko-kaizuka",
+    "id": "035",
     "name": "水子貝塚資料館",
     "region": "Kanto",
     "prefecture": "埼玉県",
@@ -1067,7 +1067,7 @@
     "access_car_en": ""
   },
   {
-    "id": "katsusaka-iseki",
+    "id": "036",
     "name": "史跡勝坂遺跡公園",
     "region": "Kanto",
     "prefecture": "神奈川県",
@@ -1097,7 +1097,7 @@
     "access_car_en": ""
   },
   {
-    "id": "shakado-iseki-museum",
+    "id": "037",
     "name": "釈迦堂遺跡博物館",
     "region": "Chubu",
     "prefecture": "山梨県",
@@ -1128,7 +1128,7 @@
     "access_car_en": ""
   },
   {
-    "id": "taishakukyo-isekigun",
+    "id": "038",
     "name": "帝釈峡遺跡群（時悠館）",
     "region": "Chugoku",
     "prefecture": "広島県",
@@ -1158,7 +1158,7 @@
     "access_car_en": ""
   },
   {
-    "id": "ichikawa-horinouchi",
+    "id": "039",
     "name": "市川考古博物館・堀之内貝塚",
     "region": "Kanto",
     "prefecture": "千葉県",
@@ -1189,7 +1189,7 @@
     "access_car_en": ""
   },
   {
-    "id": "okadaira-kaizuka",
+    "id": "040",
     "name": "美浦村文化財センター（陸平貝塚）",
     "region": "Kanto",
     "prefecture": "茨城県",
@@ -1219,7 +1219,7 @@
     "access_car_en": ""
   },
   {
-    "id": "hikosaki-kaizuka",
+    "id": "041",
     "name": "彦崎貝塚",
     "region": "Chugoku",
     "prefecture": "岡山県",
@@ -1249,7 +1249,7 @@
     "access_car_en": ""
   },
   {
-    "id": "asanebana-kaizuka",
+    "id": "042",
     "name": "朝寝鼻貝塚",
     "region": "Chugoku",
     "prefecture": "岡山県",
@@ -1279,7 +1279,7 @@
     "access_car_en": ""
   },
   {
-    "id": "awazu-kotei-iseki",
+    "id": "043",
     "name": "大津市歴史博物館",
     "region": "Kinki",
     "prefecture": "滋賀県",
@@ -1310,7 +1310,7 @@
     "access_car_en": ""
   },
   {
-    "id": "kurohama-kaizuka",
+    "id": "044",
     "name": "国指定史跡 黒浜貝塚",
     "region": "Kanto",
     "prefecture": "埼玉県",
@@ -1342,7 +1342,7 @@
     "access_car_en": ""
   },
   {
-    "id": "hirajo-kaizuka",
+    "id": "045",
     "name": "平城貝塚",
     "region": "Shikoku",
     "prefecture": "愛媛県",
@@ -1373,7 +1373,7 @@
     "access_car_en": ""
   },
   {
-    "id": "tokamachi-city-museum",
+    "id": "046",
     "name": "十日町市博物館",
     "region": "Chubu",
     "prefecture": "新潟県",
@@ -1405,7 +1405,7 @@
     "access_car_en": ""
   },
   {
-    "id": "umataka-sanjyuinaba",
+    "id": "047",
     "name": "長岡市馬高縄文館（馬高・三十稲場遺跡）",
     "region": "Chubu",
     "prefecture": "新潟県",
@@ -1437,7 +1437,7 @@
     "access_car_en": ""
   },
   {
-    "id": "ogido-kaizuka",
+    "id": "048",
     "name": "荻堂貝塚",
     "region": "Okinawa",
     "prefecture": "沖縄県",
@@ -1469,7 +1469,7 @@
     "access_car_en": ""
   },
   {
-    "id": "funagata-rekimin",
+    "id": "049",
     "name": "舟形町歴史民俗資料館",
     "region": "Tohoku",
     "prefecture": "山形県",
@@ -1501,7 +1501,7 @@
     "access_car_en": ""
   },
   {
-    "id": "ogushi-kaizuka-fureai-koen",
+    "id": "050",
     "name": "大串貝塚ふれあい公園（国指定史跡 大串貝塚）",
     "region": "Kanto",
     "prefecture": "茨城県",
