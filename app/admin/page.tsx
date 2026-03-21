@@ -387,7 +387,7 @@ export default function AdminPage() {
               詳細は Vercel ダッシュボード → Settings → API Tokens を参照してください。
             </p>
           </div>
-        ) : statsData && statsData.pageviews >= 0 ? (
+        ) : (statsData && statsData.pageviews >= 0) ? (
           // 成功状態
           <>
             <div style={{
@@ -473,7 +473,7 @@ export default function AdminPage() {
               </div>
             </div>
           </>
-        )}
+        ) : null}
       </section>
 
       <section>
