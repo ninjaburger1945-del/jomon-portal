@@ -52,61 +52,37 @@ async function retryWithBackoff(asyncFn, maxRetries = 10, initialDelayMs = 2000)
   throw lastError;
 }
 
-async function fetchOfficialUrl(facilityName, prefecture) {
-  console.log(`[URL_SEARCH] 「${facilityName}」の公式URLを検索中...`);
-
-  const urlMappings = {
-    "池上曽根遺跡": [
-      "https://www.city.izumiotsu.lg.jp/kakuka/kyoikuiinkai/ikegamisoneyayoigakusyuukan/index.html",
-      "https://www.pref.osaka.lg.jp/o180150/bunkazaihogo/bunkazai/ikegamisone.html"
-    ],
-    "纒向遺跡": [
-      "https://www.pref.nara.jp/miryoku/ikasu-nara/bunkashigen/main00601.html",
-      "https://www.kashikoken.jp/museum/yamatonoiseki/kofun/makimuku.html"
-    ],
-    "唐古・鍵遺跡": [
-      "https://www.town.tawaramoto.nara.jp/karako_kagi/iseki/about.html",
-      "https://www.pref.nara.jp/miryoku/ikasu-nara/bunkashigen/main02001.html"
-    ]
-  };
-
-  if (urlMappings[facilityName]) {
-    for (const url of urlMappings[facilityName]) {
-      if (await validateUrlQuick(url)) {
-        console.log(`[URL_FOUND] ホワイトリストから発見: ${url}`);
-        return { valid: true, url, verified: true };
-      }
-    }
+async function validateUrl(url) {
+  if (!url || !url.startsWith("http")) {
+    return { valid: false, url: "", verified: false };
   }
 
-  console.log(`[URL_NOT_FOUND] URLが見つかりません: ${facilityName}`);
-  return { valid: false, url: "", verified: false };
-}
-
-async function validateUrlQuick(url) {
   return new Promise((resolve) => {
-    if (!url || !url.startsWith("http")) {
-      resolve(false);
-      return;
-    }
-
     const options = {
       method: 'HEAD',
-      timeout: 3000,
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+      timeout: 5000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+      }
     };
 
     const protocol = url.startsWith("https") ? https : require("http");
     const req = protocol.request(url, options, (res) => {
-      resolve(res.statusCode === 200);
+      if (res.statusCode === 200) {
+        resolve({ valid: true, url, verified: true });
+      } else {
+        console.log(`[HTTP_${res.statusCode}] ${url}`);
+        resolve({ valid: false, url: "", verified: false });
+      }
       req.abort();
-    }).on('error', () => {
-      resolve(false);
+    }).on('error', (err) => {
+      console.log(`[FETCH_ERROR] ${err.message}`);
+      resolve({ valid: false, url: "", verified: false });
     });
 
-    req.setTimeout(3000, () => {
+    req.setTimeout(5000, () => {
       req.abort();
-      resolve(false);
+      resolve({ valid: false, url: "", verified: false });
     });
 
     req.end();
@@ -151,9 +127,9 @@ ${existingNames}
 - 縄文時代のみ（弥生時代は除外）
 - 公立博物館または国指定史跡
 
-【重要な指示】
-- urlフィールドは必ず空文字で返してください
-- URLの検証は別プロセスで行うため、AIが推測で生成しないでください
+【URLについて】
+施設の公式ウェブサイトURLが存在する場合は、自治体公式サイト(.lg.jp, .pref など)の URL を記載してください。
+見つからない場合は空文字("")にしてください。
 
 【出力要件】
 完全なJSON配列のみを出力：
@@ -164,7 +140,7 @@ ${existingNames}
   "prefecture": "都道府県名",
   "address": "住所",
   "description": "200〜400文字の紹介文",
-  "url": "",
+  "url": "公式サイトのURL、見つからなければ空文字",
   "thumbnail": "",
   "tags": ["世界遺産","博物館","貝塚","環状列石","土器","土偶","国宝"]から最大2個,
   "lat": 緯度,
@@ -229,11 +205,11 @@ ${existingNames}
       continue;
     }
 
-    console.log(`[VALIDATE] ${nf.name}: 公式URLを検索中...`);
-    const validation = await fetchOfficialUrl(nf.name, nf.prefecture);
+    console.log(`[VALIDATE] ${nf.name}: URLを検証中... (${nf.url})`);
+    const validation = await validateUrl(nf.url);
 
     if (!validation.valid) {
-      console.error(`[URL_FAIL] 施設を追加不可: 公式URLが見つかりません - ${nf.name}`);
+      console.error(`[URL_FAIL] 施設を追加不可: URLが無効です - ${nf.name}`);
       continue;
     }
 
