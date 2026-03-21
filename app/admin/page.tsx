@@ -172,12 +172,16 @@ export default function AdminPage() {
     if (confirm("Are you sure you want to delete this facility?")) {
       const updated = facilities.filter((f) => f.id !== id);
       try {
+        // API保存を最優先（UI更新の前）
         await saveFacilitiesToGithub(updated);
+
+        // API成功時のみUIを更新
         setFacilities(updated);
         setError("✓ Deleted and deployed!");
       } catch (err) {
         console.error("Delete error:", err);
         setError(`Failed to delete: ${err instanceof Error ? err.message : "Unknown error"}`);
+        // UIは更新しない（データ一貫性を保持）
       }
     }
   };
@@ -262,7 +266,10 @@ export default function AdminPage() {
       );
 
     try {
+      // API保存を最優先（UI更新の前）
       await saveFacilitiesToGithub(updated);
+
+      // API成功時のみUIを更新
       setFacilities(updated);
       setShowEditModal(false);
       setEditingFacility(null);
@@ -278,6 +285,7 @@ export default function AdminPage() {
             setError(`✓ Saved and deployed! ${xResponse.reason}`);
           }
         } catch (xErr) {
+          console.warn("X post failed:", xErr);
           setError("✓ Saved and deployed! (X post failed)");
         }
       } else {
@@ -289,6 +297,7 @@ export default function AdminPage() {
       setError(
         `Failed to save: ${err instanceof Error ? err.message : "Unknown error"}`
       );
+      // UIは更新しない（データ一貫性を保持）
     }
   };
 
