@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface Facility {
   id: string;
@@ -12,6 +12,9 @@ interface Facility {
   location_en?: string;
   [key: string]: any;
 }
+
+type SortKey = "id" | "name" | "prefecture" | "description";
+type SortOrder = "asc" | "desc";
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
@@ -27,6 +30,8 @@ export default function AdminPage() {
   const [postToX, setPostToX] = useState(false);
   const [statsData, setStatsData] = useState<any>(null);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>("id");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
   const handleLogin = () => {
     const correctPassword = "jomon2026";
@@ -39,10 +44,33 @@ export default function AdminPage() {
     }
   };
 
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      // Toggle sort order if clicking the same column
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // Set new sort key and default to ascending
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
+  // Compute sorted facilities using useMemo for performance
+  const sortedFacilities = useMemo(() => {
+    const sorted = [...facilities].sort((a, b) => {
+      const aValue = String(a[sortKey] || "").toLowerCase();
+      const bValue = String(b[sortKey] || "").toLowerCase();
+
+      const comparison = aValue.localeCompare(bValue, 'ja');
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+    return sorted;
+  }, [facilities, sortKey, sortOrder]);
+
   const loadFacilities = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/facilities.json");
+      const response = await fetch("/facilities.json", { cache: 'no-store' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       setFacilities(data);
@@ -58,7 +86,7 @@ export default function AdminPage() {
   const loadStats = async () => {
     setStatsLoading(true);
     try {
-      const response = await fetch("/api/stats");
+      const response = await fetch("/api/stats", { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         setStatsData(data);
@@ -79,7 +107,7 @@ export default function AdminPage() {
 
   const loadAvailableImages = async () => {
     try {
-      const response = await fetch("/api/images");
+      const response = await fetch("/api/images", { cache: 'no-store' });
       if (response.ok) {
         const images = await response.json();
         setAvailableImages(images);
@@ -513,15 +541,63 @@ export default function AdminPage() {
           <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
             <thead>
               <tr style={{ backgroundColor: "#f5f5f5", borderBottom: "2px solid #ccc" }}>
-                <th style={{ padding: "10px", textAlign: "left" }}>ID</th>
-                <th style={{ padding: "10px", textAlign: "left" }}>Name</th>
-                <th style={{ padding: "10px", textAlign: "left" }}>Prefecture</th>
-                <th style={{ padding: "10px", textAlign: "left" }}>Description</th>
+                <th
+                  onClick={() => handleSort("id")}
+                  style={{
+                    padding: "10px",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    userSelect: "none",
+                    backgroundColor: sortKey === "id" ? "#e0e0e0" : "#f5f5f5"
+                  }}
+                  title="Click to sort"
+                >
+                  ID {sortKey === "id" && (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
+                <th
+                  onClick={() => handleSort("name")}
+                  style={{
+                    padding: "10px",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    userSelect: "none",
+                    backgroundColor: sortKey === "name" ? "#e0e0e0" : "#f5f5f5"
+                  }}
+                  title="Click to sort"
+                >
+                  Name {sortKey === "name" && (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
+                <th
+                  onClick={() => handleSort("prefecture")}
+                  style={{
+                    padding: "10px",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    userSelect: "none",
+                    backgroundColor: sortKey === "prefecture" ? "#e0e0e0" : "#f5f5f5"
+                  }}
+                  title="Click to sort"
+                >
+                  Prefecture {sortKey === "prefecture" && (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
+                <th
+                  onClick={() => handleSort("description")}
+                  style={{
+                    padding: "10px",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    userSelect: "none",
+                    backgroundColor: sortKey === "description" ? "#e0e0e0" : "#f5f5f5"
+                  }}
+                  title="Click to sort"
+                >
+                  Description {sortKey === "description" && (sortOrder === "asc" ? "↑" : "↓")}
+                </th>
                 <th style={{ padding: "10px", textAlign: "center" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {facilities.map((facility) => (
+              {sortedFacilities.map((facility) => (
                 <tr key={facility.id} style={{ borderBottom: "1px solid #eee" }}>
                   <td style={{ padding: "10px" }}><code>{facility.id}</code></td>
                   <td style={{ padding: "10px" }}>{facility.name}</td>
