@@ -665,10 +665,9 @@ ${existingNames}
   } catch (error) {
     console.error(`\n[FATAL] クローラー致命的エラー:`);
     console.error(`  メッセージ: ${error.message}`);
-    console.error(`  スタック: ${error.stack?.split('\n')[1]}`);
+    console.error(`  スタック: ${error.stack?.split('\n')[1] || 'N/A'}`);
     console.error('\n[RECOVERY] 既存データを維持したまま、normal exit します。');
-    console.error(`  既存施設数: ${existingData?.length || 0} 件`);
-    process.exit(0);  // 致命的エラーでも既存データは保護 → exit code 0
+    process.exit(0);  // 致命的エラーでも正常終了（既存データ保護）
   }
 }
 
