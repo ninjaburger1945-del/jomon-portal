@@ -59,6 +59,12 @@ jobs:
             echo "✗ app/data/facilities.json MISSING"
           fi
 
+      - name: "DEBUG: List Available Models"
+        run: |
+          node scripts/check-available-models.js
+        env:
+          GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
+
       - name: "DEBUG: Verify API Key Before Crawler"
         run: |
           if [ -z "$GEMINI_API_KEY20261336" ]; then
