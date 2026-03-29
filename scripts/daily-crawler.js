@@ -111,8 +111,8 @@ async function main() {
   if (!apiKey) throw new Error("GEMINI_API_KEY20261336 が設定されていません");
 
   const client = new GoogleGenerativeAI({ apiKey });
-  const model = client.getGenerativeModel({ model: "gemini-2.5-pro" });
-  console.log('[MODEL] Using gemini-2.5-pro');
+  const model = client.getGenerativeModel({ model: "gemini-1.5-pro" });
+  console.log('[MODEL] Using gemini-1.5-pro');
 
   const regions = ["北海道", "東北", "関東", "中部", "近畿", "中国", "四国", "九州"];
   const randomRegion = regions[Math.floor(Math.random() * regions.length)];
