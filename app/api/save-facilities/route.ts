@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const { facilities } = await request.json();
 
-    const token = process.env.JOMON_GITHUB_TOKEN;
+    const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
     const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
 
     if (!token || !repo) {
