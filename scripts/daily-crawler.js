@@ -1,129 +1,172 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require("fs");
 const path = require("path");
-const https = require("https");
 
-async function retryWithBackoff(asyncFn, maxRetries = 10, initialDelayMs = 2000) {
+/**
+ * REST API形式で Google Gemini API (v1安定版) を直接叩く
+ * 3月16日の Paid Tier/Spend Caps ルール対応版
+ */
+
+const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent";
+const API_KEY = process.env.GEMINI_API_KEY20261336;
+
+if (!API_KEY) {
+  console.error("[FATAL] GEMINI_API_KEY20261336 環境変数が設定されていません");
+  process.exit(1);
+}
+
+console.log('[DEBUG] API_KEY status:');
+console.log(`  - 長さ: ${API_KEY.length}`);
+console.log(`  - プレフィックス: ${API_KEY.substring(0, 10)}`);
+console.log(`  - 形式チェック: ${API_KEY.startsWith('AIza') ? '✓ Valid' : '✗ Invalid'}`);
+
+/**
+ * リトライ機能付き fetch
+ */
+async function fetchWithRetry(url, options, maxRetries = 5) {
   let lastError;
-  let totalWaitTime = 0;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`\n[ATTEMPT ${attempt}/${maxRetries}] API呼び出し開始...`);
-      const startTime = Date.now();
-      const result = await asyncFn();
-      const elapsed = Date.now() - startTime;
-      console.log(`[SUCCESS] 試行 ${attempt} で成功（${elapsed}ms）`);
-      return result;
+      console.log(`[ATTEMPT ${attempt}/${maxRetries}] API呼び出し開始...`);
+      const response = await fetch(url, options);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[HTTP_ERROR] ステータス: ${response.status}`);
+        console.error(`[HTTP_ERROR] レスポンス: ${errorText.substring(0, 200)}`);
+
+        // 400, 401, 403 は永続的エラー（リトライしない）
+        if ([400, 401, 403].includes(response.status)) {
+          throw new Error(`[PERMANENT] HTTP ${response.status}: ${errorText.substring(0, 100)}`);
+        }
+
+        // 429, 503 はリトライ
+        if ([429, 500, 503].includes(response.status)) {
+          throw new Error(`[TEMPORARY] HTTP ${response.status}`);
+        }
+
+        throw new Error(`[UNKNOWN] HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`[SUCCESS] 試行 ${attempt} で成功`);
+      return data;
+
     } catch (error) {
       lastError = error;
-      const message = (error.message || '').toLowerCase();
-      const statusCode = error.status || error.statusCode || error.code || '';
+      console.error(`[FAIL ${attempt}/${maxRetries}] ${error.message}`);
 
-      console.error(`\n[FAIL ${attempt}/${maxRetries}] API呼び出し失敗`);
-      console.error(`  → ${error.message?.substring(0, 120)}`);
-      console.error(`  → ステータス: ${statusCode}`);
-
-      const isTemporaryError =
-        statusCode === '503' || statusCode === 503 ||
-        statusCode === '429' || statusCode === 429 ||
-        message.includes('503') ||
-        message.includes('429') ||
-        message.includes('unavailable');
-
-      if (!isTemporaryError) {
-        console.error(`[FATAL] 永続的なエラー: ${error.message}`);
+      // 永続的エラーはリトライしない
+      if (error.message.includes('[PERMANENT]') || error.message.includes('[400]')) {
+        console.error(`[FATAL] 永続的エラーのためリトライを中止`);
         throw error;
       }
 
-      if (attempt === maxRetries) {
-        console.error(`\n[EXHAUSTED] 全てのリトライが失敗`);
-        throw error;
+      if (attempt < maxRetries) {
+        const delayMs = 2000 * Math.pow(2, attempt - 1);
+        console.warn(`[BACKOFF] ${delayMs}ms 待機...`);
+        await new Promise(resolve => setTimeout(resolve, delayMs));
       }
-
-      const delayMs = initialDelayMs * Math.pow(2, attempt - 1);
-      totalWaitTime += delayMs;
-
-      console.warn(`[BACKOFF] ${delayMs}ms 待機中...`);
-      await new Promise(resolve => setTimeout(resolve, delayMs));
     }
   }
 
   throw lastError;
 }
 
-async function validateUrl(url) {
-  if (!url || !url.startsWith("http")) {
-    return { valid: false, url: "", verified: false };
+/**
+ * Gemini API を REST API経由で呼び出し
+ */
+async function callGeminiAPI(prompt) {
+  const requestBody = {
+    contents: [
+      {
+        parts: [
+          {
+            text: prompt
+          }
+        ]
+      }
+    ],
+    generationConfig: {
+      temperature: 1,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 8192
+    }
+  };
+
+  const response = await fetchWithRetry(
+    `${API_ENDPOINT}?key=${API_KEY}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; JomonPortal/1.0)'
+      },
+      body: JSON.stringify(requestBody),
+      timeout: 60000
+    }
+  );
+
+  if (!response.candidates || response.candidates.length === 0) {
+    throw new Error('No candidates in API response');
   }
 
-  return new Promise((resolve) => {
-    const options = {
+  const content = response.candidates[0].content;
+  if (!content || !content.parts || content.parts.length === 0) {
+    throw new Error('No text content in API response');
+  }
+
+  return content.parts[0].text;
+}
+
+/**
+ * URL検証
+ */
+async function validateUrl(url) {
+  if (!url || !url.startsWith('http')) {
+    return { valid: false, url: '' };
+  }
+
+  try {
+    const response = await fetch(url, {
       method: 'HEAD',
       timeout: 5000,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
       }
-    };
-
-    const protocol = url.startsWith("https") ? https : require("http");
-    const req = protocol.request(url, options, (res) => {
-      if (res.statusCode === 200) {
-        resolve({ valid: true, url, verified: true });
-      } else {
-        console.log(`[HTTP_${res.statusCode}] ${url}`);
-        resolve({ valid: false, url: "", verified: false });
-      }
-      req.abort();
-    }).on('error', (err) => {
-      console.log(`[FETCH_ERROR] ${err.message}`);
-      resolve({ valid: false, url: "", verified: false });
     });
 
-    req.setTimeout(5000, () => {
-      req.abort();
-      resolve({ valid: false, url: "", verified: false });
-    });
-
-    req.end();
-  });
+    if (response.status === 200) {
+      return { valid: true, url };
+    }
+    return { valid: false, url: '' };
+  } catch (err) {
+    console.log(`[URL_CHECK] ${url} - ${err.message}`);
+    return { valid: false, url: '' };
+  }
 }
 
+/**
+ * メイン処理
+ */
 async function main() {
-  const repoRoot = process.cwd();
-  const filePath = path.join(repoRoot, "app/data/facilities.json");
+  const filePath = path.join(__dirname, '../app/data/facilities.json');
 
-  console.log(`[CRAWLER] Starting crawler (timeout: 45min)`);
-  console.log(`[DEBUG] repoRoot: ${repoRoot}`);
-  console.log(`[DEBUG] filePath: ${filePath}`);
-  console.log(`[DEBUG] ファイル存在: ${fs.existsSync(filePath)}`);
+  console.log('[CRAWLER] クローラー開始');
+  console.log(`[CRAWLER] データファイル: ${filePath}`);
 
+  // 既存データ読み込み
   let existingData = [];
   if (fs.existsSync(filePath)) {
-    const raw = fs.readFileSync(filePath, "utf-8");
+    const raw = fs.readFileSync(filePath, 'utf-8');
     existingData = JSON.parse(raw);
-    console.log(`[CRAWLER] Loaded ${existingData.length} existing facilities`);
+    console.log(`[CRAWLER] 既存データ: ${existingData.length} 件読み込み`);
   }
 
   const existingNames = existingData.map(f => `- ${f.name}`).join('\n');
 
-  const apiKey = process.env.GEMINI_API_KEY20261336;
-  if (!apiKey) throw new Error("GEMINI_API_KEY20261336 が設定されていません");
-
-  // DEBUG: APIキーの詳細情報
-  console.log('[DEBUG] GEMINI_API_KEY20261336 環境変数:');
-  console.log(`  - 存在: ${!!apiKey}`);
-  console.log(`  - 長さ: ${apiKey.length}`);
-  console.log(`  - 最初の10文字: ${apiKey.substring(0, 10)}`);
-  console.log(`  - 最後の5文字: ${apiKey.substring(apiKey.length - 5)}`);
-  console.log(`  - スペース/改行を含む: ${/[\s]/.test(apiKey)}`);
-  console.log(`  - 形式: ${apiKey.startsWith('AIza') ? '✓ Valid prefix' : '✗ Invalid prefix'}`);
-
-  const client = new GoogleGenerativeAI({ apiKey });
-  const model = client.getGenerativeModel({ model: "gemini-1.5-pro" });
-  console.log('[MODEL] Using gemini-1.5-pro');
-
-  const regions = ["北海道", "東北", "関東", "中部", "近畿", "中国", "四国", "九州"];
+  const regions = ['北海道', '東北', '関東', '中部', '近畿', '中国', '四国', '九州'];
   const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
   const prompt = `
@@ -140,7 +183,7 @@ ${existingNames}
 - 公立博物館または国指定史跡
 
 【URLについて】
-施設の公式ウェブサイトURLが存在する場合は、自治体公式サイト(.lg.jp, .pref など)の URL を記載してください。
+施設の公式ウェブサイトURLが存在する場合は、自治体公式サイト(.lg.jp, .pref など)のURLを記載してください。
 見つからない場合は空文字("")にしてください。
 
 【出力要件】
@@ -175,82 +218,76 @@ ${existingNames}
 }]
 `;
 
-  console.log(`[CRAWLER] Gemini AI にリクエスト (地方: ${randomRegion})...`);
-
-  let candidates = [];
   try {
-    const result = await retryWithBackoff(() => model.generateContent(prompt));
+    console.log(`[CRAWLER] Gemini API にリクエスト (地方: ${randomRegion})...`);
+    console.log(`[CRAWLER] エンドポイント: ${API_ENDPOINT}`);
 
-    if (!result?.response) throw new Error("AI レスポンスが null");
+    const responseText = await callGeminiAPI(prompt);
 
-    let jsonStr = result.response.text().trim();
+    // JSON抽出
+    let jsonStr = responseText.trim();
     if (jsonStr.startsWith('```json')) jsonStr = jsonStr.slice(7);
     if (jsonStr.startsWith('```')) jsonStr = jsonStr.slice(3);
     if (jsonStr.endsWith('```')) jsonStr = jsonStr.slice(0, -3);
     jsonStr = jsonStr.trim();
 
-    candidates = JSON.parse(jsonStr);
-    if (!Array.isArray(candidates)) throw new Error("JSON が配列ではない");
+    const candidates = JSON.parse(jsonStr);
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+      console.log('[CRAWLER] 有効な候補がありません');
+      console.log(`[RESULT] 既存 ${existingData.length} 件のデータを維持`);
+      return;
+    }
 
-    console.log(`[CRAWLER] ✓ AI が ${candidates.length} 件の候補を返却`);
+    console.log(`[CRAWLER] AI が ${candidates.length} 件の候補を返却`);
 
-  } catch (aiError) {
-    console.error(`[CRAWLER_FAILURE] AI リクエスト失敗: ${aiError.message}`);
+    // 1件制限で追加
+    let addedCount = 0;
+    for (const candidate of candidates) {
+      if (addedCount >= 1) break;
+
+      const isDuplicate = existingData.some(f =>
+        f.name.includes(candidate.name) || candidate.name.includes(f.name)
+      );
+
+      if (isDuplicate) {
+        console.log(`[DUPLICATE] スキップ: ${candidate.name}`);
+        continue;
+      }
+
+      // URL検証
+      console.log(`[VALIDATE] ${candidate.name}: ${candidate.url}`);
+      const validation = await validateUrl(candidate.url);
+
+      if (!validation.valid && candidate.url) {
+        console.warn(`[URL_INVALID] スキップ: ${candidate.name}`);
+        continue;
+      }
+
+      candidate.url = validation.url;
+
+      // アクセス情報チェック
+      if (!candidate.access || !candidate.access.train || !candidate.access.bus || !candidate.access.car) {
+        console.warn(`[ACCESS_INCOMPLETE] ${candidate.name} - アクセス情報が不完全`);
+        continue;
+      }
+
+      existingData.push(candidate);
+      addedCount++;
+      console.log(`[ADDED] ✓ ${candidate.name}`);
+    }
+
+    // ファイル保存
+    fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2), 'utf-8');
+    console.log(`[RESULT] ✅ ${addedCount} 件追加、合計 ${existingData.length} 件`);
+
+  } catch (error) {
+    console.error(`[FATAL] クローラーエラー: ${error.message}`);
     console.log(`[RESULT] 既存 ${existingData.length} 件のデータを維持`);
     process.exit(0);
   }
-
-  console.log(`[CRAWLER] 候補を検証中...`);
-
-  let addedCount = 0;
-  for (const nf of candidates) {
-    if (addedCount >= 1) {
-      console.log(`[LIMIT] 1件制限に達しました`);
-      break;
-    }
-
-    const isDuplicate = existingData.some(f =>
-      f.name.includes(nf.name) || nf.name.includes(f.name)
-    );
-    if (isDuplicate) {
-      console.log(`[DUPLICATE] スキップ: ${nf.name}`);
-      continue;
-    }
-
-    console.log(`[VALIDATE] ${nf.name}: URLを検証中... (${nf.url})`);
-    const validation = await validateUrl(nf.url);
-
-    if (!validation.valid) {
-      console.error(`[URL_FAIL] 施設を追加不可: URLが無効です - ${nf.name}`);
-      continue;
-    }
-
-    nf.url = validation.url;
-    nf.verified = validation.verified;
-
-    const access = nf.access || {};
-    if (!access.train || !access.bus || !access.car || !access.rank) {
-      console.error(`[ACCESS_WARN] アクセス情報が不完全: ${nf.name}`);
-      continue;
-    }
-
-    existingData.push(nf);
-    addedCount++;
-    console.log(`[ADDED] ✓ 施設を追加: ${nf.name}`);
-  }
-
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
-    console.log(`[RESULT] ✅ ${addedCount} 件追加、合計 ${existingData.length} 件`);
-  } catch (saveErr) {
-    console.error(`[SAVE] ファイル保存失敗: ${saveErr.message}`);
-    throw saveErr;
-  }
-
-  console.log("[CRAWLER] ✓ 完了");
 }
 
 main().catch(error => {
-  console.error(`[FATAL] ${error.message}`);
+  console.error(`[ERROR] ${error.message}`);
   process.exit(1);
 });
