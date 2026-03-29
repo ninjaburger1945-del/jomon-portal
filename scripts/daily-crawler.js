@@ -2,11 +2,12 @@ const fs = require("fs");
 const path = require("path");
 
 /**
- * REST API形式で Google Gemini API (v1安定版) を直接叩く
+ * REST API形式で Google Gemini API (v1beta) を直接叩く
  * 3月16日の Paid Tier/Spend Caps ルール対応版
+ * モデル: gemini-2.5-pro (最新・最高性能)
  */
 
-const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
+const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
 const API_KEY = process.env.GEMINI_API_KEY20261336;
 
 if (!API_KEY) {
