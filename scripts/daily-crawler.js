@@ -107,8 +107,8 @@ async function main() {
 
   const existingNames = existingData.map(f => `- ${f.name}`).join('\n');
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("GEMINI_API_KEY が設定されていません");
+  const apiKey = process.env.GEMINI_API_KEY20261336;
+  if (!apiKey) throw new Error("GEMINI_API_KEY20261336 が設定されていません");
 
   const client = new GoogleGenerativeAI({ apiKey });
   const model = client.getGenerativeModel({ model: "gemini-2.5-pro" });
