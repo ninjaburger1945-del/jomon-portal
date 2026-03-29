@@ -42,7 +42,7 @@ jobs:
             echo "First 10 chars: ${GEMINI_API_KEY:0:10}"
           fi
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY20261336 }}
+          GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
 
       - name: "DEBUG: Check directory structure"
         run: |
@@ -73,7 +73,7 @@ jobs:
           fi
           exit $CRAWLER_EXIT
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY20261336 }}
+          GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
 
       - name: Commit and Push Database and Image Updates
         run: |
