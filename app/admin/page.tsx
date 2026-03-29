@@ -997,7 +997,10 @@ export default function AdminPage() {
                 Cancel
               </button>
               <button
-                onClick={handleSaveEdit}
+                onClick={() => {
+                  console.log("Save button clicked");
+                  handleSaveEdit();
+                }}
                 style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#0066cc", color: "white", border: "none", borderRadius: "4px" }}
               >
                 Save
