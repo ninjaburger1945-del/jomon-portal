@@ -1595,12 +1595,12 @@
   },
   {
     "id": "053",
-    "name": "史跡 栃原岩陰遺跡（北相木村考古博物館）",
+    "name": "北相木村考古博物館",
     "region": "Chubu",
     "prefecture": "長野県",
     "address": "長野県南佐久郡北相木村2641-1",
     "description": "長野県の山間部に位置する国指定史跡の岩陰遺跡。縄文時代草創期（約1万2千年前）から古墳時代にかけて利用された。特に、縄文時代草創期の人骨が8体以上発見されたことで全国的に知られている。これらは日本最古級の人骨群であり、当時の人々の埋葬習慣や形質を研究する上で極めて貴重な資料となっている。隣接する北相木村考古博物館では、出土した土器や石器、人骨のレプリカなどを展示しており、草創期の人々の暮らしを具体的に学ぶことができる。",
-    "url": "https://www.vill.kitaaiki.nagano.jp/soshiki/kyouiku/koukokan.html",
+    "url": "https://www.82bunka.or.jp/bunkashisetsu/detail.php?no=252",
     "thumbnail": "/images/facilities/053_ai.png",
     "tags": [
       "博物館",
@@ -1619,7 +1619,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR小海線 小海駅から北相木村営バス「考古博物館前」下車（本数少）",
+    "access_public": "JR小海線 小海駅からタクシーで約20分。小海駅から北相木村営バスで「考古博物館前」下車（本数少）",
     "access_public_en": "",
     "access_car": "上信越自動車道 佐久ICから約60分",
     "access_car_en": ""
