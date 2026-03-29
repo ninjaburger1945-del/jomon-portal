@@ -32,6 +32,7 @@ export default function AdminPage() {
   const [statsLoading, setStatsLoading] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("id");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [saving, setSaving] = useState(false);
 
   const handleLogin = () => {
     const correctPassword = "jomon2026";
@@ -220,7 +221,8 @@ export default function AdminPage() {
     }
   };
 
-  const saveFacilitiesToGithub = async (updatedFacilities: Facility[]) => {
+  const saveFacilitiesToGithub = async (updatedFacilities: Facility[], retryCount = 0) => {
+    const maxRetries = 3;
     try {
       console.log("Calling save-facilities API...");
       const response = await fetch("/api/save-facilities", {
@@ -233,7 +235,14 @@ export default function AdminPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "Failed to save");
+        // 409エラー（SHA競合）の場合はリトライ
+        if (error.status === 409 && retryCount < maxRetries) {
+          console.log(`SHA conflict, retrying... (attempt ${retryCount + 1}/${maxRetries})`);
+          // 少し待ってからリトライ
+          await new Promise(r => setTimeout(r, 500));
+          return saveFacilitiesToGithub(updatedFacilities, retryCount + 1);
+        }
+        throw new Error(error.error || error.message || "Failed to save");
       }
 
       console.log("Successfully saved to GitHub!");
@@ -299,6 +308,7 @@ export default function AdminPage() {
         f.id === facilityToSave.id ? facilityToSave : f
       );
 
+    setSaving(true);
     try {
       // API保存を最優先（UI更新の前）
       await saveFacilitiesToGithub(updated);
@@ -332,6 +342,8 @@ export default function AdminPage() {
         `Failed to save: ${err instanceof Error ? err.message : "Unknown error"}`
       );
       // UIは更新しない（データ一貫性を保持）
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -1001,9 +1013,10 @@ export default function AdminPage() {
                   console.log("Save button clicked");
                   handleSaveEdit();
                 }}
-                style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#0066cc", color: "white", border: "none", borderRadius: "4px" }}
+                disabled={saving}
+                style={{ padding: "8px 16px", cursor: saving ? "not-allowed" : "pointer", backgroundColor: saving ? "#666666" : "#0066cc", color: "white", border: "none", borderRadius: "4px", opacity: saving ? 0.6 : 1 }}
               >
-                Save
+                {saving ? "💾 Saving..." : "Save"}
               </button>
             </div>
           </div>

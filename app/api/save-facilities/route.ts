@@ -1,23 +1,14 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { revalidatePath } from 'next/cache';
 
-export async function POST(request: NextRequest) {
+async function saveWithRetry(
+  token: string,
+  repo: string,
+  facilities: any[],
+  maxRetries: number = 3,
+  retryCount: number = 0
+): Promise<any> {
   try {
-    const { facilities } = await request.json();
-
-    const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
-    const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
-
-    if (!token || !repo) {
-      return NextResponse.json(
-        { error: 'GitHub credentials not configured' },
-        { status: 400 }
-      );
-    }
-
-    console.log('[API] Saving facilities to GitHub:', repo);
-    console.log('[API] Token configured:', !!token);
-
     // 1. Get current SHA
     const getRes = await fetch(
       `https://api.github.com/repos/${repo}/contents/app/data/facilities.json`,
@@ -57,9 +48,40 @@ export async function POST(request: NextRequest) {
     );
 
     if (!putRes.ok) {
-      const errText = await putRes.text();
-      throw new Error(`Failed to save: ${putRes.status} - ${errText}`);
+      const errData = await putRes.json();
+      // 409 Conflict: retry with latest SHA
+      if (errData.status === 409 && retryCount < maxRetries) {
+        console.log(`[API] SHA conflict, retrying... (${retryCount + 1}/${maxRetries})`);
+        await new Promise(r => setTimeout(r, 500 + Math.random() * 500));
+        return saveWithRetry(token, repo, facilities, maxRetries, retryCount + 1);
+      }
+      throw new Error(`Failed to save: ${putRes.status} - ${JSON.stringify(errData)}`);
     }
+
+    return await putRes.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { facilities } = await request.json();
+
+    const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
+    const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
+
+    if (!token || !repo) {
+      return NextResponse.json(
+        { error: 'GitHub credentials not configured' },
+        { status: 400 }
+      );
+    }
+
+    console.log('[API] Saving facilities to GitHub:', repo);
+    console.log('[API] Token configured:', !!token);
+
+    await saveWithRetry(token, repo, facilities);
 
     console.log('[API] Successfully saved to GitHub!');
 
