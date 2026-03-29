@@ -5,6 +5,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const sharp = require("sharp");
 
 const API_KEY = process.env.GEMINI_API_KEY20261336;
 
@@ -55,6 +56,40 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
     }
+  }
+}
+
+/**
+ * 画像をリサイズして 1:1 正方形フォーマットに変換
+ */
+async function resizeImageToSquare(imagePath) {
+  try {
+    console.log(`[RESIZE] 開始: ${imagePath}`);
+
+    // 画像メタデータを取得
+    const metadata = await sharp(imagePath).metadata();
+    const { width, height } = metadata;
+
+    console.log(`[RESIZE] 元のサイズ: ${width}x${height}`);
+
+    // 正方形のサイズを決定（小さい方の寸法を基準）
+    const squareSize = Math.min(width, height);
+
+    // センタークロップして正方形に
+    const left = Math.floor((width - squareSize) / 2);
+    const top = Math.floor((height - squareSize) / 2);
+
+    await sharp(imagePath)
+      .extract({ left, top, width: squareSize, height: squareSize })
+      .resize(512, 512, { fit: 'fill' })
+      .toFile(imagePath);
+
+    console.log(`[RESIZE] ✅ 完了: ${squareSize}x${squareSize} → 512x512`);
+    return true;
+
+  } catch (error) {
+    console.error(`[RESIZE] ❌ リサイズ失敗: ${error.message}`);
+    return false;
   }
 }
 
@@ -129,6 +164,10 @@ async function generateImage(facilityId, facilityName, description) {
         const imageBuffer = Buffer.from(imageData.bytesBase64Encoded, "base64");
         fs.writeFileSync(outputPath, imageBuffer);
         console.log(`[IMAGE] ✅ 生成成功: ${facilityId}_ai.png (${imageBuffer.length} bytes)`);
+
+        // 画像をリサイズして正方形フォーマットに変換
+        await resizeImageToSquare(outputPath);
+
         return outputPath;
       }
     }
