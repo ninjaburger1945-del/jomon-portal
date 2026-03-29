@@ -6,7 +6,7 @@ const path = require("path");
  * 3月16日の Paid Tier/Spend Caps ルール対応版
  */
 
-const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent";
+const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
 const API_KEY = process.env.GEMINI_API_KEY20261336;
 
 if (!API_KEY) {
@@ -35,8 +35,8 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
         console.error(`[HTTP_ERROR] ステータス: ${response.status}`);
         console.error(`[HTTP_ERROR] レスポンス: ${errorText.substring(0, 200)}`);
 
-        // 400, 401, 403 は永続的エラー（リトライしない）
-        if ([400, 401, 403].includes(response.status)) {
+        // 400, 401, 403, 404 は永続的エラー（リトライしない）
+        if ([400, 401, 403, 404].includes(response.status)) {
           throw new Error(`[PERMANENT] HTTP ${response.status}: ${errorText.substring(0, 100)}`);
         }
 
