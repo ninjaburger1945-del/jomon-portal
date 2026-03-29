@@ -95,6 +95,16 @@ jobs:
         env:
           GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
 
+      - name: Generate Missing Images - Facility 052
+        timeout-minutes: 30
+        run: |
+          echo "[IMAGE_GEN] Generating image for facility 052..."
+          node scripts/generate-missing-images.js 052
+          echo "[IMAGE_GEN] ✓ Image generation completed"
+        env:
+          GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
+        continue-on-error: true
+
       - name: Commit and Push Database and Image Updates
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
