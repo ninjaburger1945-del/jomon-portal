@@ -35,11 +35,11 @@ jobs:
 
       - name: "DEBUG: Check if API key is set"
         run: |
-          if [ -z "$GEMINI_API_KEY" ]; then
-            echo "ERROR: GEMINI_API_KEY is empty"
+          if [ -z "$GEMINI_API_KEY20261336" ]; then
+            echo "ERROR: GEMINI_API_KEY20261336 is empty"
           else
-            echo "✓ GEMINI_API_KEY is set (length: ${#GEMINI_API_KEY})"
-            echo "First 10 chars: ${GEMINI_API_KEY:0:10}"
+            echo "✓ GEMINI_API_KEY20261336 is set (length: ${#GEMINI_API_KEY20261336})"
+            echo "First 10 chars: ${GEMINI_API_KEY20261336:0:10}"
           fi
         env:
           GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
