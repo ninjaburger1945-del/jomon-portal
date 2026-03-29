@@ -1,0 +1,79 @@
+name: "Generate Missing Images"
+
+on:
+  workflow_dispatch:
+    inputs:
+      facility_ids:
+        description: 'Facility IDs to generate images for (comma-separated, e.g. 052,053,054)'
+        required: true
+        default: '052'
+
+jobs:
+  generate-images:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: "DEBUG: Verify API Key"
+        run: |
+          if [ -z "$GEMINI_API_KEY20261336" ]; then
+            echo "ERROR: GEMINI_API_KEY20261336 is not set"
+            exit 1
+          else
+            echo "✓ GEMINI_API_KEY20261336 is set"
+            echo "  Length: ${#GEMINI_API_KEY20261336}"
+            echo "  First 10 chars: ${GEMINI_API_KEY20261336:0:10}"
+          fi
+        env:
+          GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
+
+      - name: Generate Missing Images
+        timeout-minutes: 60
+        run: |
+          echo "[IMAGE_GEN] Generating images for: ${{ github.event.inputs.facility_ids }}"
+          # Convert comma-separated to array
+          IFS=',' read -ra FACILITY_IDS <<< "${{ github.event.inputs.facility_ids }}"
+          for id in "${FACILITY_IDS[@]}"; do
+            id=$(echo $id | xargs)  # Trim whitespace
+            echo "[IMAGE_GEN] Processing facility: $id"
+            node scripts/generate-missing-images.js "$id"
+          done
+          echo "[IMAGE_GEN] ✓ Image generation completed"
+        env:
+          GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
+        continue-on-error: true
+
+      - name: Commit and Push Image Updates
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git config core.hooksPath .githooks
+
+          STATUS=$(git status --porcelain app/data/facilities.json public/images/facilities/)
+          if [[ -n "$STATUS" ]]; then
+            echo "[GIT] Detected changes:"
+            echo "$STATUS"
+            git add app/data/facilities.json public/images/facilities/
+            git commit -m "chore(images): auto-generated AI illustrations [skip ci]"
+            if git push origin main; then
+              echo "[GIT] ✓ Successfully pushed images"
+            else
+              echo "[GIT] ⚠️  Push failed"
+            fi
+          else
+            echo "[GIT] No changes to commit"
+          fi
