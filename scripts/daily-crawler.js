@@ -122,40 +122,19 @@ async function callGeminiAPI(prompt) {
 }
 
 /**
- * URL検証 - 緩和版
- * 404以外はすべて有効と判定（リダイレクト、接続エラーなども許容）
+ * URL検証 - スキップ版（Paid Tier対応）
+ * URLバリデーションを一時的にスキップ
+ * AI（Gemini）の出力を信頼し、チェックなしでそのまま使用
  */
 async function validateUrl(url) {
   if (!url || !url.startsWith('http')) {
-    console.log(`[URL_INVALID] 形式が不正: ${url}`);
+    console.log(`[URL_SKIP_VALIDATION] 形式チェックのみ: ${url}`);
     return { valid: false, url: '' };
   }
 
-  try {
-    const response = await fetch(url, {
-      method: 'HEAD',
-      timeout: 5000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-      }
-    });
-
-    // 404 のみを不正と判定、他は有効
-    if (response.status === 404) {
-      console.log(`[URL_INVALID] 404 Not Found: ${url}`);
-      return { valid: false, url: '' };
-    }
-
-    // 200, 301, 302, 503 など、その他は有効
-    console.log(`[URL_VALID] HTTP ${response.status}: ${url}`);
-    return { valid: true, url };
-
-  } catch (err) {
-    // ネットワークエラーやタイムアウトは、一旦有効として受け入れ
-    // （実際の施設は存在している可能性が高い）
-    console.log(`[URL_CHECK_WARNING] ${url} - ${err.message} (ただし受理)`);
-    return { valid: true, url };
-  }
+  // バリデーションをスキップし、AIの出力を信頼
+  console.log(`[URL_ACCEPTED_NO_VALIDATION] ${url}`);
+  return { valid: true, url };
 }
 
 /**
@@ -193,12 +172,14 @@ ${existingNames}
 - 縄文時代のみ（弥生時代は除外）
 - 公立博物館または国指定史跡
 
-【URLについて - 重要】
-施設の公式ウェブサイトURLが存在する場合は、「必ず現在2025年3月時点でアクセス可能」な自治体公式サイト(.lg.jp, .pref など)のURLを記載してください。
-- 自治体公式ページの施設紹介ページを優先
-- Wikipedia や他サイトではなく、公式サイトのみ
-- URLが見つからない、またはアクセス不可の場合は空文字("")にしてください
-- 確実に存在するURLであることを優先してください
+【URLについて - 極度に厳格】
+施設の公式ウェブサイトURLは「必ず現在2026年3月時点で確実にアクセス可能」な自治体公式サイト(.lg.jp, .pref など)のURLを「1つだけ」記載してください。
+重要な指示：
+- 自治体公式ページの施設紹介ページを「必ず」確認してから出力してください
+- Wikipedia や他の二次情報サイト、SNSではなく、公式サイトのみ
+- 不確実なURLは絶対に出力しないでください
+- URLが確実に見つからない、またはアクセス不可の場合のみ空文字("")にしてください
+- 1つのURLのみ出力してください（複数のURLは出力しないこと）
 
 【出力要件】
 完全なJSON配列のみを出力：
@@ -286,6 +267,13 @@ ${existingNames}
         console.warn(`[ACCESS_INCOMPLETE] ${candidate.name} - アクセス情報が不完全`);
         continue;
       }
+
+      // 画像生成（Paid Tier対応版 - 現在スキップ）
+      // TODO: Imagen API を Paid Tier で実装して、ここで画像生成
+      // const imageUrl = await generateFacilityImage(candidate.name, candidate.description);
+      // candidate.thumbnail = imageUrl || '';
+      candidate.thumbnail = ''; // 現在は空
+      console.log(`[IMAGE] スキップ（手動後処理予定）: ${candidate.name}`);
 
       existingData.push(candidate);
       addedCount++;
