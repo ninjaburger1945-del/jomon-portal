@@ -268,6 +268,11 @@ ${existingNames}
         continue;
       }
 
+      // ID生成：連番形式（001, 002, ..., 052）に統一
+      const nextId = String(existingData.length + 1).padStart(3, '0');
+      candidate.id = nextId;
+      console.log(`[ID_GENERATED] ${candidate.name} → ${nextId}`);
+
       // 画像生成（Paid Tier対応版 - 現在スキップ）
       // TODO: Imagen API を Paid Tier で実装して、ここで画像生成
       // const imageUrl = await generateFacilityImage(candidate.name, candidate.description);
@@ -277,7 +282,7 @@ ${existingNames}
 
       existingData.push(candidate);
       addedCount++;
-      console.log(`[ADDED] ✓ ${candidate.name}`);
+      console.log(`[ADDED] ✓ ${nextId} - ${candidate.name}`);
     }
 
     // ファイル保存
