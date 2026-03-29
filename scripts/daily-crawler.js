@@ -179,7 +179,8 @@ async function generateFacilityImage(facilityId, facilityName, description) {
       ],
       parameters: {
         sampleCount: 1,
-        aspectRatio: "1:1"
+        aspectRatio: "4:3",
+        outputMimeType: "image/png"
       }
     };
 
