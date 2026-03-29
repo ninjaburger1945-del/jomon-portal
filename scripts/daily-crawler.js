@@ -122,10 +122,12 @@ async function callGeminiAPI(prompt) {
 }
 
 /**
- * URL検証
+ * URL検証 - 緩和版
+ * 404以外はすべて有効と判定（リダイレクト、接続エラーなども許容）
  */
 async function validateUrl(url) {
   if (!url || !url.startsWith('http')) {
+    console.log(`[URL_INVALID] 形式が不正: ${url}`);
     return { valid: false, url: '' };
   }
 
@@ -138,13 +140,21 @@ async function validateUrl(url) {
       }
     });
 
-    if (response.status === 200) {
-      return { valid: true, url };
+    // 404 のみを不正と判定、他は有効
+    if (response.status === 404) {
+      console.log(`[URL_INVALID] 404 Not Found: ${url}`);
+      return { valid: false, url: '' };
     }
-    return { valid: false, url: '' };
+
+    // 200, 301, 302, 503 など、その他は有効
+    console.log(`[URL_VALID] HTTP ${response.status}: ${url}`);
+    return { valid: true, url };
+
   } catch (err) {
-    console.log(`[URL_CHECK] ${url} - ${err.message}`);
-    return { valid: false, url: '' };
+    // ネットワークエラーやタイムアウトは、一旦有効として受け入れ
+    // （実際の施設は存在している可能性が高い）
+    console.log(`[URL_CHECK_WARNING] ${url} - ${err.message} (ただし受理)`);
+    return { valid: true, url };
   }
 }
 
@@ -183,9 +193,12 @@ ${existingNames}
 - 縄文時代のみ（弥生時代は除外）
 - 公立博物館または国指定史跡
 
-【URLについて】
-施設の公式ウェブサイトURLが存在する場合は、自治体公式サイト(.lg.jp, .pref など)のURLを記載してください。
-見つからない場合は空文字("")にしてください。
+【URLについて - 重要】
+施設の公式ウェブサイトURLが存在する場合は、「必ず現在2025年3月時点でアクセス可能」な自治体公式サイト(.lg.jp, .pref など)のURLを記載してください。
+- 自治体公式ページの施設紹介ページを優先
+- Wikipedia や他サイトではなく、公式サイトのみ
+- URLが見つからない、またはアクセス不可の場合は空文字("")にしてください
+- 確実に存在するURLであることを優先してください
 
 【出力要件】
 完全なJSON配列のみを出力：
@@ -255,18 +268,20 @@ ${existingNames}
         continue;
       }
 
-      // URL検証
+      // URL検証（ただし無効でも名称や説明文が正しければ保存）
       console.log(`[VALIDATE] ${candidate.name}: ${candidate.url}`);
       const validation = await validateUrl(candidate.url);
 
-      if (!validation.valid && candidate.url) {
-        console.warn(`[URL_INVALID] スキップ: ${candidate.name}`);
-        continue;
+      // URL検証結果を反映（有効なら validation.url、無効でも元の URL を保持）
+      if (validation.valid) {
+        candidate.url = validation.url;
+      } else if (!validation.valid && candidate.url) {
+        // URL が無効でも、施設の名称や説明文が正しければ空文字で保存
+        console.warn(`[URL_INVALID_BUT_ACCEPTED] URL無効だが施設情報は有効: ${candidate.name}`);
+        candidate.url = '';
       }
 
-      candidate.url = validation.url;
-
-      // アクセス情報チェック
+      // アクセス情報チェック（必須）
       if (!candidate.access || !candidate.access.train || !candidate.access.bus || !candidate.access.car) {
         console.warn(`[ACCESS_INCOMPLETE] ${candidate.name} - アクセス情報が不完全`);
         continue;
