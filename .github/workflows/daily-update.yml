@@ -59,6 +59,20 @@ jobs:
             echo "✗ app/data/facilities.json MISSING"
           fi
 
+      - name: "DEBUG: Verify API Key Before Crawler"
+        run: |
+          if [ -z "$GEMINI_API_KEY20261336" ]; then
+            echo "ERROR: GEMINI_API_KEY20261336 is not set"
+            exit 1
+          else
+            echo "✓ GEMINI_API_KEY20261336 is set"
+            echo "  Length: ${#GEMINI_API_KEY20261336}"
+            echo "  First 10 chars: ${GEMINI_API_KEY20261336:0:10}"
+            echo "  Last 5 chars: ${GEMINI_API_KEY20261336: -5}"
+          fi
+        env:
+          GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
+
       - name: AI Crawler - Find 1 New Facilities
         timeout-minutes: 45
         run: |

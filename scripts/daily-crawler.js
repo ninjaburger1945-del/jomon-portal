@@ -110,6 +110,15 @@ async function main() {
   const apiKey = process.env.GEMINI_API_KEY20261336;
   if (!apiKey) throw new Error("GEMINI_API_KEY20261336 が設定されていません");
 
+  // DEBUG: APIキーの詳細情報
+  console.log('[DEBUG] GEMINI_API_KEY20261336 環境変数:');
+  console.log(`  - 存在: ${!!apiKey}`);
+  console.log(`  - 長さ: ${apiKey.length}`);
+  console.log(`  - 最初の10文字: ${apiKey.substring(0, 10)}`);
+  console.log(`  - 最後の5文字: ${apiKey.substring(apiKey.length - 5)}`);
+  console.log(`  - スペース/改行を含む: ${/[\s]/.test(apiKey)}`);
+  console.log(`  - 形式: ${apiKey.startsWith('AIza') ? '✓ Valid prefix' : '✗ Invalid prefix'}`);
+
   const client = new GoogleGenerativeAI({ apiKey });
   const model = client.getGenerativeModel({ model: "gemini-1.5-pro" });
   console.log('[MODEL] Using gemini-1.5-pro');
