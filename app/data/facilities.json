@@ -5,7 +5,7 @@
     "region": "Tohoku",
     "prefecture": "青森県",
     "address": "青森県青森市三内字丸山305",
-    "description": "日本最大級の縄文集落跡。大型竪穴建物跡や大型掘立柱建物跡が精緻に復元されており、縄文時代のムラの様子と社会組織を体感できます。青森県青森市の遺跡は、日本を代表する縄文遺跡として、考古学的な重要性が極めて高く、学術的価値も測り知れません。複数の大型建物の共存から、社会",
+    "description": "日本最大級の縄文集落跡。大型竪穴建物跡や大型掘立柱建物跡が精緻に復元されており、縄文時代のムラの様子と社会組織を体感できます。青森県青森市の遺跡は、日本を代表する縄文",
     "url": "https://sannaimaruyama.pref.aomori.jp/",
     "thumbnail": "/images/facilities/sannaimaruyama_ai.png",
     "tags": [
@@ -283,7 +283,7 @@
     "region": "Hokkaido",
     "prefecture": "北海道",
     "address": "北海道函館市大船町575-1",
-    "description": "",
+    "description": "世界文化遺産『北海道・北東北の縄文遺跡群』の構成資産。深く掘り込まれた巨大な竪穴建物跡が特徴で、祭祀場や盛土など宗教的施設が保存されています。北海道函館市の遺跡は、厳しい北の大地での縄文人の巧妙で創意工夫に満ちた生活適応を示しています。巨大な建物跡から、寒冷地での高度で洗練された建築技術の水準がうかがえます。巨大竪穴建物の内部構造から、複数の家族や人々が共同で生活していた可能性が指摘されており、社会組織の複雑化を示唆しています。",
     "url": "https://jomon-japan.jp/learn/jomon-sites/ofune",
     "thumbnail": "/images/facilities/ofune_ai.png",
     "tags": [
@@ -302,7 +302,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR函館本線函館駅からバスで約1時間40分。函館バス大船バス停から徒歩約2分",
+    "access_public": "JR函館本線函館駅からバスで約1時間40分",
     "access_public_en": "",
     "access_car": "函館新道函館ICから国道278号経由で約1時間",
     "access_car_en": ""
