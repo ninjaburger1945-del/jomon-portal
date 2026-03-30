@@ -376,3 +376,5 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
         </main>
     );
 }
+
+export const revalidate = 60;
