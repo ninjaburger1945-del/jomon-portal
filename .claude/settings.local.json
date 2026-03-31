@@ -93,7 +93,11 @@
       "Bash(xargs kill:*)",
       "Bash(rm -f .next/lock)",
       "Bash(explorer.exe \"C:\\\\Users\\\\ninja\\\\.gemini\\\\antigravity\\\\scratch\\\\jomon-portal\")",
-      "Bash(jq '.[] |= . + {name_en: \"\"\"\", description_en: \"\"\"\", location_en: \"\"\"\"}' app/data/facilities.json)"
+      "Bash(jq '.[] |= . + {name_en: \"\"\"\", description_en: \"\"\"\", location_en: \"\"\"\"}' app/data/facilities.json)",
+      "Bash(tail:*)",
+      "Bash(curl -s http://localhost:3000/api/stats)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:developers.google.com)"
     ]
   }
 }

@@ -2,7 +2,7 @@ name: "Daily Autopilot: Jomon Explorer"
 
 on:
   schedule:
-    - cron: '0 8 * * *'   # 日本時間 毎日 17:00 (UTC 08:00)
+    - cron: '37 8 * * *'   # 日本時間 毎日 17:37 (UTC 08:37)
   workflow_dispatch:      # 手動実行ボタンを有効化
 
 jobs:
@@ -33,48 +33,17 @@ jobs:
           npm install
           npm install @google/generative-ai@latest
 
-      - name: "DEBUG: Check if API key is set"
+      - name: Verify API Key and Environment
         run: |
           if [ -z "$GEMINI_API_KEY20261336" ]; then
-            echo "ERROR: GEMINI_API_KEY20261336 is empty"
-          else
-            echo "✓ GEMINI_API_KEY20261336 is set (length: ${#GEMINI_API_KEY20261336})"
-            echo "First 10 chars: ${GEMINI_API_KEY20261336:0:10}"
-          fi
-        env:
-          GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
-
-      - name: "DEBUG: Check directory structure"
-        run: |
-          echo "[DEBUG] Current directory: $(pwd)"
-          echo "[DEBUG] Directory listing:"
-          ls -la
-          echo "[DEBUG] app/data/ contents:"
-          ls -la app/data/ 2>/dev/null || echo "app/data/ not found!"
-          echo "[DEBUG] File existence check:"
-          if [ -f "app/data/facilities.json" ]; then
-            echo "✓ app/data/facilities.json EXISTS"
-            echo "File size: $(stat -f%z app/data/facilities.json 2>/dev/null || stat -c%s app/data/facilities.json 2>/dev/null || echo 'unknown')"
-          else
-            echo "✗ app/data/facilities.json MISSING"
-          fi
-
-      - name: "DEBUG: List Available Models"
-        run: |
-          node scripts/check-available-models.js
-        env:
-          GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
-
-      - name: "DEBUG: Verify API Key Before Crawler"
-        run: |
-          if [ -z "$GEMINI_API_KEY20261336" ]; then
-            echo "ERROR: GEMINI_API_KEY20261336 is not set"
+            echo "❌ ERROR: GEMINI_API_KEY20261336 is not set"
             exit 1
+          fi
+          echo "✓ API key configured (length: ${#GEMINI_API_KEY20261336})"
+          if [ -f "app/data/facilities.json" ]; then
+            echo "✓ facilities.json exists"
           else
-            echo "✓ GEMINI_API_KEY20261336 is set"
-            echo "  Length: ${#GEMINI_API_KEY20261336}"
-            echo "  First 10 chars: ${GEMINI_API_KEY20261336:0:10}"
-            echo "  Last 5 chars: ${GEMINI_API_KEY20261336: -5}"
+            echo "⚠️  facilities.json not found, will be created"
           fi
         env:
           GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
@@ -95,16 +64,6 @@ jobs:
         env:
           GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
 
-      - name: Generate Missing Images - Facility 052
-        timeout-minutes: 30
-        run: |
-          echo "[IMAGE_GEN] Generating image for facility 052..."
-          node scripts/generate-missing-images.js 052
-          echo "[IMAGE_GEN] ✓ Image generation completed"
-        env:
-          GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
-        continue-on-error: true
-
       - name: Commit and Push Database and Image Updates
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -118,12 +77,20 @@ jobs:
             echo "[GIT] Detected changes:"
             echo "$STATUS"
             git commit -m "chore(data): auto-added new Jomon facility and AI image [skip ci]"
+
+            # Push with retry - pull rebase if conflict
             if git push origin main; then
               echo "[GIT] ✓ Successfully pushed to main"
             else
-              echo "[GIT] ✗ Push failed - checking for conflicts..."
-              git log -1 --oneline
-              exit 1
+              echo "[GIT] ⚠️  Push failed - attempting git pull --rebase..."
+              git pull --rebase origin main
+              if git push origin main; then
+                echo "[GIT] ✓ Successfully pushed after rebase"
+              else
+                echo "[GIT] ✗ Push failed even after rebase"
+                git log -1 --oneline
+                exit 1
+              fi
             fi
           else
             echo "[GIT] No changes to commit"
