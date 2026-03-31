@@ -260,6 +260,70 @@ async function validateUrlWithContent(url, facilityName, address, description) {
 }
 
 /**
+ * kunishitei.bunka.go.jp でフォールバック検索
+ */
+async function findUrlViaKunishitei(facilityName, address) {
+  console.log(`[FALLBACK] kunishitei.bunka.go.jp で検索を試みます: ${facilityName}`);
+
+  // Gemini に kunishitei.bunka.go.jp 内のURL候補を生成させる
+  const fallbackPrompt = `
+あなたは国指定史跡データベース（kunishitei.bunka.go.jp）の専門家です。
+
+【指示】
+施設「${facilityName}」に関するページのURLを kunishitei.bunka.go.jp 内で探してください。
+
+【出力】
+以下のいずれかを返す：
+1. 該当ページが存在する場合：
+   {"found": true, "url": "https://kunishitei.bunka.go.jp/..."}
+
+2. 見つからない場合：
+   {"found": false}
+
+注意：
+- 絶対にハルシネーション（存在しないURL）を返さないでください
+- kunishitei.bunka.go.jp ドメインのURLのみ
+- 確実に存在すると確信できる場合のみ返してください
+`;
+
+  try {
+    const fallbackResponse = await callGeminiAPI(fallbackPrompt);
+    console.log(`[FALLBACK] Gemini レスポンス: ${fallbackResponse.substring(0, 200)}`);
+
+    // JSON抽出
+    let jsonStr = fallbackResponse.trim();
+    const jsonStart = jsonStr.indexOf('{');
+    const jsonEnd = jsonStr.lastIndexOf('}');
+
+    if (jsonStart === -1 || jsonEnd === -1) {
+      console.warn(`[FALLBACK] JSON形式のレスポンスが見つかりません`);
+      return { valid: false, url: '' };
+    }
+
+    jsonStr = jsonStr.substring(jsonStart, jsonEnd + 1);
+    const result = JSON.parse(jsonStr);
+
+    if (result.found && result.url) {
+      console.log(`[FALLBACK] 候補URL: ${result.url}`);
+
+      // 見つかったURLを検証
+      const validation = await validateUrlWithContent(result.url, facilityName, address, '');
+      if (validation.valid) {
+        console.log(`[FALLBACK] ✅ kunishitei.bunka.go.jp で検証成功: ${result.url}`);
+        return { valid: true, url: result.url };
+      }
+    }
+
+    console.warn(`[FALLBACK] kunishitei.bunka.go.jp に該当ページが見つかりません`);
+    return { valid: false, url: '' };
+
+  } catch (error) {
+    console.warn(`[FALLBACK] エラー: ${error.message}`);
+    return { valid: false, url: '' };
+  }
+}
+
+/**
  * 複数URL候補を検証して、最初に有効なURLを返す（Google検索順を信頼）
  */
 async function validateCandidateUrls(candidateUrls, facilityName, address) {
@@ -278,7 +342,14 @@ async function validateCandidateUrls(candidateUrls, facilityName, address) {
   }
 
   console.warn(`[NO_VALID_URL] 候補URLの中に有効なものがありません`);
-  return { valid: false, url: '', reason: 'No valid URLs in candidates' };
+
+  // フォールバック処理：kunishitei.bunka.go.jp で検索
+  const fallbackResult = await findUrlViaKunishitei(facilityName, address);
+  if (fallbackResult.valid) {
+    return { valid: true, url: fallbackResult.url, reason: 'Found via kunishitei.bunka.go.jp fallback' };
+  }
+
+  return { valid: false, url: '', reason: 'No valid URLs found even in kunishitei.bunka.go.jp' };
 }
 
 /**
