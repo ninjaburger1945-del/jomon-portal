@@ -571,23 +571,21 @@ ${existingNames}
       console.log(`[PROCESS] ${candidate.name} - URL候補を検証中...`);
       const candidateUrls = candidate.candidates || (candidate.url ? [candidate.url] : []);
 
-      let finalUrl = '';
-      if (candidateUrls.length > 0) {
-        const urlValidation = await validateCandidateUrls(candidateUrls, candidate.name, candidate.address);
-        if (urlValidation.valid) {
-          finalUrl = urlValidation.url;
-          console.log(`[URL_CONFIRMED] ✅ ${candidate.name} → ${finalUrl}`);
-        } else {
-          console.warn(`[URL_VALIDATION_FAILED] ${candidate.name} - 候補URL全てが検証失敗`);
-          finalUrl = '';
-        }
-      } else {
+      if (candidateUrls.length === 0) {
         console.warn(`[NO_URL_CANDIDATES] ${candidate.name} - URL候補がありません`);
-        finalUrl = '';
+        continue;
       }
 
-      candidate.url = finalUrl;
+      const urlValidation = await validateCandidateUrls(candidateUrls, candidate.name, candidate.address);
+      if (!urlValidation.valid) {
+        console.warn(`[URL_VALIDATION_FAILED] ${candidate.name} - 候補URL全てが検証失敗`);
+        continue;
+      }
+
+      candidate.url = urlValidation.url;
       delete candidate.candidates;  // ✅ 候補フィールドはDB保存時に削除
+
+      console.log(`[URL_CONFIRMED] ✅ ${candidate.name} → ${candidate.url}`);
 
       // アクセス情報チェック（必須）
       if (!candidate.access || !candidate.access.train || !candidate.access.bus || !candidate.access.car) {
