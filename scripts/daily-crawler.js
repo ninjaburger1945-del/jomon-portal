@@ -16,10 +16,7 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-console.log('[DEBUG] API_KEY status:');
-console.log(`  - 長さ: ${API_KEY.length}`);
-console.log(`  - プレフィックス: ${API_KEY.substring(0, 10)}`);
-console.log(`  - 形式チェック: ${API_KEY.startsWith('AIza') ? '✓ Valid' : '✗ Invalid'}`);
+console.log(`[INIT] API_KEY configured (${API_KEY.length} chars)`);
 
 /**
  * リトライ機能付き fetch
@@ -123,19 +120,165 @@ async function callGeminiAPI(prompt) {
 }
 
 /**
- * URL検証 - スキップ版（Paid Tier対応）
- * URLバリデーションを一時的にスキップ
- * AI（Gemini）の出力を信頼し、チェックなしでそのまま使用
+ * ページ内容取得 - HTMLを実際に取得
  */
-async function validateUrl(url) {
+async function fetchPageContent(url) {
   if (!url || !url.startsWith('http')) {
-    console.log(`[URL_SKIP_VALIDATION] 形式チェックのみ: ${url}`);
-    return { valid: false, url: '' };
+    return { success: false, content: '', statusCode: 0 };
   }
 
-  // バリデーションをスキップし、AIの出力を信頼
-  console.log(`[URL_ACCEPTED_NO_VALIDATION] ${url}`);
-  return { valid: true, url };
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const res = await fetch(url, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const html = await res.text();
+      console.log(`[FETCH_OK] ${url} (${html.length} bytes)`);
+      return { success: true, content: html, statusCode: res.status };
+    }
+
+    console.warn(`[FETCH_FAIL] ${url} → HTTP ${res.status}`);
+    return { success: false, content: '', statusCode: res.status };
+
+  } catch (e) {
+    console.warn(`[FETCH_ERROR] ${url} → ${e.message}`);
+    return { success: false, content: '', statusCode: 0 };
+  }
+}
+
+/**
+ * URL検証＆コンテンツ検証 - ページ内容からキーワードと住所を確認
+ * スコア方式で詳細度を評価
+ */
+async function validateUrlWithContent(url, facilityName, address, description) {
+  if (!url || !url.startsWith('http')) {
+    console.log(`[URL_INVALID_FORMAT] ${url}`);
+    return { valid: false, score: 0, reason: 'Invalid URL format' };
+  }
+
+  // ページ内容取得
+  const pageResult = await fetchPageContent(url);
+  if (!pageResult.success) {
+    console.warn(`[PAGE_FETCH_FAILED] ${url}`);
+    return { valid: false, score: 0, reason: 'Cannot fetch page' };
+  }
+
+  const html = pageResult.content;
+
+  // テキスト抽出（スクリプトやスタイルを除去）
+  const text = html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .toLowerCase();
+
+  // 404 検出（複数パターン）
+  const notFoundPatterns = ['404', 'ページが見つかり', 'page not found', 'not found',
+                            'お探しのページ', '存在しません', 'ページは削除されました'];
+  const hasNotFoundMarker = notFoundPatterns.some(pattern => text.includes(pattern));
+
+  if (hasNotFoundMarker) {
+    console.warn(`[404_DETECTED] ${url} - 404または削除済みページ検出`);
+    return { valid: false, score: 0, reason: `404 or removed page detected` };
+  }
+
+  let score = 0;
+
+  // キーワード検証
+  const keywords = ['縄文', '遺跡', '史跡', '文化財', '考古', '土器', '土偶', '貝塚'];
+  const foundKeywords = keywords.filter(kw => text.includes(kw));
+
+  if (foundKeywords.length === 0) {
+    console.warn(`[KEYWORD_NOT_FOUND] ${url} - キーワード未検出`);
+    return { valid: false, score: 0, reason: `No keywords found` };
+  }
+
+  // スコア計算：キーワード出現数
+  foundKeywords.forEach(kw => {
+    const count = (text.match(new RegExp(kw, 'g')) || []).length;
+    score += Math.min(count, 5);  // 最大5点
+  });
+
+  // 最小テキスト長チェック（404ページのような短いページを除外）
+  if (text.length < 300) {
+    console.warn(`[CONTENT_TOO_SHORT] ${url} - コンテンツが短すぎます（${text.length}文字）。404またはスタブページの可能性`);
+    return { valid: false, score: 0, reason: `Content too short (likely 404 or stub page)` };
+  }
+
+  // 最大テキスト長チェック（スパムやノイズを除外）
+  if (text.length > 500) {
+    console.log(`[CONTENT_TRUNCATED] ${url} - テキスト長: ${text.length}文字（検証のため最初の500文字で確認）`);
+  }
+
+  // 施設名の確認
+  if (!text.includes(facilityName.toLowerCase())) {
+    console.warn(`[NAME_MISMATCH] ${url} - 施設名が見つかりません: ${facilityName}`);
+    return { valid: false, score: 0, reason: `Facility name not found` };
+  }
+
+  // スコア計算：施設名出現数
+  const nameCount = (text.match(new RegExp(facilityName.toLowerCase(), 'g')) || []).length;
+  score += Math.min(nameCount * 2, 10);  // 最大10点
+
+  // 住所の確認
+  let addressScore = 0;
+  if (address && address.length > 5) {
+    const addressParts = address.split(/[都道府県]/).filter(p => p.length > 2);
+    addressParts.forEach(part => {
+      if (text.includes(part.toLowerCase())) {
+        const count = (text.match(new RegExp(part.toLowerCase(), 'g')) || []).length;
+        addressScore += Math.min(count, 3);
+      }
+    });
+
+    if (addressScore === 0) {
+      console.warn(`[ADDRESS_MISMATCH] ${url} - 住所が見つかりません: ${address}`);
+      return { valid: false, score: 0, reason: `Address not found` };
+    }
+  }
+  score += Math.min(addressScore, 10);  // 最大10点
+
+  // スコア計算：コンテンツの詳細度（テキスト長）
+  const contentLength = text.length;
+  score += Math.min(Math.floor(contentLength / 500), 15);  // 最大15点（500文字ごと）
+
+  console.log(`[CONTENT_VERIFIED] ${url}`);
+  console.log(`   スコア: ${score} | キーワード: ${foundKeywords.join(', ')} | 施設名出現: ${nameCount}回 | 住所スコア: ${addressScore} | テキスト長: ${contentLength}文字`);
+
+  return { valid: true, score: score, reason: 'Content verified', keywords: foundKeywords };
+}
+
+/**
+ * 複数URL候補を検証して、最初に有効なURLを返す（Google検索順を信頼）
+ */
+async function validateCandidateUrls(candidateUrls, facilityName, address) {
+  for (const url of candidateUrls) {
+    if (!url || url.trim() === '') continue;
+
+    console.log(`[VALIDATE_CANDIDATE] ${url}`);
+    const result = await validateUrlWithContent(url, facilityName, address, '');
+
+    if (result.valid) {
+      console.log(`[BEST_URL_SELECTED] ✅ ${url} (Google検索順位による採用)`);
+      return { valid: true, url: url, reason: result.reason, score: result.score };
+    } else {
+      console.warn(`[CANDIDATE_REJECTED] ${url} - 理由: ${result.reason}`);
+    }
+  }
+
+  console.warn(`[NO_VALID_URL] 候補URLの中に有効なものがありません`);
+  return { valid: false, url: '', reason: 'No valid URLs in candidates' };
 }
 
 /**
@@ -158,10 +301,16 @@ async function resizeImageToSquare(imagePath) {
     const left = Math.floor((width - squareSize) / 2);
     const top = Math.floor((height - squareSize) / 2);
 
+    // 一度テンポラリファイルに出力（同ファイル入出力エラー回避）
+    const tempPath = imagePath + '.tmp';
+
     await sharp(imagePath)
       .extract({ left, top, width: squareSize, height: squareSize })
       .resize(512, 512, { fit: 'fill' })
-      .toFile(imagePath);
+      .toFile(tempPath);
+
+    // テンポラリファイルを元のパスに上書き
+    fs.renameSync(tempPath, imagePath);
 
     console.log(`[RESIZE] ✅ 完了: ${squareSize}x${squareSize} → 512x512`);
     return true;
@@ -309,17 +458,38 @@ ${existingNames}
 - 縄文時代のみ（弥生時代は除外）
 - 公立博物館または国指定史跡
 
-【URLについて - 極度に厳格】
-施設の公式ウェブサイトURLは「必ず現在2026年3月時点で確実にアクセス可能」な自治体公式サイト(.lg.jp, .pref など)のURLを「1つだけ」記載してください。
-重要な指示：
-- 自治体公式ページの施設紹介ページを「必ず」確認してから出力してください
-- Wikipedia や他の二次情報サイト、SNSではなく、公式サイトのみ
-- 不確実なURLは絶対に出力しないでください
-- URLが確実に見つからない、またはアクセス不可の場合のみ空文字("")にしてください
-- 1つのURLのみ出力してください（複数のURLは出力しないこと）
+【🔍 重要：Google検索で実際に上位に出てくるサイトを推定してください】
+あなたのタスク：
+1. 施設名で Google 検索した場合、「実際に上位（1～5位）に出現するであろう」サイトを推定
+2. 複数のURL候補を「candidates」フィールドに上位順に列挙（信頼性の高い順）
+3. 最初の候補が最も正確で詳細な施設情報ページであることを確認してから記載
+4. ハルシネーション（存在しないURL）は絶対に避ける
+
+【URLについて - 優先順位付き】
+以下の優先順位で探してください：
+
+【優先度1（最優先）】施設専用ドメイン
+例：sannaimaruyama.pref.aomori.jp, jomon-no-mori.jp, komakinosite.jp など
+
+【優先度2】自治体公式サイト
+例：city.chino.lg.jp/site/togariishi/, www.city.chiba.jp/kasori/
+
+【優先度3】公式な文化財・遺跡情報サイト
+例：sitereports.nabunken.go.jp, jomon-japan.jp, bunka.nii.ac.jp, kunishitei.bunka.go.jp
+
+【優先度4】自治体観光ポータル
+例：visithachinohe.com, tokimeguri.jp など
+
+【優先度5】ISPサイト・地元情報サイト
+例：alles.or.jp, comlink.ne.jp など
+
+【絶対禁止】
+- Wikipedia, SNS（X/Twitter等）
+- 404/5xxエラーが返されるURL
+- ハルシネーション（存在しないURL）
 
 【出力要件】
-完全なJSON配列のみを出力：
+完全なJSON配列のみを出力。candidatesは必ず上位順に記載：
 [{
   "id": "英数字のハイフン繋ぎ",
   "name": "施設の正式名称",
@@ -327,7 +497,8 @@ ${existingNames}
   "prefecture": "都道府県名",
   "address": "住所",
   "description": "200〜400文字の紹介文",
-  "url": "公式サイトのURL、見つからなければ空文字",
+  "url": "Google検索で1位に出そうなURL（最も詳細で信頼性の高い）",
+  "candidates": ["Google検索1位想定", "Google検索2位想定", "Google検索3位想定"],
   "thumbnail": "",
   "tags": ["世界遺産","博物館","貝塚","環状列石","土器","土偶","国宝"]から最大2個,
   "lat": 緯度,
@@ -356,12 +527,22 @@ ${existingNames}
 
     const responseText = await callGeminiAPI(prompt);
 
-    // JSON抽出
+    // JSON抽出（より堅牢）
     let jsonStr = responseText.trim();
+
+    // マークダウン形式を除去
     if (jsonStr.startsWith('```json')) jsonStr = jsonStr.slice(7);
-    if (jsonStr.startsWith('```')) jsonStr = jsonStr.slice(3);
-    if (jsonStr.endsWith('```')) jsonStr = jsonStr.slice(0, -3);
-    jsonStr = jsonStr.trim();
+    else if (jsonStr.startsWith('```')) jsonStr = jsonStr.slice(3);
+
+    // 最初の [ と最後の ] を見つけて抽出
+    const jsonStart = jsonStr.indexOf('[');
+    const jsonEnd = jsonStr.lastIndexOf(']');
+
+    if (jsonStart === -1 || jsonEnd === -1 || jsonStart > jsonEnd) {
+      throw new Error('JSON array not found in response');
+    }
+
+    jsonStr = jsonStr.substring(jsonStart, jsonEnd + 1).trim();
 
     const candidates = JSON.parse(jsonStr);
     if (!Array.isArray(candidates) || candidates.length === 0) {
@@ -386,18 +567,27 @@ ${existingNames}
         continue;
       }
 
-      // URL検証（ただし無効でも名称や説明文が正しければ保存）
-      console.log(`[VALIDATE] ${candidate.name}: ${candidate.url}`);
-      const validation = await validateUrl(candidate.url);
+      // ✅ 【改造】複数URL候補を検証
+      console.log(`[PROCESS] ${candidate.name} - URL候補を検証中...`);
+      const candidateUrls = candidate.candidates || (candidate.url ? [candidate.url] : []);
 
-      // URL検証結果を反映（有効なら validation.url、無効でも元の URL を保持）
-      if (validation.valid) {
-        candidate.url = validation.url;
-      } else if (!validation.valid && candidate.url) {
-        // URL が無効でも、施設の名称や説明文が正しければ空文字で保存
-        console.warn(`[URL_INVALID_BUT_ACCEPTED] URL無効だが施設情報は有効: ${candidate.name}`);
-        candidate.url = '';
+      let finalUrl = '';
+      if (candidateUrls.length > 0) {
+        const urlValidation = await validateCandidateUrls(candidateUrls, candidate.name, candidate.address);
+        if (urlValidation.valid) {
+          finalUrl = urlValidation.url;
+          console.log(`[URL_CONFIRMED] ✅ ${candidate.name} → ${finalUrl}`);
+        } else {
+          console.warn(`[URL_VALIDATION_FAILED] ${candidate.name} - 候補URL全てが検証失敗`);
+          finalUrl = '';
+        }
+      } else {
+        console.warn(`[NO_URL_CANDIDATES] ${candidate.name} - URL候補がありません`);
+        finalUrl = '';
       }
+
+      candidate.url = finalUrl;
+      delete candidate.candidates;  // ✅ 候補フィールドはDB保存時に削除
 
       // アクセス情報チェック（必須）
       if (!candidate.access || !candidate.access.train || !candidate.access.bus || !candidate.access.car) {
