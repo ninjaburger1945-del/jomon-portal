@@ -1750,12 +1750,12 @@
   },
   {
     "id": "058",
-    "name": "上高津貝塚ふるさと歴史の広場（考古資料館）",
+    "name": "上高津貝塚ふるさと歴史の広場",
     "region": "Kanto",
     "prefecture": "茨城県",
     "address": "茨城県土浦市上高津1835",
     "description": "国指定史跡「上高津貝塚」に隣接する考古資料館です。霞ヶ浦を望む台地上に広がるこの遺跡は、縄文時代後期から晩期にかけての関東地方を代表する大規模な環状貝塚として知られています。資料館では、発掘調査で出土した膨大な量の貝殻や動物の骨、そしてこの遺跡が標式遺跡となった「上高津式土器」など、当時の人々の生活や食文化を伝える豊富な資料を展示しています。精巧な装飾が施された骨角器や土偶は、縄文人の高い技術力と精神文化を物語っています。復元された竪穴住居が点在する史跡公園と一体となっており、縄文人の暮らしを臨場感豊かに体感できる貴重な場所です。",
-    "url": "https://www.city.tsuchiura.lg.jp/page/page000216.html",
+    "url": "https://www.city.tsuchiura.lg.jp/kamitakatsukaizuka/index.html",
     "thumbnail": "/images/facilities/058_ai.png",
     "tags": [
       "貝塚",
@@ -1774,7 +1774,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR常磐線 土浦駅からバスで約15分、「上高津」バス停下車、徒歩約5分",
+    "access_public": "JR常磐線 土浦駅からバスで約15分。「上高津」バス停から徒歩約5分",
     "access_public_en": "",
     "access_car": "常磐自動車道 桜土浦ICから約10分",
     "access_car_en": ""
