@@ -88,12 +88,16 @@ export default function AdminPage() {
     setStatsLoading(true);
     try {
       const response = await fetch("/api/stats", { cache: 'no-store' });
-      if (response.ok) {
-        const data = await response.json();
-        setStatsData(data);
-      }
+      const data = await response.json();
+      setStatsData(data);
     } catch (err) {
       console.error("Failed to load stats:", err);
+      setStatsData({
+        pageviews: 0,
+        visitors: 0,
+        daily: [],
+        error: `API エラー: ${err instanceof Error ? err.message : '不明なエラー'}`
+      });
     } finally {
       setStatsLoading(false);
     }
@@ -419,27 +423,28 @@ export default function AdminPage() {
             </div>
           </div>
         ) : statsData?.error ? (
-          // エラー状態
+          // エラー状態 - デバッグ情報を見やすく表示
           <div style={{
             backgroundColor: "#fff3cd",
-            border: "1px solid #ffc107",
+            border: "2px solid #ff6b6b",
             borderRadius: "6px",
-            padding: "15px",
-            color: "#856404"
+            padding: "20px",
+            color: "#333"
           }}>
-            <strong>⚠️ 統計データを読み込めませんでした</strong>
-            <p style={{ margin: "8px 0 0 0", fontSize: "12px" }}>
-              <strong>原因:</strong> {statsData.error}
+            <strong style={{ fontSize: "16px", color: "#d9534f" }}>🔴 統計データ取得エラー</strong>
+            <p style={{ margin: "12px 0", padding: "10px", backgroundColor: "#ffe6e6", borderRadius: "4px", fontSize: "13px", fontFamily: "monospace", wordBreak: "break-all" }}>
+              <strong>詳細:</strong> {statsData.error}
             </p>
-            <p style={{ margin: "8px 0 0 0", fontSize: "12px" }}>
-              <strong>対策:</strong> 環境変数を確認してください：
+            <p style={{ margin: "12px 0 0 0", fontSize: "12px" }}>
+              <strong>確認すべき項目:</strong>
               <br />
-              • <code>PROJECT_ID</code> — Vercel プロジェクトID
+              ✓ Vercel Dashboard → Settings → Environment Variables<br />
+              &nbsp;&nbsp;→ <code>PROJECT_ID</code> が設定されているか？<br />
+              &nbsp;&nbsp;→ <code>VERCEL_AUTH_TOKEN</code> が設定されているか？<br />
               <br />
-              • <code>VERCEL_AUTH_TOKEN</code> — Vercel API トークン（スコープ: analytics）
+              ✓ 設定後に「Redeploy」ボタンで再デプロイしたか？<br />
               <br />
-              <br />
-              詳細は Vercel ダッシュボード → Settings → API Tokens を参照してください。
+              ✓ トークンのスコープが「analytics」に設定されているか？
             </p>
           </div>
         ) : (statsData && statsData.pageviews >= 0) ? (

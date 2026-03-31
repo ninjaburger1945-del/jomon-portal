@@ -26,14 +26,19 @@ export async function GET(request: NextRequest) {
   console.log(`  PROJECT_ID: ${projectId ? '✓ set' : '✗ missing'}`);
   console.log(`  VERCEL_AUTH_TOKEN: ${token ? '✓ set' : '✗ missing'}`);
 
-  // 認証情報チェック
+  // 認証情報チェック - デバッグ情報を詳しく返す
   if (!projectId || !token) {
-    console.warn('[STATS] Missing Vercel credentials');
+    const debugInfo = [
+      `PROJECT_ID: ${projectId ? '✓ set (' + projectId.substring(0, 10) + '...)' : '✗ MISSING'}`,
+      `VERCEL_AUTH_TOKEN: ${token ? '✓ set (' + token.substring(0, 10) + '...)' : '✗ MISSING'}`
+    ].join(' | ');
+
+    console.warn('[STATS] Missing Vercel credentials:', debugInfo);
     return NextResponse.json({
       pageviews: 0,
       visitors: 0,
       daily: [],
-      error: 'Vercel credentials not configured'
+      error: `環境変数が正しく設定されていません → ${debugInfo}`
     }, { status: 200 });
   }
 
