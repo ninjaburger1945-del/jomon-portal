@@ -1993,5 +1993,36 @@
     "access_public_en": "From JR Omiya Station East Exit, take a bus to 'Shiritsu Hakubutsukan' and walk 1 min (to Saitama City Museum).",
     "access_car": "東北自動車道 岩槻ICから約15分",
     "access_car_en": "Approx. 15 min from Tohoku Expressway Iwatsuki IC."
+  },
+  {
+    "id": "066",
+    "name": "指宿市考古博物館（時遊館COCCOはしむれ）",
+    "region": "Kyushu",
+    "prefecture": "鹿児島県",
+    "address": "鹿児島県指宿市十二町2290",
+    "description": "国指定史跡「橋牟礼川遺跡」に隣接する博物館です。この遺跡は、1924年に日本で初めて縄文時代の竪穴住居跡が発見された場所として、日本の考古学史において極めて重要な位置を占めています。館内では、縄文時代早期の集落の様子を再現したジオラマや、遺跡から出土した土器、石器、装飾品など豊富な資料を展示しています。橋牟礼川遺跡は縄文時代だけでなく、弥生時代から中世に至るまでの生活の痕跡が重なる複合遺跡であり、時代ごとの人々の暮らしの移り変わりを学ぶことができます。施設名の「COCCO（こっこ）」は地元の言葉で「こつこつ」を意味し、地道な研究への敬意が込められています。南九州の歴史と文化の深さを体感できる施設です。",
+    "url": "https://kunishitei.bunka.go.jp/heritage/detail/401/1816",
+    "thumbnail": "/images/facilities/066_ai.png",
+    "tags": [
+      "博物館",
+      "遺跡"
+    ],
+    "lat": 31.250543,
+    "lng": 130.631057,
+    "access": {
+      "train": "JR指宿枕崎線「指宿駅」から徒歩約15分",
+      "bus": "「考古博物館前」バス停下車すぐ",
+      "car": "指宿スカイライン「谷山IC」から約50分",
+      "rank": "A"
+    },
+    "copy": "縄文住居跡、発見の地",
+    "name_en": "Ibusuki Archaeological Museum (Cocco Hashimure)",
+    "description_en": "This museum is adjacent to the Hashimuregawa Ruins, a nationally designated historic site. The site is extremely important in Japanese archaeological history as the location where the first Jomon period pit-dwelling remains were discovered in 1924. The museum displays a wealth of materials, including dioramas recreating an Early Jomon period settlement and numerous artifacts such as pottery, stone tools, and ornaments excavated from the site. As a complex ruin with layers of human activity from the Jomon to medieval periods, it offers a unique opportunity to learn about the transitions in life and culture over time.",
+    "location_en": "Kagoshima",
+    "address_en": "2290 Junicho, Ibusuki, Kagoshima",
+    "access_public": "Approx. 15-minute walk from JR Ibusuki Station (Ibusuki Makurazaki Line).",
+    "access_public_en": "Approx. 15-minute walk from JR Ibusuki Station (Ibusuki Makurazaki Line).",
+    "access_car": "Approx. 50 minutes from the Taniyama IC on the Ibusuki Skyline.",
+    "access_car_en": "Approx. 50 minutes from the Taniyama IC on the Ibusuki Skyline."
   }
 ]
