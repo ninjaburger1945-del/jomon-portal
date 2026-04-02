@@ -1870,5 +1870,36 @@
     "access_public_en": "From JR Notogawa Station or Ohmi Railway Yokaichi Station, take the 'Chokotto Bus' and get off at the 'Maizobunkazai Center' stop.",
     "access_car": "名神高速道路「八日市IC」から約15分",
     "access_car_en": "Approx. 15 minutes from Yokaichi IC on the Meishin Expressway."
+  },
+  {
+    "id": "062",
+    "name": "徳島市立考古資料館（国史跡 矢野遺跡）",
+    "region": "Shikoku",
+    "prefecture": "徳島県",
+    "address": "徳島県徳島市国府町西矢野85-1",
+    "description": "縄文時代晩期（約3000年前）の西日本最大級の拠点集落である国史跡「矢野遺跡」の出土品を保存・展示する施設です。遺跡からは祭祀に使われたと考えられる環状に配置された配石遺構や、多様な文様の土器、石器、土偶などが見つかっており、当時の人々の精神文化や生活様式を垣間見ることができます。特に九州や近畿地方との交流を示す遺物も出土しており、四国における縄文文化の重要拠点であったことを物語っています。資料館では、これらの貴重な資料を通じて、縄文時代の徳島の姿を分かりやすく学ぶことができます。",
+    "url": "https://kunishitei.bunka.go.jp/heritage/detail/401/2984",
+    "thumbnail": "/images/facilities/062_ai.png",
+    "tags": [
+      "博物館",
+      "土器"
+    ],
+    "lat": 34.0729,
+    "lng": 134.4568,
+    "access": {
+      "train": "JR徳島線「府中駅」から徒歩約25分",
+      "bus": "徳島バス「矢野」バス停下車、徒歩約5分",
+      "car": "徳島自動車道「藍住IC」から約20分",
+      "rank": "B"
+    },
+    "copy": "西日本最大級の縄文集落",
+    "name_en": "Tokushima Municipal Archaeological Museum (Yano Site)",
+    "description_en": "This museum exhibits artifacts from the Yano Site, a nationally designated historic site and one of the largest Jomon period (Late Jomon, c. 3,000 years ago) settlements in western Japan. Discoveries include a circular stone arrangement believed to be for rituals, diverse pottery, stone tools, and clay figurines, offering a glimpse into the spiritual and daily lives of the people. Artifacts indicating exchange with Kyushu and Kinki regions highlight its importance as a key Jomon cultural hub in Shikoku.",
+    "location_en": "",
+    "address_en": "85-1 Nishiyano, Kokufu-cho, Tokushima City, Tokushima Prefecture",
+    "access_public": "Approx. 25-minute walk from Fuchu Station (JR Tokushima Line), or 5-minute walk from Yano bus stop (Tokushima Bus).",
+    "access_public_en": "Approx. 25-minute walk from Fuchu Station (JR Tokushima Line), or 5-minute walk from Yano bus stop (Tokushima Bus).",
+    "access_car": "徳島自動車道「藍住IC」より約20分",
+    "access_car_en": "Approx. 20 minutes from Aizumi IC on the Tokushima Expressway."
   }
 ]
