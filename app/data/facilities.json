@@ -1970,7 +1970,7 @@
     "prefecture": "埼玉県",
     "address": "埼玉県さいたま市岩槻区大字真福寺地内",
     "description": "埼玉県さいたま市岩槻区に位置する、縄文時代前期から後期にかけての内陸性貝塚。国の史跡に指定されている。荒川水系の支流である元荒川の旧河道に面した台地上にあり、ヤマトシジミを主体とする貝層が特徴。約5000年前の縄文人が残した生活の痕跡であり、土器や石器、骨角器などが多数出土している。隣接する「さいたま市立博物館」では、真福寺貝塚からの出土品を常設展示しており、当時の人々の暮らしや自然環境を学ぶことができる。保存状態の良い史跡公園として整備され、縄文時代の環境を体感できる貴重な場所となっている。",
-    "url": "https://kunishitei.bunka.go.jp/heritage/detail/401/1057",
+    "url": "https://www.city.saitama.lg.jp/004/005/006/001/005/001/001/p002183.html",
     "thumbnail": "/images/facilities/065_ai.png",
     "tags": [
       "遺跡",
@@ -1989,9 +1989,9 @@
     "description_en": "Located in Iwatsuki-ku, Saitama City, this is an inland shell midden from the Early to Late Jomon period, designated as a National Historic Site. Characterized by layers of Yamato shijimi clams, it reveals the lifestyle of Jomon people from about 5,000 years ago. Artifacts are displayed at the Saitama City Museum.",
     "location_en": "Saitama",
     "address_en": "Shinpukuji, Iwatsuki-ku, Saitama-shi, Saitama",
-    "access_public": "From JR Omiya Station East Exit, take a bus to 'Shiritsu Hakubutsukan' and walk 1 min (to Saitama City Museum).",
+    "access_public": "東武アーバンパークライン 岩槻駅または東岩槻駅からタクシーで約10分。さいたま市立博物館へは東武アーバンパークライン 大宮公園駅から徒歩約15分。。JR大宮駅東口から国際興業バス「導守循環」で「市立博物館」下車、徒歩約1分（さいたま市立博物館）。",
     "access_public_en": "From JR Omiya Station East Exit, take a bus to 'Shiritsu Hakubutsukan' and walk 1 min (to Saitama City Museum).",
-    "access_car": "約15分 from Tohoku Expressway Iwatsuki IC",
+    "access_car": "東北自動車道 岩槻ICから約15分",
     "access_car_en": "Approx. 15 min from Tohoku Expressway Iwatsuki IC."
   }
 ]
