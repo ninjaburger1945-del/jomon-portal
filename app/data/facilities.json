@@ -1939,7 +1939,7 @@
     "prefecture": "青森県",
     "address": "青森県つがる市木造若緑59-1",
     "description": "「遮光器土偶」の出土で知られる国指定史跡・亀ヶ岡石器時代遺跡のガイダンス施設です。縄文時代晩期を代表する亀ヶ岡文化の中心地であり、ここで出土した精巧な土器や漆器、重要文化財指定の土偶など、数多くの貴重な遺物を収蔵・展示しています。愛称の「カルコ」はアイヌ語で「湿地」を意味し、遺跡が形成された低湿地の環境を物語っています。館内では、縄文人の生活や精神性を再現したジオラマや映像で分かりやすく解説しており、北東北の縄文文化の到達点の高さを体感できます。世界遺産「北海道・北東北の縄文遺跡群」を構成する亀ヶ岡遺跡を深く知るための重要な拠点です。",
-    "url": "https://jomon-japan.jp/jomon-sites/kamegaoka/",
+    "url": "https://www.city.tsugaru.aomori.jp/soshiki/kyoiku/bunkazai/sihakukan/6521.html",
     "thumbnail": "/images/facilities/064_ai.png",
     "tags": [
       "博物館",
@@ -1958,9 +1958,9 @@
     "description_en": "This is the guidance facility for the Kamegaoka Stone Age Site, a nationally designated historic site famous for the excavation of the \"Shakoki-dogu\" (goggle-eyed clay figurine). As the center of the Kamegaoka culture, which represents the Late Jomon period, it houses and exhibits numerous valuable artifacts, including elaborate pottery, lacquerware, and clay figurines designated as Important Cultural Properties. The nickname \"Karuko\" means \"wetland\" in the Ainu language, reflecting the environment where the site was formed. The museum provides an easy-to-understand introduction to Jomon life and spirituality through dioramas and videos, allowing visitors to experience the high level of cultural achievement in northern Tohoku. It is a key facility for deeply understanding the Kamegaoka site, a component of the \"Jomon Prehistoric Sites in Northern Japan\" World Heritage Site.",
     "location_en": "Tohoku, Aomori",
     "address_en": "59-1 Wakamidori, Kizukuri, Tsugaru City, Aomori Prefecture",
-    "access_public": "From JR Kizukuri Station, take the \"Shako-chan Bus\" for about 20 minutes and get off at \"Karuko\".",
+    "access_public": "JR五能線「木造駅」から車で約15分。木造駅からのシャトルバス「しゃこちゃんバス」で約20分「カルコ」下車",
     "access_public_en": "From JR Kizukuri Station, take the \"Shako-chan Bus\" for about 20 minutes and get off at \"Karuko\".",
-    "access_car": "Approximately 40 minutes from Namioka IC on the Tohoku Expressway.",
+    "access_car": "東北自動車道「浪岡IC」から約40分",
     "access_car_en": "Approximately 40 minutes from Namioka IC on the Tohoku Expressway."
   }
 ]
