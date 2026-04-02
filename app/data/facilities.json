@@ -1901,5 +1901,35 @@
     "access_public_en": "Approx. 25-minute walk from Fuchu Station (JR Tokushima Line), or 5-minute walk from Yano bus stop (Tokushima Bus).",
     "access_car": "徳島自動車道「藍住IC」から約20分",
     "access_car_en": "Approx. 20 minutes from Aizumi IC on the Tokushima Expressway."
+  },
+  {
+    "id": "063",
+    "name": "ところ遺跡の森",
+    "region": "Hokkaido",
+    "prefecture": "北海道",
+    "address": "北海道北見市常呂町字常呂371番地",
+    "description": "縄文時代から擦文時代、オホーツク文化、アイヌ文化期に至るまでの暮らしの跡が残る国指定史跡「常呂遺跡」を保存・活用する施設です。広大な敷地内には縄文時代の竪穴住居跡などが復元され、時代の移り変わりを体感できます。併設の「ところ埋蔵文化財センター」では各時代の出土品を展示。特にオホーツク文化の遺物で知られますが、基層文化である縄文時代の土器や石器も充実しています。オホーツク海沿岸の厳しい自然に適応し、独自の文化を育んだ古代の人々の営みを、連続した時間軸の中で理解できる国内でも有数の複合遺跡です。",
+    "url": "https://kunishitei.bunka.go.jp/heritage/detail/401/1688",
+    "thumbnail": "/images/facilities/063_ai.png",
+    "tags": [
+      "博物館"
+    ],
+    "lat": 44.11025,
+    "lng": 144.15241,
+    "access": {
+      "train": "JR石北本線 網走駅から車で約40分",
+      "bus": "網走バス「常呂」バス停から徒歩約20分",
+      "car": "女満別空港から車で約40分",
+      "rank": "C"
+    },
+    "copy": "時を越えるオホーツクの村",
+    "name_en": "Tokoro Heritage Site Forest (Tokoro Iseki no Mori)",
+    "description_en": "This facility preserves the Tokoro Ruins, a nationally designated historic site with remains from the Jomon to the Ainu cultural periods. The vast site features reconstructed Jomon pit dwellings, allowing visitors to experience historical changes. The adjacent archaeological center exhibits artifacts from each era. While known for its Okhotsk culture collection, it also has a substantial Jomon period display. It is a leading multi-period site in Japan for understanding the continuous history of ancient peoples adapting to the harsh Okhotsk coast environment.",
+    "location_en": "",
+    "address_en": "371 Tokoro, Tokoro-cho, Kitami-shi, Hokkaido",
+    "access_public": "JR網走駅から車で約40分。網走バス「常呂」バス停から徒歩約20分",
+    "access_public_en": "Approx. 40-min drive from JR Abashiri Station. Approx. 20-min walk from 'Tokoro' bus stop (Abashiri Bus).",
+    "access_car": "女満別空港から車で約40分。網走市内から国道238号経由で約40分",
+    "access_car_en": "Approx. 40 minutes by car from Memanbetsu Airport or central Abashiri."
   }
 ]
