@@ -48,25 +48,43 @@ if (!process.env.GOOGLESEARCH_SERVICE_ACCOUNT) {
 try {
   let serviceAccountStr = process.env.GOOGLESEARCH_SERVICE_ACCOUNT;
   console.log(`[DEBUG] Service Account 文字列の長さ: ${serviceAccountStr ? serviceAccountStr.length : 0}`);
-  console.log(`[DEBUG] '{' を含む: ${serviceAccountStr && serviceAccountStr.includes('{') ? 'YES' : 'NO'}`);
+  console.log(`[DEBUG] '{' を含む: ${serviceAccountStr && serviceAccountStr.includes('{') ? 'YES（JSON）' : 'NO（Base64？）'}`);
 
   // Base64 デコード対応
   if (serviceAccountStr && !serviceAccountStr.includes('{')) {
-    console.log(`[DEBUG] Base64 デコードを試みる...`);
+    console.log(`[DEBUG] Base64 エンコードされていると判断。デコード中...`);
     serviceAccountStr = Buffer.from(serviceAccountStr, 'base64').toString('utf-8');
     console.log(`[DEBUG] デコード後の長さ: ${serviceAccountStr.length}`);
   }
 
   if (!serviceAccountStr) {
-    throw new Error("Service Account string is empty");
+    throw new Error("Service Account string is empty or undefined");
   }
 
   GOOGLESEARCH_SERVICE_ACCOUNT_JSON = JSON.parse(serviceAccountStr);
   console.log(`[INIT_SECRETS] GOOGLESEARCH_SERVICE_ACCOUNT: ✅ JSON パース成功`);
-  console.log(`[DEBUG] client_email: ${GOOGLESEARCH_SERVICE_ACCOUNT_JSON.client_email || 'NOT FOUND'}`);
-  console.log(`[DEBUG] private_key 長: ${GOOGLESEARCH_SERVICE_ACCOUNT_JSON.private_key ? GOOGLESEARCH_SERVICE_ACCOUNT_JSON.private_key.length : 0}`);
+
+  // 必須フィールド確認
+  if (!GOOGLESEARCH_SERVICE_ACCOUNT_JSON.client_email) {
+    throw new Error("Service Account JSON に client_email がありません");
+  }
+  if (!GOOGLESEARCH_SERVICE_ACCOUNT_JSON.private_key) {
+    throw new Error("Service Account JSON に private_key がありません");
+  }
+  if (!GOOGLESEARCH_SERVICE_ACCOUNT_JSON.project_id) {
+    throw new Error("Service Account JSON に project_id がありません");
+  }
+
+  console.log(`[DEBUG] client_email: ${GOOGLESEARCH_SERVICE_ACCOUNT_JSON.client_email}`);
+  console.log(`[DEBUG] project_id: ${GOOGLESEARCH_SERVICE_ACCOUNT_JSON.project_id}`);
+  console.log(`[DEBUG] private_key 長: ${GOOGLESEARCH_SERVICE_ACCOUNT_JSON.private_key.length} 文字`);
+  console.log(`[DEBUG] ✅ Service Account JSON は有効です`);
 } catch (e) {
   console.error(`[FATAL] ❌ GOOGLESEARCH_SERVICE_ACCOUNT のパース失敗: ${e.message}`);
+  console.error(`[FATAL] 確認項目:`);
+  console.error(`[FATAL] 1. GitHub Secrets に GOOGLESEARCH_SERVICE_ACCOUNT が登録されているか`);
+  console.error(`[FATAL] 2. JSON が正しい形式か（またはBase64エンコード）`);
+  console.error(`[FATAL] 3. client_email, private_key, project_id が含まれているか`);
   console.error(`[DEBUG] スタックトレース: ${e.stack}`);
   process.exit(1);
 }
@@ -106,25 +124,50 @@ function generateGoogleJWT() {
 
 // ========== Google OAuth Token 取得 ==========
 async function getGoogleAccessToken() {
-  const jwt = generateGoogleJWT();
+  try {
+    const jwt = generateGoogleJWT();
+    console.log(`[AUTH] JWT 生成成功。OAuth token を要求中...`);
 
-  const response = await fetch("https://oauth2.googleapis.com/token", {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
-  });
+    const response = await fetch("https://oauth2.googleapis.com/token", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error(`[AUTH] ❌ OAuth token 取得失敗: ${response.status}`);
-    console.error(`[AUTH] 詳細: ${errorText}`);
+    console.log(`[AUTH] OAuth レスポンス: ${response.status}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[AUTH] ❌ OAuth token 取得失敗: HTTP ${response.status}`);
+      console.error(`[AUTH] エラー詳細: ${errorText.substring(0, 500)}`);
+
+      if (response.status === 400) {
+        console.error(`[AUTH] 【400 Bad Request】`);
+        console.error(`[AUTH] - Service Account JSON の client_email が無効`);
+        console.error(`[AUTH] - private_key が破損している`);
+        console.error(`[AUTH] - JWT 生成に失敗している`);
+      }
+
+      return null;
+    }
+
+    const data = await response.json();
+    if (!data.access_token) {
+      console.error(`[AUTH] ❌ access_token がレスポンスに含まれていません`);
+      console.error(`[AUTH] レスポンス: ${JSON.stringify(data).substring(0, 200)}`);
+      return null;
+    }
+
+    console.log(`[AUTH] ✅ OAuth token 取得成功`);
+    return data.access_token;
+
+  } catch (error) {
+    console.error(`[AUTH] ❌ OAuth token 取得例外: ${error.message}`);
+    console.error(`[AUTH] スタックトレース: ${error.stack}`);
     return null;
   }
-
-  const data = await response.json();
-  return data.access_token;
 }
 
 // ========== リトライ機能付き fetch ==========
@@ -221,6 +264,11 @@ async function searchUrlsViaGoogleCustomSearch(facilityName, prefectureName) {
     const accessToken = await getGoogleAccessToken();
     if (!accessToken) {
       console.error(`[SEARCH_API] ❌ OAuth token 取得失敗`);
+      console.error(`[SEARCH_API] 【Google Cloud 課金確認】`);
+      console.error(`[SEARCH_API] 以下を確認してください:`);
+      console.error(`[SEARCH_API] 1. Google Cloud Console → Billing → 課金アカウントが有効か`);
+      console.error(`[SEARCH_API] 2. プロジェクトに課金アカウントが紐付けられているか`);
+      console.error(`[SEARCH_API] 3. APIs & Services → Enabled APIs に "Custom Search API" があるか`);
       return [];
     }
 
@@ -243,16 +291,33 @@ async function searchUrlsViaGoogleCustomSearch(facilityName, prefectureName) {
     console.log(`[SEARCH_API] HTTP レスポンス: ${response.status}`);
 
     if (!response.ok) {
-      console.error(`[SEARCH_API] 🔴 API エラー: HTTP ${response.status}`);
       const errorText = await response.text();
-      console.error(`[SEARCH_API] 詳細: ${errorText.substring(0, 200)}`);
+      console.error(`[SEARCH_API] 🔴 API エラー: HTTP ${response.status}`);
+
+      // 403 Forbidden - 課金関連の問題
+      if (response.status === 403) {
+        console.error(`[SEARCH_API] 【403 Forbidden】課金が有効になっていない可能性があります`);
+        console.error(`[SEARCH_API] 対応:`);
+        console.error(`[SEARCH_API] 1. Google Cloud Console → Billing`);
+        console.error(`[SEARCH_API] 2. 課金アカウントを作成・確認`);
+        console.error(`[SEARCH_API] 3. プロジェクトに課金アカウントを紐付け`);
+        console.error(`[SEARCH_API] 4. GitHub Actions を再実行`);
+      }
+
+      // 401 Unauthorized - 認証エラー
+      if (response.status === 401) {
+        console.error(`[SEARCH_API] 【401 Unauthorized】Service Account 認証失敗`);
+        console.error(`[SEARCH_API] Service Account JSON が正しいか確認してください`);
+      }
+
+      console.error(`[SEARCH_API] レスポンス詳細: ${errorText.substring(0, 300)}`);
       return [];
     }
 
     const data = await response.json();
 
     if (!data.items || data.items.length === 0) {
-      console.warn(`[SEARCH_API] ⚠️ 検索結果が見つかりません`);
+      console.warn(`[SEARCH_API] ⚠️ 検索結果が見つかりません（クエリが無効の可能性）`);
       return [];
     }
 
@@ -294,6 +359,7 @@ async function searchUrlsViaGoogleCustomSearch(facilityName, prefectureName) {
 
   } catch (error) {
     console.error(`[SEARCH_API] ❌ エラー: ${error.message}`);
+    console.error(`[SEARCH_API] スタックトレース: ${error.stack}`);
     return [];
   }
 }
@@ -470,6 +536,7 @@ async function validateCandidateUrls(candidateUrls, facilityName, address, prefe
   const googleSearchUrls = await searchUrlsViaGoogleCustomSearch(facilityName, prefecture);
 
   if (googleSearchUrls.length > 0) {
+    console.log(`[PRIORITY] Google Search で ${googleSearchUrls.length} 件取得。検証中...`);
     for (const url of googleSearchUrls) {
       const result = await validateUrlWithContent(url, facilityName, address);
       if (result.valid) {
@@ -477,36 +544,63 @@ async function validateCandidateUrls(candidateUrls, facilityName, address, prefe
         return { valid: true, url: url, source: 'Google Search' };
       }
     }
-    console.warn(`[PRIORITY] Google Search に有効な URL なし。フェーズ2に進みます`);
+    console.warn(`[PRIORITY] Google Search 結果は全て検証失敗。フェーズ2に進みます`);
   } else {
-    console.error(`[PRIORITY] ❌ Google Search で URL が見つかりません`);
+    console.warn(`[PRIORITY] ⚠️ Google Search API がURL を返しません`);
+    console.warn(`[PRIORITY] → 課金が有効か、Service Account が正しいか確認してください`);
+    console.warn(`[PRIORITY] → Gemini 候補をより積極的に検証します`);
   }
 
-  // フェーズ2: Gemini 候補 URL
-  console.log(`[PRIORITY] フェーズ2: Gemini 候補 URL を検証`);
+  // フェーズ2: Gemini 候補 URL（Google Search 失敗時は積極的に検証）
+  console.log(`[PRIORITY] フェーズ2: Gemini 候補 URL を詳細検証`);
+
+  if (candidateUrls.length === 0) {
+    console.warn(`[PRIORITY] ⚠️ Gemini から URL 候補がありません`);
+  } else {
+    console.log(`[PRIORITY] ${candidateUrls.length} 個の Gemini 候補を検証します`);
+  }
+
   for (const url of candidateUrls) {
     if (!url || url.trim() === '') continue;
 
+    console.log(`[PRIORITY] Gemini 候補を検証: ${url}`);
+
+    // 404 対応（代替 URL を探す）
     const fixResult = await searchAndFixUrlViaGoogle(url, facilityName, prefecture);
 
     if (fixResult.valid) {
       const result = await validateUrlWithContent(fixResult.url, facilityName, address);
       if (result.valid) {
         console.log(`[BEST_URL] ✅ Gemini 候補から採用: ${fixResult.url}`);
+        if (fixResult.fixed) {
+          console.log(`[NOTE] Gemini の元の URL が無効だったため、Google 検索で代替 URL に置換`);
+        }
         return { valid: true, url: fixResult.url, fixed: fixResult.fixed, source: 'Gemini' };
+      } else {
+        console.warn(`[PRIORITY] 検証失敗。内容チェックに引っかかった: ${fixResult.url}`);
       }
+    } else {
+      console.warn(`[PRIORITY] 検証失敗。404 かアクセス不可: ${url}`);
     }
   }
 
-  // フェーズ3: kunishitei フォールバック
-  console.log(`[PRIORITY] フェーズ3: kunishitei フォールバック`);
+  console.warn(`[PRIORITY] ⚠️ Gemini 候補はすべて検証失敗`);
+
+  // フェーズ3: kunishitei フォールバック（本当の最終手段）
+  console.log(`[PRIORITY] フェーズ3: kunishitei.bunka.go.jp フォールバック（最終手段）`);
   const fallbackResult = await findUrlViaKunishitei(facilityName, address);
   if (fallbackResult.valid) {
     console.log(`[BEST_URL] ✅ kunishitei から採用: ${fallbackResult.url}`);
+    console.log(`[WARNING] Google Search が失敗したため kunishitei にフォールバック`);
     return { valid: true, url: fallbackResult.url, source: 'kunishitei' };
   }
 
   console.error(`[FINAL_FAILURE] ❌ 全ての検索方法で有効な URL が見つかりません`);
+  console.error(`[FINAL_FAILURE] 対応:`);
+  console.error(`[FINAL_FAILURE] 1. Google Cloud の課金が有効か確認`);
+  console.error(`[FINAL_FAILURE] 2. Service Account が正しいか確認`);
+  console.error(`[FINAL_FAILURE] 3. Gemini プロンプトを修正（より詳しい URL 候補を提案させる）`);
+
   return { valid: false, url: '' };
 }
 
