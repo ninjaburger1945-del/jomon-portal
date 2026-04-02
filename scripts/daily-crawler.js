@@ -146,6 +146,70 @@ async function fetchPageContent(url) {
   }
 }
 
+// ========== URL スコアリング（ドメイン解析） ==========
+function scoreUrlByDomain(url, facilityName, address) {
+  try {
+    const urlObj = new URL(url);
+    const domain = urlObj.hostname.toLowerCase();
+
+    let domainScore = 0;
+
+    // 自治体名・施設名がドメインに含まれているか確認
+    const facilityNameLower = facilityName.toLowerCase();
+    const mainFacilityPart = facilityName.split(/[遺跡史跡博物館]/)[0].trim().toLowerCase();
+
+    // 住所から都道府県名と市町村名を抽出
+    let prefectureName = '';
+    let cityName = '';
+    if (address) {
+      const addressLower = address.toLowerCase();
+      // 都道府県抽出（例：「徳島県」から「徳島」）
+      const prefMatch = address.match(/([^\s都道府県]+)(?:都|道|府|県)/);
+      if (prefMatch) prefectureName = prefMatch[1].toLowerCase();
+
+      // 市町村抽出（例：「阿波市」から「阿波」）
+      const cityMatch = address.match(/([^\s市区町村]+)(?:市|区|町|村)/);
+      if (cityMatch) cityName = cityMatch[1].toLowerCase();
+    }
+
+    // 【優先度1】施設名や主要部分がドメインに含まれている → 100点
+    if (domain.includes(facilityNameLower) || domain.includes(mainFacilityPart)) {
+      console.log(`[DOMAIN_SCORE] 🌟 施設名がドメインに含まれている → +100点`);
+      domainScore = 100;
+    }
+    // 【優先度2】都道府県名や市町村名がドメインに含まれている → 80点
+    else if ((prefectureName && domain.includes(prefectureName)) || (cityName && domain.includes(cityName))) {
+      console.log(`[DOMAIN_SCORE] 🏛️ 自治体名がドメインに含まれている → +80点`);
+      domainScore = 80;
+    }
+    // 【優先度3】.lg.jp（自治体公式） → 70点
+    else if (domain.includes('.lg.jp')) {
+      console.log(`[DOMAIN_SCORE] 📋 .lg.jp（自治体公式） → +70点`);
+      domainScore = 70;
+    }
+    // 【優先度4】.go.jp（政府機関）→ 60点
+    else if (domain.includes('.go.jp')) {
+      console.log(`[DOMAIN_SCORE] 🏢 .go.jp（政府機関） → +60点`);
+      domainScore = 60;
+    }
+    // 【優先度5】.or.jp（公開サイト） → 50点
+    else if (domain.includes('.or.jp')) {
+      console.log(`[DOMAIN_SCORE] 📌 .or.jp（公開サイト） → +50点`);
+      domainScore = 50;
+    }
+    // 【優先度6】その他 → 30点
+    else {
+      console.log(`[DOMAIN_SCORE] その他 → +30点`);
+      domainScore = 30;
+    }
+
+    return domainScore;
+  } catch (e) {
+    console.warn(`[DOMAIN_SCORE] URL 解析失敗: ${e.message}`);
+    return 20;
+  }
+}
+
 // ========== URL 内容検証 ==========
 async function validateUrlWithContent(url, facilityName, address) {
   if (!url || !url.startsWith('http')) {
@@ -199,9 +263,17 @@ async function validateUrlWithContent(url, facilityName, address) {
     nameFound = mainPart.length > 2 && text.includes(mainPart.toLowerCase());
   }
 
-  let score = foundKeywords.length * 10 + (text.length / 100);
-  console.log(`[VALIDATE] ✅ 検証成功 (スコア: ${Math.floor(score)})`);
-  return { valid: true, score: score };
+  // スコア計算（コンテンツスコア）
+  let contentScore = foundKeywords.length * 10 + (text.length / 100);
+
+  // ドメインスコア（優先度重視）
+  const domainScore = scoreUrlByDomain(url, facilityName, address);
+
+  // 総合スコア = ドメイン重視 + コンテンツスコア
+  let totalScore = domainScore * 2 + contentScore;
+
+  console.log(`[VALIDATE] ✅ 検証成功 (ドメイン: ${domainScore}, コンテンツ: ${Math.floor(contentScore)}, 合計: ${Math.floor(totalScore)})`);
+  return { valid: true, score: totalScore, domainScore, contentScore };
 }
 
 // ========== kunishitei フォールバック（最終手段） ==========
@@ -250,18 +322,21 @@ async function findUrlViaKunishitei(facilityName, address) {
   }
 }
 
-// ========== URL 検証フロー（Gemini 候補を順番に検証） ==========
+// ========== URL 検証フロー（Gemini 候補を全て検証し、最高スコアを採用） ==========
 async function validateCandidateUrls(candidateUrls, facilityName, address, prefecture) {
   console.log(`\n[VALIDATE_FLOW] ========== URL 検証開始（${candidateUrls.length} 候補） ==========`);
+  console.log(`[VALIDATE_FLOW] 全ての候補を検証し、最高スコアを採用します`);
 
-  // フェーズ1: Gemini 候補を順番に検証（404チェック + コンテンツ検証）
-  console.log(`[VALIDATE_FLOW] フェーズ1: Gemini 候補を順番に検証`);
+  // フェーズ1: Gemini 候補を全て検証（404チェック + コンテンツ検証 + スコアリング）
+  console.log(`[VALIDATE_FLOW] フェーズ1: ${candidateUrls.length} 個の候補を全検証`);
+
+  const validResults = [];
 
   for (let index = 0; index < candidateUrls.length; index++) {
     const url = candidateUrls[index];
     if (!url || url.trim() === '') continue;
 
-    console.log(`[VALIDATE_FLOW] 候補 ${index + 1}/${candidateUrls.length}: ${url}`);
+    console.log(`\n[VALIDATE_FLOW] [${index + 1}/${candidateUrls.length}] ${url}`);
 
     // ページ取得 + 404チェック
     const pageResult = await fetchPageContent(url);
@@ -271,21 +346,31 @@ async function validateCandidateUrls(candidateUrls, facilityName, address, prefe
       continue;
     }
 
-    // コンテンツ検証
+    // コンテンツ検証（スコア付き）
     const result = await validateUrlWithContent(url, facilityName, address);
     if (result.valid) {
-      console.log(`[VALIDATE_FLOW] ✅ 採用: ${url}`);
-      return { valid: true, url: url, source: 'Gemini候補', score: result.score };
+      console.log(`[VALIDATE_FLOW] ✅ 有効 (スコア: ${Math.floor(result.score)})`);
+      validResults.push({ url, score: result.score, domainScore: result.domainScore, contentScore: result.contentScore });
+    } else {
+      console.warn(`[VALIDATE_FLOW] ❌ コンテンツ検証失敗`);
     }
-
-    console.warn(`[VALIDATE_FLOW] ⚠️ コンテンツ検証失敗`);
   }
 
-  console.warn(`[VALIDATE_FLOW] ⚠️ Gemini の ${candidateUrls.length} 候補がすべて失敗`);
+  // 最高スコアの URL を採用
+  if (validResults.length > 0) {
+    const best = validResults.reduce((a, b) => a.score > b.score ? a : b);
+    console.log(`\n[VALIDATE_FLOW] 🏆 最高スコア採用: ${best.url}`);
+    console.log(`[VALIDATE_FLOW] スコア内訳：ドメイン=${best.domainScore}, コンテンツ=${Math.floor(best.contentScore)}, 合計=${Math.floor(best.score)}`);
+    return { valid: true, url: best.url, source: 'Gemini候補', score: best.score };
+  }
+
+  console.warn(`[VALIDATE_FLOW] ⚠️ 有効な候補がありません。kunishitei に進みます`);
 
   // フェーズ2: kunishitei フォールバック（本当の最終手段）
+  console.log(`[VALIDATE_FLOW] フェーズ2: kunishitei.bunka.go.jp 最終検索`);
   const fallbackResult = await findUrlViaKunishitei(facilityName, address);
   if (fallbackResult.valid) {
+    console.log(`[VALIDATE_FLOW] kunishitei から採用 (スコア: 50)`);
     return { valid: true, url: fallbackResult.url, source: 'kunishitei', score: 50 };
   }
 
