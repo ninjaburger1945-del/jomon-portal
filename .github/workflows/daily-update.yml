@@ -2,7 +2,7 @@ name: "Daily Autopilot: Jomon Explorer"
 
 on:
   schedule:
-    - cron: '37 8 * * *'   # 日本時間 毎日 17:37 (UTC 08:37)
+    - cron: '37 8 * * *'   # 日本時間 毎日 17:37
   workflow_dispatch:      # 手動実行ボタンを有効化
 
 jobs:
@@ -32,6 +32,7 @@ jobs:
         run: |
           npm install
           npm install @google/generative-ai@latest
+          npm install sharp # ✅ 画像リサイズに必要なので追加
 
       - name: Verify API Key and Environment
         run: |
@@ -39,66 +40,48 @@ jobs:
             echo "❌ ERROR: GEMINI_API_KEY20261336 is not set"
             exit 1
           fi
-          echo "✓ API key configured (length: ${#GEMINI_API_KEY20261336})"
-          if [ -f "app/data/facilities.json" ]; then
-            echo "✓ facilities.json exists"
-          else
-            echo "⚠️  facilities.json not found, will be created"
+          echo "✓ Gemini API key configured"
+          
+          # ✅ Google検索の鍵もチェックするように追加
+          if [ -z "$GOOGLESEARCH_SERVICE_ACCOUNT" ]; then
+            echo "❌ ERROR: GOOGLESEARCH_SERVICE_ACCOUNT is not set"
+            exit 1
           fi
+          if [ -z "$GOOGLESEARCH_CX" ]; then
+            echo "❌ ERROR: GOOGLESEARCH_CX is not set"
+            exit 1
+          fi
+          echo "✓ Google Search API keys configured"
         env:
           GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
+          GOOGLESEARCH_SERVICE_ACCOUNT: ${{ secrets.GOOGLESEARCH_SERVICE_ACCOUNT }}
+          GOOGLESEARCH_CX: ${{ secrets.GOOGLESEARCH_CX }}
 
       - name: AI Crawler - Find 1 New Facilities
         timeout-minutes: 45
         run: |
           echo "[CRAWLER] Starting crawler (timeout: 45min)"
           node scripts/daily-crawler.js
-          CRAWLER_EXIT=$?
-          echo "[CRAWLER] Exit code: $CRAWLER_EXIT"
-          if [ $CRAWLER_EXIT -eq 0 ]; then
-            echo "[CRAWLER] ✓ Crawler completed successfully"
-          else
-            echo "[CRAWLER] ⚠️  Crawler exited with code $CRAWLER_EXIT"
-          fi
-          exit $CRAWLER_EXIT
         env:
+          # ✅ ここが運命の分かれ道！Googleの鍵をプログラムに渡します
           GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
+          GOOGLESEARCH_SERVICE_ACCOUNT: ${{ secrets.GOOGLESEARCH_SERVICE_ACCOUNT }}
+          GOOGLESEARCH_CX: ${{ secrets.GOOGLESEARCH_CX }}
 
       - name: Commit and Push Database and Image Updates
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git config core.hooksPath .githooks
           git add app/data/facilities.json
           git add public/images/facilities/
 
-          STATUS=$(git status --porcelain app/data/facilities.json public/images/facilities/)
+          STATUS=$(git status --porcelain)
           if [[ -n "$STATUS" ]]; then
-            echo "[GIT] Detected changes:"
-            echo "$STATUS"
             git commit -m "chore(data): auto-added new Jomon facility and AI image [skip ci]"
-
-            # Push with retry - pull rebase if conflict
-            if git push origin main; then
-              echo "[GIT] ✓ Successfully pushed to main"
-            else
-              echo "[GIT] ⚠️  Push failed - attempting git pull --rebase..."
-              git pull --rebase origin main
-              if git push origin main; then
-                echo "[GIT] ✓ Successfully pushed after rebase"
-              else
-                echo "[GIT] ✗ Push failed even after rebase"
-                git log -1 --oneline
-                exit 1
-              fi
-            fi
+            git push origin main || (git pull --rebase origin main && git push origin main)
           else
             echo "[GIT] No changes to commit"
           fi
 
       - name: Build
         run: npm run build
-
-      - name: Trigger Vercel ISR Cache Invalidation
-        run: |
-          echo "ISR will be triggered automatically by Vercel on git push"
