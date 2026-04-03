@@ -33,6 +33,11 @@ export default function AdminPage() {
   const [sortKey, setSortKey] = useState<SortKey>("id");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [saving, setSaving] = useState(false);
+  const [regenerateStartId, setRegenerateStartId] = useState("52");
+  const [regenerateEndId, setRegenerateEndId] = useState("52");
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [regenerateLogs, setRegenerateLogs] = useState<string[]>([]);
+  const [showRegenerateModal, setShowRegenerateModal] = useState(false);
 
   const handleLogin = () => {
     const correctPassword = "jomon2026";
@@ -281,6 +286,72 @@ export default function AdminPage() {
     } catch (err) {
       console.error("X post error:", err);
       throw err;
+    }
+  };
+
+  const handleRegenerateImages = async () => {
+    const start = parseInt(regenerateStartId);
+    const end = parseInt(regenerateEndId);
+
+    if (isNaN(start) || isNaN(end) || start < 1 || end > 999 || start > end) {
+      setError("Invalid ID range. Start and End must be between 1-999 and Start ≤ End.");
+      return;
+    }
+
+    setIsRegenerating(true);
+    setRegenerateLogs([]);
+    setError("");
+
+    try {
+      const response = await fetch("/api/regenerate-images", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ startId: start, endId: end }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to start regeneration");
+      }
+
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n').filter(line => line.startsWith('data: '));
+
+        for (const line of lines) {
+          try {
+            const data = JSON.parse(line.replace('data: ', ''));
+            if (data.log) {
+              setRegenerateLogs(prev => [...prev, data.log]);
+            }
+            if (data.status === 'complete') {
+              setError("✓ 画像再生成が完了しました！");
+              await loadFacilities();
+            }
+            if (data.status === 'error') {
+              throw new Error(data.message);
+            }
+          } catch (parseErr) {
+            console.error("Parse error:", parseErr);
+          }
+        }
+      }
+    } catch (err) {
+      setError(`Regeneration error: ${err instanceof Error ? err.message : "Unknown error"}`);
+    } finally {
+      setIsRegenerating(false);
     }
   };
 
@@ -534,6 +605,33 @@ export default function AdminPage() {
             </div>
           </>
         ) : null}
+      </section>
+
+      {/* Image Regeneration Section */}
+      <section style={{ marginBottom: "30px", backgroundColor: "#f0f7ff", padding: "20px", borderRadius: "8px", border: "1px solid #b3d9ff" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+          <h2 style={{ margin: 0 }}>🖼️ 画像再生成 (Imagen 4.0)</h2>
+          <button
+            onClick={() => setShowRegenerateModal(true)}
+            disabled={isRegenerating}
+            style={{
+              padding: "10px 16px",
+              cursor: isRegenerating ? "not-allowed" : "pointer",
+              backgroundColor: isRegenerating ? "#999" : "#ff9800",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              fontSize: "14px",
+              fontWeight: "500",
+              opacity: isRegenerating ? 0.6 : 1
+            }}
+          >
+            {isRegenerating ? "🔄 再生成中..." : "🎨 再生成開始"}
+          </button>
+        </div>
+        <p style={{ margin: "0 0 10px 0", fontSize: "13px", color: "#555" }}>
+          施設の画像を Google Imagen 4.0 で一括再生成できます。ID範囲を指定して実行してください。
+        </p>
       </section>
 
       <section>
@@ -1024,6 +1122,115 @@ export default function AdminPage() {
                 {saving ? "💾 Saving..." : "Save"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Regeneration Modal */}
+      {showRegenerateModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: "white",
+            padding: "30px",
+            borderRadius: "8px",
+            maxWidth: "600px",
+            width: "90%",
+            maxHeight: "80vh",
+            overflowY: "auto",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+          }}>
+            <h2 style={{ marginTop: 0 }}>🎨 画像再生成 (Imagen 4.0)</h2>
+            <p style={{ fontSize: "14px", color: "#666", marginBottom: "20px" }}>
+              施設IDの範囲を指定して画像を再生成します。再生成中は処理が完了するまでお待ちください。
+            </p>
+
+            {!isRegenerating ? (
+              <>
+                <div style={{ marginBottom: "15px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  <label>
+                    <strong>Start ID:</strong>
+                    <input
+                      type="number"
+                      min="1"
+                      max="999"
+                      value={regenerateStartId}
+                      onChange={(e) => setRegenerateStartId(e.target.value)}
+                      style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                    />
+                  </label>
+                  <label>
+                    <strong>End ID:</strong>
+                    <input
+                      type="number"
+                      min="1"
+                      max="999"
+                      value={regenerateEndId}
+                      onChange={(e) => setRegenerateEndId(e.target.value)}
+                      style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                    />
+                  </label>
+                </div>
+
+                <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                  <button
+                    onClick={() => setShowRegenerateModal(false)}
+                    style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#ccc", border: "none", borderRadius: "4px" }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRegenerateImages}
+                    style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#ff9800", color: "white", border: "none", borderRadius: "4px", fontWeight: "500" }}
+                  >
+                    🎨 再生成開始
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{
+                  backgroundColor: "#f5f5f5",
+                  border: "1px solid #ddd",
+                  borderRadius: "4px",
+                  padding: "15px",
+                  marginBottom: "15px",
+                  maxHeight: "400px",
+                  overflowY: "auto",
+                  fontFamily: "monospace",
+                  fontSize: "12px",
+                  lineHeight: "1.5"
+                }}>
+                  {regenerateLogs.length === 0 ? (
+                    <div style={{ color: "#999" }}>処理中...</div>
+                  ) : (
+                    regenerateLogs.map((log, idx) => (
+                      <div key={idx} style={{
+                        color: log.includes("❌") || log.includes("[ERROR]") ? "#d32f2f" :
+                               log.includes("✅") || log.includes("[SUCCESS]") ? "#388e3c" :
+                               log.includes("[REGENERATE]") || log.includes("[IMAGE]") ? "#1976d2" : "#666"
+                      }}>
+                        {log}
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <p style={{ fontSize: "12px", color: "#999", marginBottom: "15px" }}>
+                  🔄 再生成中です。完了するまでこのウィンドウを閉じないでください...
+                </p>
+              </>
+            )}
           </div>
         </div>
       )}
