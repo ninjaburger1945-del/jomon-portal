@@ -13,10 +13,9 @@ const fs = require("fs");
 const path = require("path");
 
 const API_KEY = process.env.GEMINI_API_KEY20261336;
-const IMAGEN_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate:generateImage";
 
 // ========== 初期化 ==========
-console.log(`\n[REGENERATE] ========== 画像再生成スクリプト v1.1 (Imagen 4.0) ==========`);
+console.log(`\n[REGENERATE] ========== 画像再生成スクリプト v1.2 (Imagen 4.0) ==========`);
 console.log(`[REGENERATE] GEMINI_API_KEY20261336: ${API_KEY ? '✅ 存在' : '❌ 未設定'}`);
 
 if (!API_KEY) {
@@ -35,35 +34,37 @@ async function generateFacilityImage(facilityId, facilityName, description) {
   const outputPath = path.join(imagesDir, `${facilityId}_ai.png`);
 
   try {
-    const prompt = `縄文時代の遺跡。ナショナルジオグラフィック風、学術的なドキュメンタリー撮影。自然な大地、風化した粘土、土器の破片、貝塚、石の配置。リアルな質感で、全面構成で余白なし。余白禁止。文字なし。ロゴなし。装飾なし。シンプル。アーストーン、褐色、焦げ茶、赤褐色。実在的。レンズは地表レベルから。掘られた遺跡の状態。考古学的なリアリズム。`;
+    const prompt = `日本の縄文時代の遺跡「${facilityName}」のAIイラストを生成してください。
+特徴：${description.substring(0, 200)}...
+要件：縄文時代の雰囲気、土器・貝塚・環状列石などを含める、暖色系、教育的価値`;
 
     console.log(`[IMAGE] [${facilityId}] Imagen にリクエスト中...`);
 
-    const response = await fetch(IMAGEN_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'x-goog-api-key': API_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        instances: [
-          {
-            prompt: prompt
-          }
-        ],
-        parameters: {
-          sampleCount: 1,
-          aspectRatio: '16:9',
-          outputMimeType: 'image/png'
-        }
-      }),
-      timeout: 120000
-    });
+    const requestBody = {
+      instances: [{ prompt: prompt }],
+      parameters: {
+        sampleCount: 1,
+        aspectRatio: "16:9",
+        outputMimeType: "image/png"
+      }
+    };
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody),
+        timeout: 120000
+      }
+    );
 
     const responseText = await response.text();
     console.log(`[IMAGE] [${facilityId}] レスポンス状態: ${response.status}`);
     console.log(`[IMAGE] [${facilityId}] レスポンス長: ${responseText.length} 文字`);
-    console.log(`[IMAGE] [${facilityId}] レスポンス先頭: ${responseText.substring(0, 200)}`);
+    console.log(`[IMAGE] [${facilityId}] レスポンス先頭: ${responseText.substring(0, 300)}`);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${responseText}`);
@@ -76,8 +77,8 @@ async function generateFacilityImage(facilityId, facilityName, description) {
       throw new Error(`JSON Parse Error: ${jsonErr.message}. Response: ${responseText.substring(0, 500)}`);
     }
 
-    if (data.predictions && data.predictions.length > 0 && data.predictions[0].imageBase64) {
-      const imageBase64 = data.predictions[0].imageBase64;
+    if (data.predictions && data.predictions.length > 0 && data.predictions[0].bytesBase64Encoded) {
+      const imageBase64 = data.predictions[0].bytesBase64Encoded;
       console.log(`[IMAGE] [${facilityId}] 生成完了、保存中...`);
 
       const buffer = Buffer.from(imageBase64, 'base64');
