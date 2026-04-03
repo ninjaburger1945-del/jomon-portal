@@ -35,24 +35,9 @@ async function generateFacilityImage(facilityId, facilityName, description) {
   const outputPath = path.join(imagesDir, `${facilityId}_ai.png`);
 
   try {
-    const prompt = `【3大禁止事項 - 最優先】
-1. Full-bleed, edge-to-edge composition. Absolutely NO white borders, padding, or frame. Image fills entire canvas.
-2. Absolutely NO TEXT, no letters, no logos, no signage, no captions, no Japanese characters visible.
-3. National Geographic documentary style. Weathered textures, raw film grain. Authentic archaeological photography.
+    const prompt = `CRITICAL: Full-bleed edge-to-edge composition filling entire frame. ABSOLUTELY NO TEXT, LETTERS, LOGOS, CAPTIONS, OR JAPANESE CHARACTERS. NO SIGNAGE. NO PADDING OR WHITE BORDERS.
 
-【施設】Jomon-era archaeological site: "${facilityName}"
-
-【ビジュアル】
-- Ancient Jomon period excavation site with natural earth tones
-- Scattered pottery shards, shell middens (kaizuka), stone circles (kanjo-resseki)
-- Warm earthy palette: browns, ochre, burnt sienna, reddish-brown soil
-- Natural daylight, soft shadows creating depth and authenticity
-- Weathered textures, archaeological authenticity reminiscent of museum-quality documentary photography
-- Ground-level perspective showing artifacts naturally embedded in earth
-
-【説明】${description.substring(0, 120)}
-
-【絶対禁止】Text, captions, labels, signage, logos, white space, borders, modern elements`;
+Ancient Jomon archaeological site in natural earth. Weathered clay soil with pottery fragments, shell middens, and stone arrangements. National Geographic raw documentary style with authentic weathered textures and film grain. Natural daylight with soft shadows. Ground-level perspective showing real excavated artifacts naturally embedded in earth. Earthy palette of browns, ochres, rust, and burnt sienna. Archaeological realism. NO MODERN ELEMENTS. NO TEXT ANYWHERE.`;
 
     console.log(`[IMAGE] [${facilityId}] DALL-E 3 リクエスト中...`);
 
