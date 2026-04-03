@@ -42,10 +42,10 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          if git diff --quiet app/data/facilities.json; then
-            echo "No changes to commit"
-          else
-            git add app/data/facilities.json
+          git add public/images/facilities/ app/data/facilities.json
+          if ! git diff --cached --quiet; then
             git commit -m "chore(images): regenerate facility images with DALL-E 3 [IDs ${{ github.event.inputs.start_id }}-${{ github.event.inputs.end_id }}]"
             git push
+          else
+            echo "No changes to commit"
           fi
