@@ -20,46 +20,16 @@ export async function POST(request) {
       );
     }
 
-    // Trigger GitHub Actions workflow
-    const githubToken = process.env.GITHUB_TOKEN;
-    if (!githubToken) {
-      return Response.json(
-        { error: 'GitHub token not configured' },
-        { status: 500 }
-      );
-    }
-
-    const response = await fetch(
-      'https://api.github.com/repos/ninjaburger1945-del/jomon-portal/actions/workflows/regenerate-images.yml/dispatches',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${githubToken}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ref: 'main',
-          inputs: {
-            start_id: String(start),
-            end_id: String(end)
-          }
-        })
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.text();
-      return Response.json(
-        { error: `Failed to trigger workflow: ${error}` },
-        { status: response.status }
-      );
-    }
+    // Generate GitHub Actions URL
+    const workflowUrl = `https://github.com/ninjaburger1945-del/jomon-portal/actions/workflows/regenerate-images.yml`;
 
     return Response.json({
       success: true,
-      message: `GitHub Actions で ID ${start}-${end} の画像再生成を開始しました。`,
-      workflowUrl: 'https://github.com/ninjaburger1945-del/jomon-portal/actions'
+      message: `ID ${start}-${end} の画像再生成をリクエストしました`,
+      startId: start,
+      endId: end,
+      workflowUrl: workflowUrl,
+      instructionUrl: `${workflowUrl}?check_suite_focus=true`
     });
   } catch (error) {
     return Response.json(

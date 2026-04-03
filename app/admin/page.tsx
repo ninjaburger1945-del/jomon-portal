@@ -318,20 +318,26 @@ export default function AdminPage() {
       }
 
       setRegenerateLogs([
-        `✅ GitHub Actions ワークフロー開始しました`,
+        `✅ リクエスト送信完了`,
         `ID 範囲: ${start}-${end}`,
         ``,
-        `🔗 進捗確認: https://github.com/ninjaburger1945-del/jomon-portal/actions`,
+        `GitHub Actions ワークフロー実行ページへ移動します...`,
         ``,
         `再生成完了後、自動でデプロイされます。`
       ]);
 
-      setError(`✓ 画像再生成を開始しました！ GitHub Actions で進捗をご確認ください。`);
+      // GitHub Actions ページへリダイレクト
+      window.open(
+        `https://github.com/ninjaburger1945-del/jomon-portal/actions/workflows/regenerate-images.yml`,
+        '_blank'
+      );
 
-      // 10秒後に facilities を再読み込み
+      setError(`✓ GitHub Actions ページを開きました。「Run workflow」から実行してください。`);
+
+      // 30秒後に facilities を再読み込み
       setTimeout(() => {
         loadFacilities();
-      }, 10000);
+      }, 30000);
     } catch (err) {
       setError(`エラー: ${err instanceof Error ? err.message : "Unknown error"}`);
       setRegenerateLogs([`❌ 実行失敗: ${err instanceof Error ? err.message : "Unknown error"}`]);
