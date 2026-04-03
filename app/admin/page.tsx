@@ -287,10 +287,10 @@ export default function AdminPage() {
 
   const handleRegenerateImages = async () => {
     console.log("handleRegenerateImages called");
-    const startIdInput = prompt("Start ID (1-999):", regenerateStartId);
+    const startIdInput = prompt("Start ID (1-999):", "52");
     if (!startIdInput) return;
 
-    const endIdInput = prompt("End ID (1-999):", regenerateEndId);
+    const endIdInput = prompt("End ID (1-999):", "52");
     if (!endIdInput) return;
 
     const start = parseInt(startIdInput);
