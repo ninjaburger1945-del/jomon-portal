@@ -348,6 +348,7 @@
 
 .cardImage {
   object-fit: cover;
+  object-position: center;
   transition: transform 0.5s ease;
 }
 
