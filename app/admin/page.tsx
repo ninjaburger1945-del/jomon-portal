@@ -290,8 +290,11 @@ export default function AdminPage() {
   };
 
   const handleRegenerateImages = async () => {
+    console.log("handleRegenerateImages called");
     const start = parseInt(regenerateStartId);
     const end = parseInt(regenerateEndId);
+
+    console.log("Start:", start, "End:", end);
 
     if (isNaN(start) || isNaN(end) || start < 1 || end > 999 || start > end) {
       setError("Invalid ID range. Start and End must be between 1-999 and Start ≤ End.");
@@ -299,7 +302,10 @@ export default function AdminPage() {
     }
 
     setIsRegenerating(true);
-    setRegenerateLogs([]);
+    setRegenerateLogs([
+      `✅ リクエスト送信中...`,
+      `ID 範囲: ${start}-${end}`,
+    ]);
     setError("");
 
     try {
@@ -312,6 +318,7 @@ export default function AdminPage() {
       });
 
       const data = await response.json();
+      console.log("API response:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to start regeneration");
@@ -321,7 +328,7 @@ export default function AdminPage() {
         `✅ リクエスト送信完了`,
         `ID 範囲: ${start}-${end}`,
         ``,
-        `GitHub Actions ワークフロー実行ページへ移動します...`,
+        `GitHub Actions ページを開いています...`,
         ``,
         `再生成完了後、自動でデプロイされます。`
       ]);
@@ -332,13 +339,14 @@ export default function AdminPage() {
         '_blank'
       );
 
-      setError(`✓ GitHub Actions ページを開きました。「Run workflow」から実行してください。`);
+      setError(`✓ GitHub Actions ページを開きました。Run workflow から実行してください。`);
 
       // 30秒後に facilities を再読み込み
       setTimeout(() => {
         loadFacilities();
       }, 30000);
     } catch (err) {
+      console.error("Error:", err);
       setError(`エラー: ${err instanceof Error ? err.message : "Unknown error"}`);
       setRegenerateLogs([`❌ 実行失敗: ${err instanceof Error ? err.message : "Unknown error"}`]);
     } finally {
@@ -603,7 +611,10 @@ export default function AdminPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
           <h2 style={{ margin: 0 }}>🖼️ 画像再生成 (Imagen 4.0)</h2>
           <button
-            onClick={() => setShowRegenerateModal(true)}
+            onClick={() => {
+              console.log("Button clicked");
+              setShowRegenerateModal(true);
+            }}
             disabled={isRegenerating}
             style={{
               padding: "10px 16px",
