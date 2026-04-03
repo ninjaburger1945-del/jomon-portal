@@ -1993,5 +1993,128 @@
     "access_public_en": "From JR Omiya Station East Exit, take a bus to 'Shiritsu Hakubutsukan' and walk 1 min (to Saitama City Museum).",
     "access_car": "東北自動車道 岩槻ICから約15分",
     "access_car_en": "Approx. 15 min from Tohoku Expressway Iwatsuki IC."
+  },
+  {
+    "id": "066",
+    "name": "指宿市考古博物館（時遊館COCCOはしむれ）",
+    "region": "Kyushu",
+    "prefecture": "鹿児島県",
+    "address": "鹿児島県指宿市十二町2290",
+    "description": "国指定史跡「橋牟礼川遺跡」に隣接する博物館です。この遺跡は、1924年に日本で初めて縄文時代の竪穴住居跡が発見された場所として、日本の考古学史において極めて重要な位置を占めています。館内では、縄文時代早期の集落の様子を再現したジオラマや、遺跡から出土した土器、石器、装飾品など豊富な資料を展示しています。橋牟礼川遺跡は縄文時代だけでなく、弥生時代から中世に至るまでの生活の痕跡が重なる複合遺跡であり、時代ごとの人々の暮らしの移り変わりを学ぶことができます。施設名の「COCCO（こっこ）」は地元の言葉で「こつこつ」を意味し、地道な研究への敬意が込められています。南九州の歴史と文化の深さを体感できる施設です。",
+    "url": "https://www.city.ibusuki.lg.jp/cocco/",
+    "thumbnail": "/images/facilities/066_ai.png",
+    "tags": [
+      "博物館",
+      "遺跡"
+    ],
+    "lat": 31.250543,
+    "lng": 130.631057,
+    "access": {
+      "train": "JR指宿枕崎線「指宿駅」から徒歩約15分",
+      "bus": "「考古博物館前」バス停下車すぐ",
+      "car": "指宿スカイライン「谷山IC」から約50分",
+      "rank": "A"
+    },
+    "copy": "縄文住居跡、発見の地",
+    "name_en": "Ibusuki Archaeological Museum (Cocco Hashimure)",
+    "description_en": "This museum is adjacent to the Hashimuregawa Ruins, a nationally designated historic site. The site is extremely important in Japanese archaeological history as the location where the first Jomon period pit-dwelling remains were discovered in 1924. The museum displays a wealth of materials, including dioramas recreating an Early Jomon period settlement and numerous artifacts such as pottery, stone tools, and ornaments excavated from the site. As a complex ruin with layers of human activity from the Jomon to medieval periods, it offers a unique opportunity to learn about the transitions in life and culture over time.",
+    "location_en": "Kagoshima",
+    "address_en": "2290 Junicho, Ibusuki, Kagoshima",
+    "access_public": "JR指宿枕崎線「指宿駅」から徒歩約15分。「考古博物館前」バス停下車すぐ",
+    "access_public_en": "Approx. 15-minute walk from JR Ibusuki Station (Ibusuki Makurazaki Line).",
+    "access_car": "指宿スカイライン「谷山IC」から約50分",
+    "access_car_en": "Approx. 50 minutes from the Taniyama IC on the Ibusuki Skyline."
+  },
+  {
+    "id": "067",
+    "name": "国指定史跡 泉福寺洞窟",
+    "region": "Kyushu",
+    "prefecture": "長崎県",
+    "address": "長崎県佐世保市瀬戸越町",
+    "description": "長崎県佐世保市にある国指定史跡で、旧石器時代から縄文時代草創期にかけての重要な洞窟遺跡です。この遺跡の最大の特徴は、約16,000年前の世界最古級とされる土器片「豆粒文土器」が発見されたことです。これは土器の起源を考える上で極めて重要な発見であり、日本の考古学史に名を刻んでいます。洞窟内からは、豆粒文土器のほか、隆起線文土器や石器なども出土しており、旧石器文化から縄文文化への移行期の人々の生活を知る上で貴重な手がかりを提供しています。現在、洞窟は保存のために覆屋がかけられ、解説板と共に一般に公開されています。出土品は近隣の福井洞窟ミュージアムで展示されています。",
+    "url": "https://www.pref.nagasaki.jp/bunkadb/index.php/view/217",
+    "thumbnail": "/images/facilities/067_ai.png",
+    "tags": [
+      "遺跡"
+    ],
+    "lat": 33.19012,
+    "lng": 129.74325,
+    "access": {
+      "train": "松浦鉄道西九州線 泉福寺駅から徒歩約5分",
+      "bus": "西肥バス「瀬戸越」バス停から徒歩約3分",
+      "car": "西九州自動車道 佐世保中央ICから約10分",
+      "rank": "A"
+    },
+    "copy": "世界最古級の土器発見地",
+    "name_en": "Senpukuji Cave Dwelling Site",
+    "description_en": "A nationally designated historic site in Sasebo City, Nagasaki, this cave is crucial for understanding the period from the Paleolithic to the Incipient Jomon era. Its most significant discovery is the 'Toryumon' (bean-pattern) pottery, dated to about 16,000 years ago, making it one of the world's oldest pottery fragments. This finding is vital for studies on the origin of pottery. In addition to Toryumon pottery, linear-relief pottery and stone tools were also found, providing valuable insights into the lives of people during the transition from Paleolithic to Jomon culture. The cave is now protected by a shelter and is open to the public with explanatory panels. Artifacts are displayed at the nearby Fukui Cave Museum.",
+    "location_en": "Sasebo, Nagasaki",
+    "address_en": "Setogoe-cho, Sasebo-shi, Nagasaki-ken",
+    "access_public": "松浦鉄道西九州線 泉福寺駅から徒歩約5分。西肥バス「瀬戸越」バス停から徒歩約3分",
+    "access_public_en": "Approx. 5-minute walk from Senpukuji Station on the Matsuura Railway Nishi-Kyushu Line, or a 3-minute walk from the 'Setogoe' bus stop (Sasebo Bus).",
+    "access_car": "西九州自動車道 佐世保中央ICから約10分",
+    "access_car_en": "Approx. 10 minutes from the Sasebo-Chuo IC on the Nishi-Kyushu Expressway."
+  },
+  {
+    "id": "068",
+    "name": "津南町歴史民俗資料館（農と縄文の体験実習館 なじょもん）",
+    "region": "Chubu",
+    "prefecture": "新潟県",
+    "address": "新潟県中魚沼郡津南町大字下船渡乙835",
+    "description": "国指定史跡・沖ノ原遺跡に隣接する体験型の博物館です。信濃川中流域の河岸段丘に花開いた、火焔型土器に代表される縄文文化を紹介しています。館内には、沖ノ原遺跡や堂平遺跡などから出土した火焔型土器や石器、生活道具が豊富に展示されており、豪雪地帯ならではの縄文人の暮らしぶりを垣間見ることができます。施設名の「なじょもん」は、この地方の方言で「いかがですか？」を意味する「なじょも」と「縄文」を組み合わせたもの。その名の通り、土器作りや火おこし、勾玉作りなど多彩な体験メニューが用意されており、大人から子供まで楽しみながら縄文文化を学ぶことができます。復元された竪穴住居群も見どころの一つです。",
+    "url": "https://www.najomon.com/page_top/index.php",
+    "thumbnail": "/images/facilities/068_ai.png",
+    "tags": [
+      "博物館",
+      "遺跡"
+    ],
+    "lat": 37.0163,
+    "lng": 138.6475,
+    "access": {
+      "train": "JR飯山線「津南駅」からタクシーで約10分",
+      "bus": "南越後観光バス「大割野」バス停から徒歩約20分",
+      "car": "関越自動車道「塩沢石打IC」から車で約40分",
+      "rank": "B"
+    },
+    "copy": "火焔土器のふるさと体験",
+    "name_en": "Tsunan Town History and Folklore Museum (Najomon)",
+    "description_en": "",
+    "location_en": "",
+    "address_en": "835 Shimofunawatou-otsu, Tsunan Town, Nakauonuma District, Niigata Prefecture",
+    "access_public": "JR飯山線「津南駅」からタクシーで約10分。南越後観光バス「大割野」バス停から徒歩約20分",
+    "access_public_en": "",
+    "access_car": "関越自動車道「塩沢石打IC」から車で約40分",
+    "access_car_en": ""
+  },
+  {
+    "id": "069",
+    "name": "福井洞窟ミュージアム",
+    "region": "Kyushu",
+    "prefecture": "長崎県",
+    "address": "長崎県佐世保市吉井町立石473",
+    "description": "縄文時代草創期の標識遺跡である国指定史跡「福井洞窟」のガイダンス施設です。福井洞窟は、日本で初めて旧石器時代の石器と縄文土器（隆起線文土器）が同じ層から発見され、旧石器時代から縄文時代への移行期を解明する上で極めて重要な遺跡とされています。ミュージアムでは、精巧なレプリカや映像資料を用いて、約2万年にわたる人々の暮らしの変遷をわかりやすく解説しています。特に、日本最古級の土器とされる豆粒文土器や隆起線文土器の出土状況が学べる展示は必見です。洞窟実物とあわせて見学することで、日本のあけぼのの時代を体感できます。",
+    "url": "https://fukuicave.jp/",
+    "thumbnail": "/images/facilities/069_ai.png",
+    "tags": [
+      "博物館",
+      "遺跡"
+    ],
+    "lat": 33.2435,
+    "lng": 129.6998,
+    "access": {
+      "train": "松浦鉄道「吉井駅」から徒歩約20分",
+      "bus": "西肥バス「福祉センター前」バス停から徒歩約3分",
+      "car": "西九州自動車道「佐々IC」から約15分",
+      "rank": "B"
+    },
+    "copy": "縄文の夜明けを照らす洞窟",
+    "name_en": "Fukui Cave Museum",
+    "description_en": "This is a guidance facility for the Fukui Cave, a nationally designated historic site and a key location for understanding the Incipient Jomon period. The cave is critically important as it was the first place in Japan where Paleolithic stone tools and Jomon pottery (Ryukisenmon pottery) were discovered in the same stratum, shedding light on the transition from the Paleolithic to the Jomon period. The museum uses elaborate replicas and video materials to clearly explain the changes in people's lives over approximately 20,000 years. The exhibition showcasing the discovery of some of Japan's oldest pottery, such as Tsubumon and Ryukisenmon pottery, is a must-see.",
+    "location_en": "Sasebo, Nagasaki",
+    "address_en": "473 Tateishi, Yoshii-cho, Sasebo-shi, Nagasaki",
+    "access_public": "松浦鉄道「吉井駅」から徒歩約20分。または西肥バス「福祉センター前」バス停から徒歩約3分。",
+    "access_public_en": "Approx. 20-minute walk from Yoshii Station on the Matsuura Railway, or a 3-minute walk from the Fukushi Center Mae bus stop (Saihoku bus).",
+    "access_car": "西九州自動車道「佐々IC」から約15分。",
+    "access_car_en": "Approx. 15 minutes from Sasa IC on the Nishi-Kyushu Expressway."
   }
 ]
