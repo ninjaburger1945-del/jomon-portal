@@ -1,4 +1,4 @@
-name: Regenerate Images (Imagen 4.0)
+name: Regenerate Images (Pollinations AI)
 
 on:
   workflow_dispatch:
@@ -34,10 +34,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Regenerate facility images with Imagen 4.0
+      - name: Regenerate facility images with Pollinations AI
         run: node scripts/regenerate-images.js ${{ github.event.inputs.start_id }} ${{ github.event.inputs.end_id }}
         env:
           GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
+        # Note: Pollinations AI doesn't require API key, but we keep it for future use
         timeout-minutes: 50
 
       - name: Configure Git
