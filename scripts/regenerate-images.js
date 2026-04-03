@@ -12,15 +12,15 @@
 const fs = require("fs");
 const path = require("path");
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_API_ENDPOINT = "https://api.openai.com/v1/images/generations";
+const API_KEY = process.env.GEMINI_API_KEY20261336;
+const IMAGEN_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate:generateImage";
 
 // ========== 初期化 ==========
-console.log(`\n[REGENERATE] ========== 画像再生成スクリプト v1.0 (DALL-E 3) ==========`);
-console.log(`[REGENERATE] OPENAI_API_KEY: ${OPENAI_API_KEY ? '✅ 存在' : '❌ 未設定'}`);
+console.log(`\n[REGENERATE] ========== 画像再生成スクリプト v1.1 (Imagen 4.0) ==========`);
+console.log(`[REGENERATE] GEMINI_API_KEY20261336: ${API_KEY ? '✅ 存在' : '❌ 未設定'}`);
 
-if (!OPENAI_API_KEY) {
-  console.error("[FATAL] ❌ OPENAI_API_KEY が設定されていません");
+if (!API_KEY) {
+  console.error("[FATAL] ❌ GEMINI_API_KEY20261336 が設定されていません");
   process.exit(1);
 }
 
@@ -35,25 +35,27 @@ async function generateFacilityImage(facilityId, facilityName, description) {
   const outputPath = path.join(imagesDir, `${facilityId}_ai.png`);
 
   try {
-    const prompt = `CRITICAL: Full-bleed edge-to-edge composition filling entire frame. ABSOLUTELY NO TEXT, LETTERS, LOGOS, CAPTIONS, OR JAPANESE CHARACTERS. NO SIGNAGE. NO PADDING OR WHITE BORDERS.
+    const prompt = `縄文時代の遺跡。ナショナルジオグラフィック風、学術的なドキュメンタリー撮影。自然な大地、風化した粘土、土器の破片、貝塚、石の配置。リアルな質感で、全面構成で余白なし。余白禁止。文字なし。ロゴなし。装飾なし。シンプル。アーストーン、褐色、焦げ茶、赤褐色。実在的。レンズは地表レベルから。掘られた遺跡の状態。考古学的なリアリズム。`;
 
-Ancient Jomon archaeological site in natural earth. Weathered clay soil with pottery fragments, shell middens, and stone arrangements. National Geographic raw documentary style with authentic weathered textures and film grain. Natural daylight with soft shadows. Ground-level perspective showing real excavated artifacts naturally embedded in earth. Earthy palette of browns, ochres, rust, and burnt sienna. Archaeological realism. NO MODERN ELEMENTS. NO TEXT ANYWHERE.`;
+    console.log(`[IMAGE] [${facilityId}] Imagen にリクエスト中...`);
 
-    console.log(`[IMAGE] [${facilityId}] DALL-E 3 リクエスト中...`);
-
-    const response = await fetch(OPENAI_API_ENDPOINT, {
+    const response = await fetch(IMAGEN_ENDPOINT, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'x-goog-api-key': API_KEY,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'dall-e-3',
-        prompt: prompt,
-        n: 1,
-        size: '1792x1024',
-        quality: 'hd',
-        style: 'natural'
+        instances: [
+          {
+            prompt: prompt
+          }
+        ],
+        parameters: {
+          sampleCount: 1,
+          aspectRatio: '16:9',
+          outputMimeType: 'image/png'
+        }
       }),
       timeout: 120000
     });
@@ -65,18 +67,11 @@ Ancient Jomon archaeological site in natural earth. Weathered clay soil with pot
 
     const data = await response.json();
 
-    if (data.data && data.data.length > 0 && data.data[0].url) {
-      const imageUrl = data.data[0].url;
-      console.log(`[IMAGE] [${facilityId}] URL取得、ダウンロード中...`);
+    if (data.predictions && data.predictions.length > 0 && data.predictions[0].imageBase64) {
+      const imageBase64 = data.predictions[0].imageBase64;
+      console.log(`[IMAGE] [${facilityId}] 生成完了、保存中...`);
 
-      const imageResponse = await fetch(imageUrl, { timeout: 30000 });
-      if (!imageResponse.ok) {
-        throw new Error(`ダウンロード失敗: HTTP ${imageResponse.status}`);
-      }
-
-      // arrayBuffer() を使用してバイナリデータを取得（node-fetch 最新仕様）
-      const arrayBuffer = await imageResponse.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+      const buffer = Buffer.from(imageBase64, 'base64');
       fs.writeFileSync(outputPath, buffer);
       console.log(`[IMAGE] ✅ [${facilityId}] 生成・保存成功`);
       return `/images/facilities/${facilityId}_ai.png`;

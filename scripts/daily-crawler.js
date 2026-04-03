@@ -21,18 +21,16 @@ const sharp = require("sharp");
 const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
 const API_KEY = process.env.GEMINI_API_KEY20261336;
 
-// OpenAI API (DALL-E 3用)
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_API_ENDPOINT = "https://api.openai.com/v1/images/generations";
+// Google Imagen API (画像生成)
+const IMAGEN_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate:generateImage";
 
 // Google Custom Search API（オプション）
 const GOOGLE_SEARCH_API_KEY = process.env.GOOGLE_SEARCH_API_KEY || process.env.GOOGLE_CUSTOM_SEARCH_API_KEY;
 const GOOGLE_SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID || process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID;
 
 // ========== 初期化 ==========
-console.log(`\n[INIT] ========== Jomon Portal Crawler v5.4 (DALL-E 3) ==========`);
+console.log(`\n[INIT] ========== Jomon Portal Crawler v5.5 (Imagen 4.0) ==========`);
 console.log(`[INIT] GEMINI_API_KEY20261336: ${API_KEY ? '✅ 存在' : '❌ 未設定'}`);
-console.log(`[INIT] OPENAI_API_KEY: ${OPENAI_API_KEY ? '✅ 存在' : '⚠️ 未設定'}`);
 
 if (!API_KEY) {
   console.error("[FATAL] ❌ GEMINI_API_KEY20261336 が設定されていません");
@@ -41,12 +39,7 @@ if (!API_KEY) {
 
 const useGoogleSearch = GOOGLE_SEARCH_API_KEY && GOOGLE_SEARCH_ENGINE_ID;
 console.log(`[INIT] Google Custom Search API: ${useGoogleSearch ? '✅ 有効' : '⚠️ 無効'}`);
-console.log(`[INIT] 画像生成: ${OPENAI_API_KEY ? '✅ DALL-E 3 (OpenAI)' : '❌ DALL-E 3 未設定'}`);
-
-if (!OPENAI_API_KEY) {
-  console.warn("[INIT] ⚠️ OPENAI_API_KEY が未設定のため、画像生成はスキップされます");
-}
-
+console.log(`[INIT] 画像生成: ✅ Google Imagen 4.0`);
 console.log(`[INIT] ✅ 初期化完了\n`);
 
 // ========== JSON 抽出・クリーニング関数 v2 ==========
@@ -958,55 +951,50 @@ async function generateFacilityImage(facilityId, facilityName, description) {
   const outputPath = path.join(imagesDir, `${facilityId}_ai.png`);
 
   try {
-    const prompt = `CRITICAL: Full-bleed edge-to-edge composition filling entire frame. ABSOLUTELY NO TEXT, LETTERS, LOGOS, CAPTIONS, OR JAPANESE CHARACTERS. NO SIGNAGE. NO PADDING OR WHITE BORDERS.
+    const prompt = `縄文時代の遺跡。ナショナルジオグラフィック風、学術的なドキュメンタリー撮影。自然な大地、風化した粘土、土器の破片、貝塚、石の配置。リアルな質感で、全面構成で余白なし。余白禁止。文字なし。ロゴなし。装飾なし。シンプル。アーストーン、褐色、焦げ茶、赤褐色。実在的。レンズは地表レベルから。掘られた遺跡の状態。考古学的なリアリズム。`;
 
-Ancient Jomon archaeological site in natural earth. Weathered clay soil with pottery fragments, shell middens, and stone arrangements. National Geographic raw documentary style with authentic weathered textures and film grain. Natural daylight with soft shadows. Ground-level perspective showing real excavated artifacts naturally embedded in earth. Earthy palette of browns, ochres, rust, and burnt sienna. Archaeological realism. NO MODERN ELEMENTS. NO TEXT ANYWHERE.`;
+    console.log(`[IMAGE] Google Imagen にリクエスト中...`);
 
-    console.log(`[IMAGE] DALL-E 3 にリクエスト中...`);
-
-    const response = await fetch(OPENAI_API_ENDPOINT, {
+    const response = await fetch(IMAGEN_ENDPOINT, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'x-goog-api-key': API_KEY,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'dall-e-3',
-        prompt: prompt,
-        n: 1,
-        size: '1792x1024',
-        quality: 'hd',
-        style: 'natural'
+        instances: [
+          {
+            prompt: prompt
+          }
+        ],
+        parameters: {
+          sampleCount: 1,
+          aspectRatio: '16:9',
+          outputMimeType: 'image/png'
+        }
       }),
       timeout: 120000
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`DALL-E 3 API エラー: ${response.status} - ${JSON.stringify(errorData)}`);
+      throw new Error(`Imagen API エラー: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
 
-    if (data.data && data.data.length > 0 && data.data[0].url) {
-      const imageUrl = data.data[0].url;
-      console.log(`[IMAGE] DALL-E 3 URL取得: ${imageUrl.substring(0, 50)}...`);
+    if (data.predictions && data.predictions.length > 0 && data.predictions[0].imageBase64) {
+      const imageBase64 = data.predictions[0].imageBase64;
+      console.log(`[IMAGE] Imagen 生成完了`);
 
-      // URL から画像をダウンロード
-      const imageResponse = await fetch(imageUrl, { timeout: 30000 });
-      if (!imageResponse.ok) {
-        throw new Error(`画像ダウンロード失敗: HTTP ${imageResponse.status}`);
-      }
-
-      // arrayBuffer() を使用してバイナリデータを取得（node-fetch 最新仕様）
-      const arrayBuffer = await imageResponse.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+      // Base64 から Buffer に変換して保存
+      const buffer = Buffer.from(imageBase64, 'base64');
       fs.writeFileSync(outputPath, buffer);
       console.log(`[IMAGE] ✅ 生成・保存成功: ${facilityId}_ai.png`);
       return `/images/facilities/${facilityId}_ai.png`;
     }
 
-    console.warn(`[IMAGE] ❌ DALL-E 3 レスポンスが無効`);
+    console.warn(`[IMAGE] ❌ Imagen レスポンスが無効`);
     return '';
 
   } catch (error) {
@@ -1018,11 +1006,6 @@ Ancient Jomon archaeological site in natural earth. Weathered clay soil with pot
 // ========== 一括画像再生成（指定IDの画像を再生成） ==========
 async function regenerateImages(facilityData, startId = 52, endId = 67) {
   console.log(`\n[REGENERATE] ========== 画像一括再生成開始 (ID ${startId}-${endId}) ==========`);
-
-  if (!OPENAI_API_KEY) {
-    console.error(`[REGENERATE] ❌ OPENAI_API_KEY が未設定のため、再生成できません`);
-    return;
-  }
 
   let updatedCount = 0;
 
