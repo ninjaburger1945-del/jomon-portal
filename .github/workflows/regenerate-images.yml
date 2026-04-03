@@ -1,4 +1,4 @@
-name: Regenerate Images (DALL-E 3)
+name: Regenerate Images (Imagen 4.0)
 
 on:
   workflow_dispatch:
