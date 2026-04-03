@@ -1,0 +1,51 @@
+name: Regenerate Images (DALL-E 3)
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_id:
+        description: 'Start ID'
+        required: true
+        default: '52'
+      end_id:
+        description: 'End ID'
+        required: true
+        default: '69'
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Regenerate facility images with DALL-E 3
+        run: node scripts/regenerate-images.js ${{ github.event.inputs.start_id }} ${{ github.event.inputs.end_id }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        timeout-minutes: 50
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Commit and push changes
+        run: |
+          if git diff --quiet app/data/facilities.json; then
+            echo "No changes to commit"
+          else
+            git add app/data/facilities.json
+            git commit -m "chore(images): regenerate facility images with DALL-E 3 [IDs ${{ github.event.inputs.start_id }}-${{ github.event.inputs.end_id }}]"
+            git push
+          fi
