@@ -89,7 +89,9 @@ async function generateFacilityImage(facilityId, facilityName, description) {
         throw new Error(`ダウンロード失敗: HTTP ${imageResponse.status}`);
       }
 
-      const buffer = await imageResponse.buffer();
+      // arrayBuffer() を使用してバイナリデータを取得（node-fetch 最新仕様）
+      const arrayBuffer = await imageResponse.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
       fs.writeFileSync(outputPath, buffer);
       console.log(`[IMAGE] ✅ [${facilityId}] 生成・保存成功`);
       return `/images/facilities/${facilityId}_ai.png`;
