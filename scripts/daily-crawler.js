@@ -21,14 +21,14 @@ const sharp = require("sharp");
 const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
 const API_KEY = process.env.GEMINI_API_KEY20261336;
 
-// Google Imagen API（注：GEMINI_API_KEY を使用）
+// Pollinations AI（認証不要、無料）
 
 // Google Custom Search API（オプション）
 const GOOGLE_SEARCH_API_KEY = process.env.GOOGLE_SEARCH_API_KEY || process.env.GOOGLE_CUSTOM_SEARCH_API_KEY;
 const GOOGLE_SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID || process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID;
 
 // ========== 初期化 ==========
-console.log(`\n[INIT] ========== Jomon Portal Crawler v5.5 (Imagen 4.0) ==========`);
+console.log(`\n[INIT] ========== Jomon Portal Crawler v5.6 (Pollinations AI) ==========`);
 console.log(`[INIT] GEMINI_API_KEY20261336: ${API_KEY ? '✅ 存在' : '❌ 未設定'}`);
 
 if (!API_KEY) {
@@ -38,7 +38,7 @@ if (!API_KEY) {
 
 const useGoogleSearch = GOOGLE_SEARCH_API_KEY && GOOGLE_SEARCH_ENGINE_ID;
 console.log(`[INIT] Google Custom Search API: ${useGoogleSearch ? '✅ 有効' : '⚠️ 無効'}`);
-console.log(`[INIT] 画像生成: ✅ Google Imagen 4.0`);
+console.log(`[INIT] 画像生成: ✅ Pollinations AI (無料、認証不要)`);
 console.log(`[INIT] ✅ 初期化完了\n`);
 
 // ========== JSON 抽出・クリーニング関数 v2 ==========
@@ -950,59 +950,24 @@ async function generateFacilityImage(facilityId, facilityName, description) {
   const outputPath = path.join(imagesDir, `${facilityId}_ai.png`);
 
   try {
-    const prompt = `日本の縄文時代の遺跡「${facilityName}」のAIイラストを生成してください。
-特徴：${description.substring(0, 200)}...
-要件：縄文時代の雰囲気、土器・貝塚・環状列石などを含める、暖色系、教育的価値`;
+    const prompt = `Jomon period archaeological site: ${facilityName}. ${description.substring(0, 150)}. Ancient pottery, shell middens, stone circles, warm earthy tones, educational value, photorealistic, National Geographic documentary style`;
 
-    console.log(`[IMAGE] Imagen にリクエスト中...`);
+    console.log(`[IMAGE] Pollinations AI にリクエスト中...`);
 
-    const requestBody = {
-      instances: [{ prompt: prompt }],
-      parameters: {
-        sampleCount: 1,
-        aspectRatio: "16:9",
-        outputMimeType: "image/png"
-      }
-    };
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1792&height=1024&nologo=true`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${API_KEY}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody),
-        timeout: 120000
-      }
-    );
-
-    const responseText = await response.text();
+    const response = await fetch(imageUrl, { timeout: 60000 });
 
     if (!response.ok) {
-      throw new Error(`Imagen API エラー: ${response.status} - ${responseText.substring(0, 300)}`);
+      throw new Error(`HTTP ${response.status}`);
     }
 
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (jsonErr) {
-      throw new Error(`JSON Parse Error: ${jsonErr.message}. Response: ${responseText.substring(0, 300)}`);
-    }
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    fs.writeFileSync(outputPath, buffer);
 
-    if (data.predictions && data.predictions.length > 0 && data.predictions[0].bytesBase64Encoded) {
-      const imageBase64 = data.predictions[0].bytesBase64Encoded;
-      console.log(`[IMAGE] Imagen 生成完了`);
-
-      // Base64 から Buffer に変換して保存
-      const buffer = Buffer.from(imageBase64, 'base64');
-      fs.writeFileSync(outputPath, buffer);
-      console.log(`[IMAGE] ✅ 生成・保存成功: ${facilityId}_ai.png`);
-      return `/images/facilities/${facilityId}_ai.png`;
-    }
-
-    console.warn(`[IMAGE] ❌ Imagen レスポンスが無効: ${JSON.stringify(data)}`);
-    return '';
+    console.log(`[IMAGE] ✅ 生成・保存成功: ${facilityId}_ai.png (${buffer.length} bytes)`);
+    return `/images/facilities/${facilityId}_ai.png`;
 
   } catch (error) {
     console.warn(`[IMAGE] ❌ 生成失敗: ${error.message}`);
