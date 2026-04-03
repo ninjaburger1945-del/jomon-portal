@@ -1,9 +1,3 @@
-import { spawn } from 'child_process';
-import path from 'path';
-
-export const runtime = 'nodejs';
-export const maxDuration = 300; // 5 minutes timeout
-
 export async function POST(request) {
   try {
     const { startId, endId } = await request.json();
@@ -26,116 +20,47 @@ export async function POST(request) {
       );
     }
 
-    return new Response(
-      new ReadableStream({
-        async start(controller) {
-          const sendLog = (message) => {
-            controller.enqueue(
-              new TextEncoder().encode(`data: ${JSON.stringify({ log: message })}\n\n`)
-            );
-          };
+    // Trigger GitHub Actions workflow
+    const githubToken = process.env.GITHUB_TOKEN;
+    if (!githubToken) {
+      return Response.json(
+        { error: 'GitHub token not configured' },
+        { status: 500 }
+      );
+    }
 
-          try {
-            sendLog(`[START] 画像再生成を開始します (ID ${start}-${end})`);
-
-            const scriptPath = path.join(process.cwd(), 'scripts', 'regenerate-images.js');
-            const geminiApiKey = process.env.GEMINI_API_KEY20261336;
-
-            if (!geminiApiKey) {
-              sendLog('[ERROR] ❌ GEMINI_API_KEY20261336 が設定されていません');
-              controller.enqueue(
-                new TextEncoder().encode(
-                  `data: ${JSON.stringify({ status: 'error', message: 'API key not configured' })}\n\n`
-                )
-              );
-              controller.close();
-              return;
-            }
-
-            const process = spawn('node', [scriptPath, String(start), String(end)], {
-              cwd: process.cwd(),
-              env: {
-                ...process.env,
-                GEMINI_API_KEY20261336: geminiApiKey,
-                NODE_ENV: 'production'
-              }
-            });
-
-            let outputBuffer = '';
-
-            process.stdout.on('data', (data) => {
-              const chunk = data.toString();
-              outputBuffer += chunk;
-
-              // Send each complete line as a log event
-              const lines = outputBuffer.split('\n');
-              for (let i = 0; i < lines.length - 1; i++) {
-                const line = lines[i].trim();
-                if (line) {
-                  sendLog(line);
-                }
-              }
-              outputBuffer = lines[lines.length - 1];
-            });
-
-            process.stderr.on('data', (data) => {
-              const line = data.toString().trim();
-              if (line) {
-                sendLog(`[STDERR] ${line}`);
-              }
-            });
-
-            process.on('close', (code) => {
-              if (outputBuffer.trim()) {
-                sendLog(outputBuffer);
-              }
-
-              if (code === 0) {
-                sendLog('[SUCCESS] ✅ 画像再生成が完了しました');
-                controller.enqueue(
-                  new TextEncoder().encode(
-                    `data: ${JSON.stringify({ status: 'complete', message: 'Regeneration completed successfully' })}\n\n`
-                  )
-                );
-              } else {
-                sendLog(`[ERROR] ❌ スクリプトが終了コード ${code} で失敗しました`);
-                controller.enqueue(
-                  new TextEncoder().encode(
-                    `data: ${JSON.stringify({ status: 'error', message: `Script exited with code ${code}` })}\n\n`
-                  )
-                );
-              }
-              controller.close();
-            });
-
-            process.on('error', (err) => {
-              sendLog(`[ERROR] ❌ プロセスエラー: ${err.message}`);
-              controller.enqueue(
-                new TextEncoder().encode(
-                  `data: ${JSON.stringify({ status: 'error', message: err.message })}\n\n`
-                )
-              );
-              controller.close();
-            });
-          } catch (err) {
-            sendLog(`[ERROR] ❌ ${err.message}`);
-            controller.enqueue(
-              new TextEncoder().encode(
-                `data: ${JSON.stringify({ status: 'error', message: err.message })}\n\n`
-              )
-            );
-            controller.close();
-          }
-        }
-      }),
+    const response = await fetch(
+      'https://api.github.com/repos/ninjaburger1945-del/jomon-portal/actions/workflows/regenerate-images.yml/dispatches',
       {
+        method: 'POST',
         headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive'
-        }
+          'Authorization': `Bearer ${githubToken}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ref: 'main',
+          inputs: {
+            start_id: String(start),
+            end_id: String(end)
+          }
+        })
       }
     );
+
+    if (!response.ok) {
+      const error = await response.text();
+      return Response.json(
+        { error: `Failed to trigger workflow: ${error}` },
+        { status: response.status }
+      );
+    }
+
+    return Response.json({
+      success: true,
+      message: `GitHub Actions で ID ${start}-${end} の画像再生成を開始しました。`,
+      workflowUrl: 'https://github.com/ninjaburger1945-del/jomon-portal/actions'
+    });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : 'Unknown error' },

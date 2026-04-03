@@ -311,45 +311,30 @@ export default function AdminPage() {
         body: JSON.stringify({ startId: start, endId: end }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to start regeneration");
+        throw new Error(data.error || "Failed to start regeneration");
       }
 
-      if (!response.body) {
-        throw new Error("No response body");
-      }
+      setRegenerateLogs([
+        `✅ GitHub Actions ワークフロー開始しました`,
+        `ID 範囲: ${start}-${end}`,
+        ``,
+        `🔗 進捗確認: https://github.com/ninjaburger1945-del/jomon-portal/actions`,
+        ``,
+        `再生成完了後、自動でデプロイされます。`
+      ]);
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
+      setError(`✓ 画像再生成を開始しました！ GitHub Actions で進捗をご確認ください。`);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(line => line.startsWith('data: '));
-
-        for (const line of lines) {
-          try {
-            const data = JSON.parse(line.replace('data: ', ''));
-            if (data.log) {
-              setRegenerateLogs(prev => [...prev, data.log]);
-            }
-            if (data.status === 'complete') {
-              setError("✓ 画像再生成が完了しました！");
-              await loadFacilities();
-            }
-            if (data.status === 'error') {
-              throw new Error(data.message);
-            }
-          } catch (parseErr) {
-            console.error("Parse error:", parseErr);
-          }
-        }
-      }
+      // 10秒後に facilities を再読み込み
+      setTimeout(() => {
+        loadFacilities();
+      }, 10000);
     } catch (err) {
-      setError(`Regeneration error: ${err instanceof Error ? err.message : "Unknown error"}`);
+      setError(`エラー: ${err instanceof Error ? err.message : "Unknown error"}`);
+      setRegenerateLogs([`❌ 実行失敗: ${err instanceof Error ? err.message : "Unknown error"}`]);
     } finally {
       setIsRegenerating(false);
     }
@@ -1155,7 +1140,7 @@ export default function AdminPage() {
               施設IDの範囲を指定して画像を再生成します。再生成中は処理が完了するまでお待ちください。
             </p>
 
-            {!isRegenerating ? (
+            {regenerateLogs.length === 0 ? (
               <>
                 <div style={{ marginBottom: "15px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                   <label>
@@ -1167,6 +1152,7 @@ export default function AdminPage() {
                       value={regenerateStartId}
                       onChange={(e) => setRegenerateStartId(e.target.value)}
                       style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                      disabled={isRegenerating}
                     />
                   </label>
                   <label>
@@ -1178,6 +1164,7 @@ export default function AdminPage() {
                       value={regenerateEndId}
                       onChange={(e) => setRegenerateEndId(e.target.value)}
                       style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                      disabled={isRegenerating}
                     />
                   </label>
                 </div>
@@ -1185,15 +1172,17 @@ export default function AdminPage() {
                 <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
                   <button
                     onClick={() => setShowRegenerateModal(false)}
-                    style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#ccc", border: "none", borderRadius: "4px" }}
+                    disabled={isRegenerating}
+                    style={{ padding: "8px 16px", cursor: isRegenerating ? "not-allowed" : "pointer", backgroundColor: "#ccc", border: "none", borderRadius: "4px", opacity: isRegenerating ? 0.6 : 1 }}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleRegenerateImages}
-                    style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#ff9800", color: "white", border: "none", borderRadius: "4px", fontWeight: "500" }}
+                    disabled={isRegenerating}
+                    style={{ padding: "8px 16px", cursor: isRegenerating ? "not-allowed" : "pointer", backgroundColor: isRegenerating ? "#999" : "#ff9800", color: "white", border: "none", borderRadius: "4px", fontWeight: "500", opacity: isRegenerating ? 0.6 : 1 }}
                   >
-                    🎨 再生成開始
+                    {isRegenerating ? "🔄 送信中..." : "🎨 再生成開始"}
                   </button>
                 </div>
               </>
@@ -1205,30 +1194,32 @@ export default function AdminPage() {
                   borderRadius: "4px",
                   padding: "15px",
                   marginBottom: "15px",
-                  maxHeight: "400px",
-                  overflowY: "auto",
                   fontFamily: "monospace",
-                  fontSize: "12px",
-                  lineHeight: "1.5"
+                  fontSize: "13px",
+                  lineHeight: "1.8",
+                  whiteSpace: "pre-wrap",
+                  wordWrap: "break-word"
                 }}>
-                  {regenerateLogs.length === 0 ? (
-                    <div style={{ color: "#999" }}>処理中...</div>
-                  ) : (
-                    regenerateLogs.map((log, idx) => (
-                      <div key={idx} style={{
-                        color: log.includes("❌") || log.includes("[ERROR]") ? "#d32f2f" :
-                               log.includes("✅") || log.includes("[SUCCESS]") ? "#388e3c" :
-                               log.includes("[REGENERATE]") || log.includes("[IMAGE]") ? "#1976d2" : "#666"
-                      }}>
-                        {log}
-                      </div>
-                    ))
-                  )}
+                  {regenerateLogs.map((log, idx) => (
+                    <div key={idx} style={{
+                      color: log.includes("❌") ? "#d32f2f" :
+                             log.includes("✅") ? "#388e3c" :
+                             log.includes("🔗") ? "#0066cc" : "#666"
+                    }}>
+                      {log}
+                    </div>
+                  ))}
                 </div>
 
-                <p style={{ fontSize: "12px", color: "#999", marginBottom: "15px" }}>
-                  🔄 再生成中です。完了するまでこのウィンドウを閉じないでください...
-                </p>
+                <button
+                  onClick={() => {
+                    setShowRegenerateModal(false);
+                    setRegenerateLogs([]);
+                  }}
+                  style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#2196F3", color: "white", border: "none", borderRadius: "4px" }}
+                >
+                  Close
+                </button>
               </>
             )}
           </div>
