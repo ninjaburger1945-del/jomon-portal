@@ -33,11 +33,7 @@ export default function AdminPage() {
   const [sortKey, setSortKey] = useState<SortKey>("id");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [saving, setSaving] = useState(false);
-  const [regenerateStartId, setRegenerateStartId] = useState("52");
-  const [regenerateEndId, setRegenerateEndId] = useState("52");
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [regenerateLogs, setRegenerateLogs] = useState<string[]>([]);
-  const [showRegenerateModal, setShowRegenerateModal] = useState(false);
 
   const handleLogin = () => {
     const correctPassword = "jomon2026";
@@ -291,22 +287,22 @@ export default function AdminPage() {
 
   const handleRegenerateImages = async () => {
     console.log("handleRegenerateImages called");
-    const start = parseInt(regenerateStartId);
-    const end = parseInt(regenerateEndId);
+    const startIdInput = prompt("Start ID (1-999):", regenerateStartId);
+    if (!startIdInput) return;
 
-    console.log("Start:", start, "End:", end);
+    const endIdInput = prompt("End ID (1-999):", regenerateEndId);
+    if (!endIdInput) return;
+
+    const start = parseInt(startIdInput);
+    const end = parseInt(endIdInput);
 
     if (isNaN(start) || isNaN(end) || start < 1 || end > 999 || start > end) {
-      setError("Invalid ID range. Start and End must be between 1-999 and Start ≤ End.");
+      alert("Invalid ID range. Start and End must be between 1-999 and Start ≤ End.");
       return;
     }
 
     setIsRegenerating(true);
-    setRegenerateLogs([
-      `✅ リクエスト送信中...`,
-      `ID 範囲: ${start}-${end}`,
-    ]);
-    setError("");
+    setError("リクエスト送信中...");
 
     try {
       const response = await fetch("/api/regenerate-images", {
@@ -324,22 +320,13 @@ export default function AdminPage() {
         throw new Error(data.error || "Failed to start regeneration");
       }
 
-      setRegenerateLogs([
-        `✅ リクエスト送信完了`,
-        `ID 範囲: ${start}-${end}`,
-        ``,
-        `GitHub Actions ページを開いています...`,
-        ``,
-        `再生成完了後、自動でデプロイされます。`
-      ]);
-
       // GitHub Actions ページへリダイレクト
       window.open(
         `https://github.com/ninjaburger1945-del/jomon-portal/actions/workflows/regenerate-images.yml`,
         '_blank'
       );
 
-      setError(`✓ GitHub Actions ページを開きました。Run workflow から実行してください。`);
+      setError(`✓ GitHub Actions ページを開きました。Run workflow から ID ${start}-${end} で実行してください。`);
 
       // 30秒後に facilities を再読み込み
       setTimeout(() => {
@@ -348,7 +335,6 @@ export default function AdminPage() {
     } catch (err) {
       console.error("Error:", err);
       setError(`エラー: ${err instanceof Error ? err.message : "Unknown error"}`);
-      setRegenerateLogs([`❌ 実行失敗: ${err instanceof Error ? err.message : "Unknown error"}`]);
     } finally {
       setIsRegenerating(false);
     }
@@ -611,10 +597,7 @@ export default function AdminPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
           <h2 style={{ margin: 0 }}>🖼️ 画像再生成 (Imagen 4.0)</h2>
           <button
-            onClick={() => {
-              console.log("Button clicked");
-              setShowRegenerateModal(true);
-            }}
+            onClick={handleRegenerateImages}
             disabled={isRegenerating}
             style={{
               padding: "10px 16px",
@@ -1128,120 +1111,6 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Image Regeneration Modal */}
-      {showRegenerateModal && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: "white",
-            padding: "30px",
-            borderRadius: "8px",
-            maxWidth: "600px",
-            width: "90%",
-            maxHeight: "80vh",
-            overflowY: "auto",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
-          }}>
-            <h2 style={{ marginTop: 0 }}>🎨 画像再生成 (Imagen 4.0)</h2>
-            <p style={{ fontSize: "14px", color: "#666", marginBottom: "20px" }}>
-              施設IDの範囲を指定して画像を再生成します。再生成中は処理が完了するまでお待ちください。
-            </p>
-
-            {regenerateLogs.length === 0 ? (
-              <>
-                <div style={{ marginBottom: "15px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                  <label>
-                    <strong>Start ID:</strong>
-                    <input
-                      type="number"
-                      min="1"
-                      max="999"
-                      value={regenerateStartId}
-                      onChange={(e) => setRegenerateStartId(e.target.value)}
-                      style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
-                      disabled={isRegenerating}
-                    />
-                  </label>
-                  <label>
-                    <strong>End ID:</strong>
-                    <input
-                      type="number"
-                      min="1"
-                      max="999"
-                      value={regenerateEndId}
-                      onChange={(e) => setRegenerateEndId(e.target.value)}
-                      style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
-                      disabled={isRegenerating}
-                    />
-                  </label>
-                </div>
-
-                <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-                  <button
-                    onClick={() => setShowRegenerateModal(false)}
-                    disabled={isRegenerating}
-                    style={{ padding: "8px 16px", cursor: isRegenerating ? "not-allowed" : "pointer", backgroundColor: "#ccc", border: "none", borderRadius: "4px", opacity: isRegenerating ? 0.6 : 1 }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleRegenerateImages}
-                    disabled={isRegenerating}
-                    style={{ padding: "8px 16px", cursor: isRegenerating ? "not-allowed" : "pointer", backgroundColor: isRegenerating ? "#999" : "#ff9800", color: "white", border: "none", borderRadius: "4px", fontWeight: "500", opacity: isRegenerating ? 0.6 : 1 }}
-                  >
-                    {isRegenerating ? "🔄 送信中..." : "🎨 再生成開始"}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div style={{
-                  backgroundColor: "#f5f5f5",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  padding: "15px",
-                  marginBottom: "15px",
-                  fontFamily: "monospace",
-                  fontSize: "13px",
-                  lineHeight: "1.8",
-                  whiteSpace: "pre-wrap",
-                  wordWrap: "break-word"
-                }}>
-                  {regenerateLogs.map((log, idx) => (
-                    <div key={idx} style={{
-                      color: log.includes("❌") ? "#d32f2f" :
-                             log.includes("✅") ? "#388e3c" :
-                             log.includes("🔗") ? "#0066cc" : "#666"
-                    }}>
-                      {log}
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={() => {
-                    setShowRegenerateModal(false);
-                    setRegenerateLogs([]);
-                  }}
-                  style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#2196F3", color: "white", border: "none", borderRadius: "4px" }}
-                >
-                  Close
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
