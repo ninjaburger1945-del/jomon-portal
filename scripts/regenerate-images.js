@@ -60,12 +60,21 @@ async function generateFacilityImage(facilityId, facilityName, description) {
       timeout: 120000
     });
 
+    const responseText = await response.text();
+    console.log(`[IMAGE] [${facilityId}] レスポンス状態: ${response.status}`);
+    console.log(`[IMAGE] [${facilityId}] レスポンス長: ${responseText.length} 文字`);
+    console.log(`[IMAGE] [${facilityId}] レスポンス先頭: ${responseText.substring(0, 200)}`);
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`HTTP ${response.status}: ${JSON.stringify(errorData)}`);
+      throw new Error(`HTTP ${response.status}: ${responseText}`);
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (jsonErr) {
+      throw new Error(`JSON Parse Error: ${jsonErr.message}. Response: ${responseText.substring(0, 500)}`);
+    }
 
     if (data.predictions && data.predictions.length > 0 && data.predictions[0].imageBase64) {
       const imageBase64 = data.predictions[0].imageBase64;
@@ -77,7 +86,7 @@ async function generateFacilityImage(facilityId, facilityName, description) {
       return `/images/facilities/${facilityId}_ai.png`;
     }
 
-    throw new Error(`無効なレスポンス`);
+    throw new Error(`無効なレスポンス: ${JSON.stringify(data)}`);
 
   } catch (error) {
     console.warn(`[IMAGE] ❌ [${facilityId}] 失敗: ${error.message}`);

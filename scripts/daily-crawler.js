@@ -976,12 +976,18 @@ async function generateFacilityImage(facilityId, facilityName, description) {
       timeout: 120000
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Imagen API エラー: ${response.status} - ${JSON.stringify(errorData)}`);
+      throw new Error(`Imagen API エラー: ${response.status} - ${responseText}`);
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (jsonErr) {
+      throw new Error(`JSON Parse Error: ${jsonErr.message}. Response: ${responseText.substring(0, 500)}`);
+    }
 
     if (data.predictions && data.predictions.length > 0 && data.predictions[0].imageBase64) {
       const imageBase64 = data.predictions[0].imageBase64;
@@ -994,7 +1000,7 @@ async function generateFacilityImage(facilityId, facilityName, description) {
       return `/images/facilities/${facilityId}_ai.png`;
     }
 
-    console.warn(`[IMAGE] ❌ Imagen レスポンスが無効`);
+    console.warn(`[IMAGE] ❌ Imagen レスポンスが無効: ${JSON.stringify(data)}`);
     return '';
 
   } catch (error) {
