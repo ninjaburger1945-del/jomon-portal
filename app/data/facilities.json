@@ -2024,5 +2024,35 @@
     "access_public_en": "Approx. 15-minute walk from JR Ibusuki Station (Ibusuki Makurazaki Line).",
     "access_car": "指宿スカイライン「谷山IC」から約50分",
     "access_car_en": "Approx. 50 minutes from the Taniyama IC on the Ibusuki Skyline."
+  },
+  {
+    "id": "067",
+    "name": "国指定史跡 泉福寺洞窟",
+    "region": "Kyushu",
+    "prefecture": "長崎県",
+    "address": "長崎県佐世保市瀬戸越町",
+    "description": "長崎県佐世保市にある国指定史跡で、旧石器時代から縄文時代草創期にかけての重要な洞窟遺跡です。この遺跡の最大の特徴は、約16,000年前の世界最古級とされる土器片「豆粒文土器」が発見されたことです。これは土器の起源を考える上で極めて重要な発見であり、日本の考古学史に名を刻んでいます。洞窟内からは、豆粒文土器のほか、隆起線文土器や石器なども出土しており、旧石器文化から縄文文化への移行期の人々の生活を知る上で貴重な手がかりを提供しています。現在、洞窟は保存のために覆屋がかけられ、解説板と共に一般に公開されています。出土品は近隣の福井洞窟ミュージアムで展示されています。",
+    "url": "https://kunishitei.bunka.go.jp/heritage/detail/401/3257",
+    "thumbnail": "/images/facilities/067_ai.png",
+    "tags": [
+      "遺跡"
+    ],
+    "lat": 33.19012,
+    "lng": 129.74325,
+    "access": {
+      "train": "松浦鉄道西九州線 泉福寺駅から徒歩約5分",
+      "bus": "西肥バス「瀬戸越」バス停から徒歩約3分",
+      "car": "西九州自動車道 佐世保中央ICから約10分",
+      "rank": "A"
+    },
+    "copy": "世界最古級の土器発見地",
+    "name_en": "Senpukuji Cave Dwelling Site",
+    "description_en": "A nationally designated historic site in Sasebo City, Nagasaki, this cave is crucial for understanding the period from the Paleolithic to the Incipient Jomon era. Its most significant discovery is the 'Toryumon' (bean-pattern) pottery, dated to about 16,000 years ago, making it one of the world's oldest pottery fragments. This finding is vital for studies on the origin of pottery. In addition to Toryumon pottery, linear-relief pottery and stone tools were also found, providing valuable insights into the lives of people during the transition from Paleolithic to Jomon culture. The cave is now protected by a shelter and is open to the public with explanatory panels. Artifacts are displayed at the nearby Fukui Cave Museum.",
+    "location_en": "Sasebo, Nagasaki",
+    "address_en": "Setogoe-cho, Sasebo-shi, Nagasaki-ken",
+    "access_public": "松浦鉄道西九州線 泉福寺駅から徒歩約5分。または西肥バス「瀬戸越」バス停から徒歩約3分。",
+    "access_public_en": "Approx. 5-minute walk from Senpukuji Station on the Matsuura Railway Nishi-Kyushu Line, or a 3-minute walk from the 'Setogoe' bus stop (Sasebo Bus).",
+    "access_car": "西九州自動車道 佐世保中央ICから約10分",
+    "access_car_en": "Approx. 10 minutes from the Sasebo-Chuo IC on the Nishi-Kyushu Expressway."
   }
 ]
