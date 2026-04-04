@@ -35,7 +35,7 @@ async function extractKeywords(facilityName, description) {
 
     const userPrompt = `遺跡名: ${facilityName}\n\n解説文:\n${description}`;
 
-    const response = await fetch(API_ENDPOINT, {
+    const response = await fetch(`${API_ENDPOINT}?key=${API_KEY}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
