@@ -93,13 +93,15 @@ async function extractKeywords(facilityName, description) {
  */
 function buildPrompt(facilityName, description, keywords) {
   if (keywords && keywords.length === 3) {
-    // 【新型プロンプト】遺跡固有キーワード連動版
-    return `A realistic, high-definition documentary photograph of ${facilityName}. `
-         + `The composition focuses strictly on the specific historical details mentioned in the text: `
+    // 【新型プロンプト】遺跡固有キーワード連動版 + 縄文OS（原始的な質感、湿った土の空気感）
+    return `A realistic, high-definition archaeological documentary photograph of ${facilityName}. `
+         + `The composition focuses strictly on the specific Jomon-era artifacts and features: `
          + `${keywords[0]}, ${keywords[1]}, and ${keywords[2]}. `
-         + `The scene captures the unique atmosphere of the site, whether it be sunny, misty, or raw, depending on its location. `
-         + `Shot on a professional camera with natural lighting. `
-         + `The image must be borderless and contain no text.`;
+         + `These ancient objects must be depicted as primitive relics covered in soot, soil, and moisture from thousands of years of burial - not modern reproductions or polished museum pieces. `
+         + `The background and atmosphere capture the raw, earthy excavation site with wet earth texture, serious documentary quality, and archaeological authenticity. `
+         + `No modern aesthetics, no small clean park settings, no bright or sanitized appearance. `
+         + `Shot with archaeological documentation style lighting on raw natural materials, emphasizing the serious, primordial quality of the Jomon period. `
+         + `Borderless, no text, no labels, no borders.`;
   }
 
   // 【Fallback プロンプト】Gemini 未設定 or 抽出失敗時
