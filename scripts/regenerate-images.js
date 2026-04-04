@@ -11,6 +11,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { generatePrompt } = require('./lib/image-prompt');
 
 // ========== 初期化 ==========
 console.log(`\n[REGENERATE] ========== 画像再生成スクリプト v1.3 (Pollinations AI) ==========`);
@@ -25,12 +26,19 @@ async function generateFacilityImage(facilityId, facilityName, description) {
 
   const outputPath = path.join(imagesDir, `${facilityId}_ai.png`);
 
-  const prompt = `Jomon period archaeological site: ${facilityName}. ${description.substring(0, 150)}. Ancient pottery, shell middens, stone circles, warm earthy tones, educational value, photorealistic, National Geographic documentary style`;
+  const prompt = await generatePrompt(facilityName, description);
 
-  // リトライ最大3回
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  // リトライ最大5回（成功率重視）
+  const MAX_RETRIES = 5;
+  const getWaitTime = (attempt) => {
+    // 試行ごとの待機時間：15秒、30秒、30秒、30秒、30秒
+    const waitTimes = [15000, 30000, 30000, 30000, 30000];
+    return waitTimes[attempt - 1] || 30000;
+  };
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      console.log(`[IMAGE] [${facilityId}] Pollinations AI にリクエスト中... (試行 ${attempt}/3)`);
+      console.log(`[IMAGE] [${facilityId}] Pollinations AI にリクエスト中... (試行 ${attempt}/${MAX_RETRIES})`);
 
       const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1792&height=1024&nologo=true`;
 
@@ -46,21 +54,22 @@ async function generateFacilityImage(facilityId, facilityName, description) {
       }
 
       // 502, 429 などの一時エラーの場合はリトライ
-      if ((response.status === 502 || response.status === 429) && attempt < 3) {
-        const waitTime = attempt * 5000; // 5秒、10秒、15秒
-        console.warn(`[IMAGE] ⚠️ [${facilityId}] HTTP ${response.status}. ${waitTime}ms 待機後にリトライします...`);
+      if ((response.status === 502 || response.status === 429) && attempt < MAX_RETRIES) {
+        const waitTime = getWaitTime(attempt);
+        console.warn(`[IMAGE] ⚠️ [${facilityId}] HTTP ${response.status}. ${waitTime}ms 待機後にリトライします... (${attempt + 1}/${MAX_RETRIES}へ)`);
         await new Promise(r => setTimeout(r, waitTime));
         continue;
       }
 
       throw new Error(`HTTP ${response.status}`);
     } catch (error) {
-      if (attempt === 3) {
-        console.warn(`[IMAGE] ❌ [${facilityId}] 3回失敗: ${error.message}`);
+      if (attempt === MAX_RETRIES) {
+        console.warn(`[IMAGE] ❌ [${facilityId}] ${MAX_RETRIES}回失敗: ${error.message}`);
         return '';
       }
-      console.warn(`[IMAGE] ⚠️ [${facilityId}] 試行${attempt}失敗: ${error.message}. リトライします...`);
-      await new Promise(r => setTimeout(r, 5000));
+      const waitTime = getWaitTime(attempt);
+      console.warn(`[IMAGE] ⚠️ [${facilityId}] 試行${attempt}失敗: ${error.message}. ${waitTime}ms 待機後にリトライ...`);
+      await new Promise(r => setTimeout(r, waitTime));
     }
   }
 

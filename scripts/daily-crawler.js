@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
+const { generatePrompt } = require('./lib/image-prompt');
 
 /**
  * Jomon Portal クローラー v5.2 (Gemini シンプル版)
@@ -934,7 +935,7 @@ async function validateCandidateUrls(candidateUrls, facilityName, address, prefe
   return { valid: false, url: '' };
 }
 
-// ========== 画像生成 v2.0 (DALL-E 3) ==========
+// ========== 画像生成 v2.0 (DALL-E 3) + リトライ強化 ==========
 async function generateFacilityImage(facilityId, facilityName, description) {
   if (!OPENAI_API_KEY) {
     console.warn(`[IMAGE] ⚠️ OPENAI_API_KEY が未設定のため、画像生成をスキップ`);
@@ -949,30 +950,54 @@ async function generateFacilityImage(facilityId, facilityName, description) {
 
   const outputPath = path.join(imagesDir, `${facilityId}_ai.png`);
 
-  try {
-    const prompt = `Jomon period archaeological site: ${facilityName}. ${description.substring(0, 150)}. Ancient pottery, shell middens, stone circles, warm earthy tones, educational value, photorealistic, National Geographic documentary style`;
+  const prompt = await generatePrompt(facilityName, description);
 
-    console.log(`[IMAGE] Pollinations AI にリクエスト中...`);
+  // リトライ最大5回（成功率重視）
+  const MAX_RETRIES = 5;
+  const getWaitTime = (attempt) => {
+    // 試行ごとの待機時間：15秒、30秒、30秒、30秒、30秒
+    const waitTimes = [15000, 30000, 30000, 30000, 30000];
+    return waitTimes[attempt - 1] || 30000;
+  };
 
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1792&height=1024&nologo=true`;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      console.log(`[IMAGE] [${facilityId}] Pollinations AI にリクエスト中... (試行 ${attempt}/${MAX_RETRIES})`);
 
-    const response = await fetch(imageUrl, { timeout: 60000 });
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1792&height=1024&nologo=true`;
 
-    if (!response.ok) {
+      const response = await fetch(imageUrl, { timeout: 60000 });
+
+      if (response.ok) {
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        fs.writeFileSync(outputPath, buffer);
+
+        console.log(`[IMAGE] ✅ [${facilityId}] 生成・保存成功 (${buffer.length} bytes)`);
+        return `/images/facilities/${facilityId}_ai.png`;
+      }
+
+      // 502, 429 などの一時エラーの場合はリトライ
+      if ((response.status === 502 || response.status === 429) && attempt < MAX_RETRIES) {
+        const waitTime = getWaitTime(attempt);
+        console.warn(`[IMAGE] ⚠️ [${facilityId}] HTTP ${response.status}. ${waitTime}ms 待機後にリトライします... (${attempt + 1}/${MAX_RETRIES}へ)`);
+        await new Promise(r => setTimeout(r, waitTime));
+        continue;
+      }
+
       throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      if (attempt === MAX_RETRIES) {
+        console.warn(`[IMAGE] ❌ [${facilityId}] ${MAX_RETRIES}回失敗: ${error.message}`);
+        return '';
+      }
+      const waitTime = getWaitTime(attempt);
+      console.warn(`[IMAGE] ⚠️ [${facilityId}] 試行${attempt}失敗: ${error.message}. ${waitTime}ms 待機後にリトライ...`);
+      await new Promise(r => setTimeout(r, waitTime));
     }
-
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    fs.writeFileSync(outputPath, buffer);
-
-    console.log(`[IMAGE] ✅ 生成・保存成功: ${facilityId}_ai.png (${buffer.length} bytes)`);
-    return `/images/facilities/${facilityId}_ai.png`;
-
-  } catch (error) {
-    console.warn(`[IMAGE] ❌ 生成失敗: ${error.message}`);
-    return '';
   }
+
+  return '';
 }
 
 // ========== 一括画像再生成（指定IDの画像を再生成） ==========
