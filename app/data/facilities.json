@@ -2144,5 +2144,31 @@
     "thumbnail": "/images/facilities/070_ai.png",
     "access_public": "JR神戸線「土山駅」から徒歩約15分.。JR土山駅南口からバス「大中遺跡南」下車、徒歩5分.",
     "access_car": "第二神明道路「明石西IC」から約3km."
+  },
+  {
+    "id": "071",
+    "name": "【要確認】伊那市創造館",
+    "prefecture": "長野県",
+    "address": "長野県伊那市荒井3520",
+    "description": "縄文時代草創期の標式遺跡である国指定史跡「神子柴遺跡」の出土品を常設展示。日本最古級で「最も美しい」とも評される磨製石器群は必見。",
+    "region": "Chubu",
+    "url": "https://ja.wikipedia.org/wiki/%E4%BC%8A%E9%82%A3%E5%B8%82%E5%89%B5%E9%80%A0%E9%A4%A8",
+    "tags": [
+      "縄文草創期",
+      "重要文化財"
+    ],
+    "lat": 35.84073,
+    "lng": 137.9575,
+    "access": {
+      "train": "JR飯田線 伊那市駅から徒歩約4分",
+      "bus": "伊那バスターミナルから徒歩約3分",
+      "car": "中央自動車道 伊那ICから約15分",
+      "rank": 1
+    },
+    "copy": "石器時代の夜明け",
+    "name_en": "Ina City Creation Museum",
+    "description_en": "This museum permanently exhibits artifacts from the Mikoshiba site, a nationally designated historic site that represents the Incipient Jomon period. The polished stone tools, considered among the oldest and 'most beautiful' in Japan, are a must-see.",
+    "needsCheck": true,
+    "thumbnail": "/images/facilities/071_ai.png"
   }
 ]
