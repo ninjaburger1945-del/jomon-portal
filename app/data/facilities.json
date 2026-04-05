@@ -2172,5 +2172,32 @@
     "thumbnail": "/images/facilities/071_ai.png",
     "access_public": "JR飯田線 伊那市駅から徒歩約4分。伊那バスターミナルから徒歩約3分",
     "access_car": "中央自動車道 伊那ICから約15分"
+  },
+  {
+    "id": "072",
+    "name": "【要確認】大境洞窟住居跡",
+    "prefecture": "富山県",
+    "address": "富山県氷見市大境",
+    "description": "国指定史跡。縄文時代中期から近世に至る複合洞窟遺跡。日本で最初に本格的な調査が行われた洞窟遺跡として考古学史的にも重要。",
+    "region": "Chubu",
+    "url": "https://ja.wikipedia.org/wiki/%E5%A4%A7%E5%A2%83%E6%B4%9E%E7%AA%9F%E4%BD%8F%E5%B1%85%E8%B7%A1",
+    "tags": [
+      "洞窟遺跡",
+      "国指定史跡"
+    ],
+    "lat": 36.931389,
+    "lng": 136.995833,
+    "access": {
+      "train": "JR氷見線氷見駅から加越能バスで約30分、「大境」下車徒歩5分",
+      "bus": "「大境」バス停から徒歩5分",
+      "car": "能越自動車道 灘浦ICから約10分",
+      "rank": 2
+    },
+    "copy": "日本海側の縄文洞窟",
+    "name_en": "Ozakai Cave Dwelling Site",
+    "description_en": "A nationally designated historic site, this cave complex was inhabited from the Middle Jomon period to early modern times. It holds archaeological significance as the first cave site in Japan to undergo full-scale investigation.",
+    "needsCheck": true,
+    "userApproved": false,
+    "thumbnail": "/images/facilities/072_ai.png"
   }
 ]
