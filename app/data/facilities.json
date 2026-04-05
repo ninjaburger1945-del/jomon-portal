@@ -2037,7 +2037,7 @@
     "url": "https://www.city.saitama.lg.jp/004/005/006/001/005/001/001/p002183.html",
     "thumbnail": "/images/facilities/065_ai.png",
     "tags": [
-      "遺跡",
+      "博物館",
       "貝塚"
     ],
     "lat": 35.952933,
@@ -2070,7 +2070,7 @@
     "thumbnail": "/images/facilities/066_ai.png",
     "tags": [
       "博物館",
-      "遺跡"
+      "土器"
     ],
     "lat": 31.250543,
     "lng": 130.631057,
@@ -2101,7 +2101,8 @@
     "url": "https://www.pref.nagasaki.jp/bunkadb/index.php/view/217",
     "thumbnail": "/images/facilities/067_ai.png",
     "tags": [
-      "遺跡"
+      "博物館",
+      "土器"
     ],
     "lat": 33.19012,
     "lng": 129.74325,
@@ -2133,7 +2134,7 @@
     "thumbnail": "/images/facilities/068_ai.png",
     "tags": [
       "博物館",
-      "遺跡"
+      "土器"
     ],
     "lat": 37.0163,
     "lng": 138.6475,
@@ -2165,7 +2166,7 @@
     "thumbnail": "/images/facilities/069_ai.png",
     "tags": [
       "博物館",
-      "遺跡"
+      "土器"
     ],
     "lat": 33.2435,
     "lng": 129.6998,
@@ -2195,8 +2196,7 @@
     "region": "Kinki",
     "url": "https://www.hyogo-koukohaku.jp/",
     "tags": [
-      "博物館",
-      "考古学"
+      "博物館"
     ],
     "lat": 34.7171,
     "lng": 134.8697,
@@ -2224,8 +2224,7 @@
     "region": "Chubu",
     "url": "https://www.inacity.jp/shisetsu/library_museum/inashisozokan/index.html",
     "tags": [
-      "縄文草創期",
-      "重要文化財"
+      "博物館"
     ],
     "lat": 35.84073,
     "lng": 137.9575,
@@ -2252,10 +2251,7 @@
     "description": "国指定史跡。縄文時代中期から近世に至る複合洞窟遺跡。日本で最初に本格的な調査が行われた洞窟遺跡として考古学史的にも重要。",
     "region": "Chubu",
     "url": "https://www.kitokitohimi.com/site/tourism-guide/292.html",
-    "tags": [
-      "洞窟遺跡",
-      "国指定史跡"
-    ],
+    "tags": [],
     "lat": 36.931389,
     "lng": 136.995833,
     "access": {
