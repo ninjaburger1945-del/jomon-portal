@@ -68,6 +68,18 @@ export async function POST(request: NextRequest) {
   try {
     const { facilities } = await request.json();
 
+    // 【要確認】ラベルが削除された施設に userApproved フラグを設定
+    // これにより、クローラーが再実行時に【要確認】を復活させない
+    const facilitiesWithApprovalFlags = facilities.map((facility: any) => {
+      if (!facility.name?.includes('【要確認】')) {
+        // 【要確認】がない = ユーザーが承認・削除した
+        return { ...facility, userApproved: true };
+      }
+      return facility;
+    });
+
+    console.log('[API] Approval flags set for facilities without 【要確認】');
+
     const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
     const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
 
@@ -81,7 +93,7 @@ export async function POST(request: NextRequest) {
     console.log('[API] Saving facilities to GitHub:', repo);
     console.log('[API] Token configured:', !!token);
 
-    await saveWithRetry(token, repo, facilities);
+    await saveWithRetry(token, repo, facilitiesWithApprovalFlags);
 
     console.log('[API] Successfully saved to GitHub!');
 
