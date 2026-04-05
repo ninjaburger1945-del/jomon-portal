@@ -96,6 +96,9 @@ function cleanAndExtractJson(responseText, isArray = true) {
     .replace(/```\s*/gi, '')
     .trim();
 
+  // Step 1-B: 引用番号 [1], [2][3], [1, 2] 等を除去（Grounding 付きレスポンスに混入する）
+  cleaned = cleaned.replace(/\s*\[\d+(?:[,\s]+\d+)*\]/g, '');
+
   // Step 2: [ または { まで前の部分を削除
   if (isArray) {
     const startIdx = cleaned.indexOf('[');
@@ -137,6 +140,9 @@ function repairJsonSyntax(jsonStr) {
 
   // Step 0: 不正な *** を削除
   repaired = repaired.replace(/\*\*\*/g, '');
+
+  // Step 0-B: 引用番号 [1], [2][3], [1, 2] 等を除去（Grounding 付きレスポンスに混入する）
+  repaired = repaired.replace(/\s*\[\d+(?:[,\s]+\d+)*\]/g, '');
 
   // Step 1: 不正な制御文字を削除（改行は許可）
   repaired = repaired.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
@@ -303,11 +309,22 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
   throw lastError;
 }
 
-// ========== Gemini API 呼び出し ==========
+// ========== Gemini API 呼び出し（Grounding with Google Search 有効） ==========
 async function callGeminiAPI(prompt) {
   const requestBody = {
+    systemInstruction: {
+      parts: [{
+        text: `あなたは日本の縄文遺跡・博物館の専門調査員です。
+回答前に必ず Google 検索を実行し、404にならない現行の公式サイトURLを特定してください。
+URLは検索結果で実際に確認できた現行の URL のみを使用し、推測によるURLは絶対に含めないでください。
+最新のリアルタイム情報をベースに回答してください。`
+      }]
+    },
     contents: [{
       parts: [{ text: prompt }]
+    }],
+    tools: [{
+      googleSearch: {}  // Grounding with Google Search（gemini-2.5-pro 対応）
     }],
     generationConfig: {
       temperature: 1,
@@ -334,9 +351,28 @@ async function callGeminiAPI(prompt) {
     throw new Error('No candidates in API response');
   }
 
-  const content = response.candidates[0].content;
+  const candidate = response.candidates[0];
+  const content = candidate.content;
   if (!content || !content.parts || content.parts.length === 0) {
     throw new Error('No text content in API response');
+  }
+
+  // ✅ Grounding エビデンス（本物の検索結果 vs 記憶の区別）
+  try {
+    const groundingMeta = candidate.groundingMetadata;
+    if (groundingMeta && (groundingMeta.groundingChunks?.length > 0 || groundingMeta.webSearchQueries?.length > 0)) {
+      const queries = groundingMeta.webSearchQueries || [];
+      const chunks = groundingMeta.groundingChunks || [];
+      console.log(`[GROUNDING] ✅ 本物の Google 検索結果を使用`);
+      if (queries.length > 0) {
+        console.log(`[GROUNDING]   検索クエリ: ${queries.join(', ')}`);
+      }
+      console.log(`[GROUNDING]   検索ヒット数: ${chunks.length}件`);
+    } else {
+      console.warn(`[GROUNDING] ⚠️ 検索結果なし → Gemini の記憶のみ使用（URL信頼度低）`);
+    }
+  } catch (err) {
+    console.warn(`[GROUNDING] ⚠️ メタデータ確認エラー: ${err.message}`);
   }
 
   return content.parts[0].text;
