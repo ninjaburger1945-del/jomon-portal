@@ -25,8 +25,15 @@ const API_KEY = process.env.GEMINI_API_KEY20261336;
 // Pollinations AI（認証不要、無料）
 
 // Google Custom Search API（オプション）
-const GOOGLE_SEARCH_API_KEY = process.env.GOOGLE_SEARCH_API_KEY || process.env.GOOGLE_CUSTOM_SEARCH_API_KEY;
-const GOOGLE_SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID || process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID;
+const GOOGLE_SEARCH_API_KEY =
+  process.env.GOOGLE_SEARCH_API_KEY ||
+  process.env.GOOGLE_CUSTOM_SEARCH_API_KEY ||
+  process.env.GOOGLESEARCH_SERVICE_ACCOUNT;
+
+const GOOGLE_SEARCH_ENGINE_ID =
+  process.env.GOOGLE_SEARCH_ENGINE_ID ||
+  process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID ||
+  process.env.GOOGLESEARCH_CX;
 
 // ========== 初期化 ==========
 console.log(`\n[INIT] ========== Jomon Portal Crawler v5.6 (Pollinations AI) ==========`);
@@ -47,6 +54,27 @@ const JOMON_KEYWORDS = ['縄文', '縄紋', 'じょうもん', 'jomon'];
 const RELATED_KEYWORDS = ['貝塚', '土器', '草創期', '晩期', '定住化'];
 const ALL_JOMON_KEYWORDS = [...JOMON_KEYWORDS, ...RELATED_KEYWORDS];
 const NG_KEYWORDS = ['弥生時代', '古墳時代', '戦国', '江戸', 'お城'];
+
+// ========== 信頼できる縄文専門ドメイン ==========
+const TRUSTED_JOMON_DOMAINS = [
+  'jomon-japan.jp',
+  'hokkaido-jomon.jp',
+  'jomon.or.jp',
+];
+
+// ========== 施設名のキーワード抽出関数 ==========
+function extractKeywords(facilityName) {
+  // 接頭辞を除去（「国指定史跡」「国特別史跡」など）
+  const cleaned = facilityName
+    .replace(/^(国指定史跡|国特別史跡|都道府県指定|市指定|町指定|村指定|国特別天然記念物|県指定|道指定)\s*/g, '')
+    .trim();
+
+  // スペース・　・・で分割、2文字以上の部分を返す
+  return cleaned
+    .split(/[\s　・]+/)
+    .filter(k => k.length >= 2)
+    .map(k => k.toLowerCase());
+}
 
 // ========== JSON 抽出・クリーニング関数 v2 ==========
 function cleanAndExtractJson(responseText, isArray = true) {
@@ -471,6 +499,11 @@ function scoreUrlByDomain(url, facilityName, address, boostWikipedia = false) {
       domainScore = 100;
       scoreReason = '.lg.jp（自治体公式）';
     }
+    // 【100点】信頼できる縄文専門ドメイン
+    if (domainScore === 0 && TRUSTED_JOMON_DOMAINS.some(trustedDomain => domain.includes(trustedDomain))) {
+      domainScore = 100;
+      scoreReason = '縄文専門サイト（信頼度高）';
+    }
     // 【80点】.or.jp（公開サイト・振興会等）
     if (domainScore === 0 && domain.includes('.or.jp')) {
       domainScore = 80;
@@ -532,15 +565,16 @@ async function validateUrlWithContent(url, facilityName, address, boostWikipedia
   // ドメインスコア取得（Wikipedia優遇フラグ付き）
   const domainScore = scoreUrlByDomain(url, facilityName, address, boostWikipedia);
 
-  // 【v5.2 新ルール1】縄文キーワード検知（自治体.lg.jp は免除）
+  // 【v5.2 新ルール1】縄文キーワード検知（自治体.lg.jp・文化庁 は免除）
   const urlObj = new URL(url);
   const domain = urlObj.hostname.toLowerCase();
   const isLgJp = domain.includes('.lg.jp');
+  const isKunishitei = domain.includes('kunishitei.bunka.go.jp');
 
   // 【縄文キーワード判定（try-catch で安全化）】
   try {
-    if (!isLgJp) {
-      // 自治体以外はキーワードチェック必須
+    if (!isLgJp && !isKunishitei) {
+      // 自治体・文化庁以外はキーワードチェック必須
       const hasJomonKeyword = ALL_JOMON_KEYWORDS.some(kw => text.includes(kw.toLowerCase()));
 
       if (!hasJomonKeyword) {
@@ -548,9 +582,12 @@ async function validateUrlWithContent(url, facilityName, address, boostWikipedia
         return { valid: false, score: 0, domainScore };
       }
       console.log(`[VALIDATE] ✅ 縄文キーワード確認`);
-    } else {
+    } else if (isLgJp) {
       // 自治体公式サイト（.lg.jp）はキーワードチェック免除
       console.log(`[VALIDATE] ✅ 自治体公式サイト（.lg.jp）→ キーワード検判定免除`);
+    } else {
+      // 文化庁DB（kunishitei）はキーワードチェック免除
+      console.log(`[VALIDATE] ✅ 文化庁DB（kunishitei）→ キーワード検判定免除`);
     }
 
     // 【v5.0 新ルール2】NGキーワードによる即時除外
@@ -594,20 +631,20 @@ async function validateUrlWithContent(url, facilityName, address, boostWikipedia
     }
   }
 
-  // 【v5.3 新ルール】文化庁DB（kunishitei）の厳格化
-  const isKunishitei = domain.includes('kunishitei.bunka.go.jp');
-
+  // 【v5.3 修正】文化庁DB（kunishitei）の判定緩和
+  // 注: isKunishitei は既に上で定義済み（キーワードチェック免除処理）
   if (isKunishitei) {
-    // 文化庁DB は施設名とタイトルの100%一致 + 画像1枚以上が必須
+    // 文化庁DB は以前より厳格だったが、テキスト主体のページが多いため緩和
+    // タイトルにキーワード組み合わせが含まれていれば採用OK
     const kunPageTitle = extractPageTitle(html);
-    const kunFacilityNameLower = facilityName.toLowerCase();
-    const kunTitleContainsName = kunPageTitle.includes(kunFacilityNameLower);
+    const kunKeywords = extractKeywords(facilityName);
+    const kunTitleMatchesKeywords = kunKeywords.length > 0 && kunKeywords.some(kw => kunPageTitle.includes(kw));
 
-    if (!kunTitleContainsName || imageCount === 0) {
-      console.warn(`[VALIDATE] ❌ 文化庁DB: タイトル一致=${kunTitleContainsName}, 画像=${imageCount}枚 → 採用禁止`);
+    if (!kunTitleMatchesKeywords) {
+      console.warn(`[VALIDATE] ❌ 文化庁DB: タイトルに施設キーワード「${kunKeywords.join('・')}」が含まれていない → 採用禁止`);
       return { valid: false, score: 0, domainScore };
     }
-    console.log(`[VALIDATE] ✅ 文化庁DB: タイトル一致 ✓、画像 ${imageCount}枚 ✓ → 許可`);
+    console.log(`[VALIDATE] ✅ 文化庁DB: タイトルにキーワード確認 ✓ → 許可（画像要件は不要）`);
   }
 
   // 【v5.0 新ルール3】施設名の厳格マッチング（title/h1-h2検査）
@@ -615,30 +652,56 @@ async function validateUrlWithContent(url, facilityName, address, boostWikipedia
   const headings = extractHeadings(html);
   const facilityNameLower = facilityName.toLowerCase();
 
-  // スコアリング：title または h1/h2 に含まれるか
+  // スコアリング：施設名の完全一致 + キーワード組み合わせ一致（ゆらぎ検索）
   let nameMatchScore = 0;
   let nameMatchLocation = '';
 
+  // キーワード抽出（例：「国指定史跡 鷲ノ木遺跡」→ ['鷲ノ木', '遺跡']）
+  const keywords = extractKeywords(facilityName);
+  const keywordMatchesInText = keywords.length > 0 && keywords.every(kw => text.includes(kw));
+
+  // 【100点】title に完全一致
   if (pageTitle.includes(facilityNameLower)) {
     nameMatchScore = 100;
-    nameMatchLocation = 'title';
-  } else if (headings.some(h => h.includes(facilityNameLower))) {
+    nameMatchLocation = 'title（完全一致）';
+  }
+  // 【60点】title にキーワード組み合わせ一致
+  else if (keywords.length > 0 && keywords.some(kw => pageTitle.includes(kw))) {
+    const matchedKeywords = keywords.filter(kw => pageTitle.includes(kw));
+    nameMatchScore = 60;
+    nameMatchLocation = `title（キーワード: ${matchedKeywords.join('・')}）`;
+  }
+  // 【80点】h1/h2 に完全一致
+  else if (headings.some(h => h.includes(facilityNameLower))) {
     nameMatchScore = 80;
-    nameMatchLocation = 'h1/h2';
-  } else if (text.includes(facilityNameLower)) {
+    nameMatchLocation = 'h1/h2（完全一致）';
+  }
+  // 【50点】h1/h2 にキーワード組み合わせ一致
+  else if (keywords.length > 0 && headings.some(h => keywords.some(kw => h.includes(kw)))) {
     nameMatchScore = 50;
-    nameMatchLocation = '本文';
-  } else {
-    // 施設名全体が含まれていない場合、破棄
-    console.warn(`[VALIDATE] ❌ 施設名「${facilityName}」が本文に1文字も含まれていない → 破棄`);
+    nameMatchLocation = 'h1/h2（キーワード一致）';
+  }
+  // 【50点】本文に完全一致
+  else if (text.includes(facilityNameLower)) {
+    nameMatchScore = 50;
+    nameMatchLocation = '本文（完全一致）';
+  }
+  // 【30点】本文にキーワード組み合わせ一致
+  else if (keywordMatchesInText) {
+    nameMatchScore = 30;
+    nameMatchLocation = '本文（キーワード組み合わせ）';
+  }
+  // 破棄：キーワードが本文に1つも含まれない
+  else {
+    console.warn(`[VALIDATE] ❌ 施設名のキーワード「${keywords.join('・')}」が本文に含まれていない → 破棄`);
     return { valid: false, score: 0, domainScore };
   }
 
-  console.log(`[VALIDATE] ✅ 施設名マッチング: ${nameMatchLocation}に確認 (スコア: ${nameMatchScore})`);
+  console.log(`[VALIDATE] ✅ 施設名マッチング: ${nameMatchLocation} (スコア: ${nameMatchScore})`);
 
-  // 30点以下のURLで施設名「完全一致」チェック
+  // 低信頼ドメイン（30点以下）で施設名スコアが50点未満の場合は厳格化
   if (domainScore <= 30 && nameMatchScore < 50) {
-    console.warn(`[VALIDATE] ❌ ドメインスコア≤30点で施設名が本文外 → 破棄`);
+    console.warn(`[VALIDATE] ⚠️ ドメインスコア≤30点で施設名スコア<50点 → 破棄`);
     return { valid: false, score: 0, domainScore };
   }
 
