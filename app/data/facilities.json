@@ -28,7 +28,8 @@
     "access_public": "JR奥羽本線青森駅からバスで約35分。縄文時遊館前バス停から徒歩約2分",
     "access_public_en": "",
     "access_car": "東北道青森ICから国道7号経由で約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "002",
@@ -59,7 +60,8 @@
     "access_public": "JR中央本線茅野駅からアルピコ交通バスで約20分",
     "access_public_en": "",
     "access_car": "中央自動車道諏訪ICから国道152号経由で約30分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "003",
@@ -90,7 +92,8 @@
     "access_public": "JR総武本線都賀駅からバスで約10分",
     "access_public_en": "",
     "access_car": "京葉道路穴川ICから約10分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "004",
@@ -121,7 +124,8 @@
     "access_public": "JR八戸駅からバスで約30分",
     "access_public_en": "",
     "access_car": "八戸自動車道八戸ICから約20分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "005",
@@ -152,7 +156,8 @@
     "access_public": "JR中央本線富士見駅からバスで約10分",
     "access_public_en": "",
     "access_car": "中央自動車道諏訪南ICから約10分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "006",
@@ -183,7 +188,8 @@
     "access_public": "JR小浜線鳥浜駅からタクシーで約5分",
     "access_public_en": "",
     "access_car": "舞鶴若狭道若狭三方ICから約5分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "007",
@@ -214,7 +220,8 @@
     "access_public": "JR信越本線・上越新幹線長岡駅からバスで約20分",
     "access_public_en": "",
     "access_car": "関越自動車道長岡ICから国道8号経由で約5分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "008",
@@ -244,7 +251,8 @@
     "access_public": "JR日豊本線国分駅からバスで約20分",
     "access_public_en": "",
     "access_car": "東九州自動車道国分ICから県道2号経由で約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "009",
@@ -275,7 +283,8 @@
     "access_public": "JR中央本線甲府駅からバスで約25分",
     "access_public_en": "",
     "access_car": "中央道甲府南ICから約5分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "010",
@@ -305,7 +314,8 @@
     "access_public": "JR函館本線函館駅からバスで約1時間40分",
     "access_public_en": "",
     "access_car": "函館新道函館ICから国道278号経由で約1時間",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "011",
@@ -336,7 +346,8 @@
     "access_public": "JR花輪線鹿角花輪駅からバスで約30分",
     "access_public_en": "",
     "access_car": "東北道鹿角八幡平ICから約10分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "012",
@@ -367,7 +378,8 @@
     "access_public": "JR奥羽本線鷹ノ巣駅からバスで約20分",
     "access_public_en": "",
     "access_car": "日本海沿岸東北自動車道鷹巣ICから国道105号経由で約10分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "013",
@@ -398,7 +410,8 @@
     "access_public": "JR奥羽本線青森駅からバスで約35分",
     "access_public_en": "",
     "access_car": "東北自動車道青森中央ICから約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "014",
@@ -429,7 +442,8 @@
     "access_public": "JR五能線 木造駅からタクシーで約15分",
     "access_public_en": "",
     "access_car": "東北道 浪岡ICから国道101号経由で約40分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "015",
@@ -460,7 +474,8 @@
     "access_public": "JR室蘭本線黄金駅からバスで約10分",
     "access_public_en": "",
     "access_car": "道央自動車道伊達ICから国道37号経由で約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "016",
@@ -490,7 +505,8 @@
     "access_public": "JR函館駅から函館バスで約60分",
     "access_public_en": "",
     "access_car": "函館新外環状道路函館空港ICから国道278号経由で約30分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "017",
@@ -521,7 +537,8 @@
     "access_public": "JR室蘭本線洞爺駅から道南バスで約30分",
     "access_public_en": "",
     "access_car": "道央自動車道虻田洞爺湖ICから国道230号経由で約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "018",
@@ -551,7 +568,8 @@
     "access_public": "JR東北本線一戸駅からバスで約15分",
     "access_public_en": "",
     "access_car": "東北自動車道一戸ICから車で約5分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "019",
@@ -581,7 +599,8 @@
     "access_public": "JR篠ノ井線塩尻駅から市バスで約15分",
     "access_public_en": "",
     "access_car": "中央道塩尻ICから県道25号経由で約10分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "020",
@@ -611,7 +630,8 @@
     "access_public": "京浜急行本線大森海岸駅から徒歩約5分",
     "access_public_en": "",
     "access_car": "首都高速1号羽田線平和島ICから約10分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "021",
@@ -641,7 +661,8 @@
     "access_public": "JR中央本線下諏訪駅からタクシーで約40分",
     "access_public_en": "",
     "access_car": "中央道諏訪ICから県道254号経由で約40分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "022",
@@ -671,7 +692,8 @@
     "access_public": "豊橋鉄道渥美線三河田原駅から豊鉄バスで約15分",
     "access_public_en": "",
     "access_car": "東名高速道路豊川ICから国道23号・259号経由で約60分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "023",
@@ -701,7 +723,8 @@
     "access_public": "JR小浜線若狭鳥浜駅からタクシーで約5分",
     "access_public_en": "",
     "access_car": "舞鶴若狭自動車道若狭三方ICから国道27号経由で約10分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "024",
@@ -731,7 +754,8 @@
     "access_public": "JR山陽本線笠岡駅からバスで約20分",
     "access_public_en": "",
     "access_car": "山陽道笠岡ICから国道2号経由で約20分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "025",
@@ -761,7 +785,8 @@
     "access_public": "JR予讃線松山駅からJR四国バス・町営バス乗り継ぎで約80分",
     "access_public_en": "",
     "access_car": "松山自動車道久万高原スマートICから国道33号線・県道12号線経由で約20分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "026",
@@ -791,7 +816,8 @@
     "access_public": "JR仙石線野蒜駅から東松島市コミュニティバスで約20分",
     "access_public_en": "",
     "access_car": "三陸自動車道鳴瀬奥松島ICから県道27号経由で約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "027",
@@ -821,7 +847,8 @@
     "access_public": "JR中央本線茅野駅からバスで約30分",
     "access_public_en": "",
     "access_car": "中央道諏訪南ICから県道17号経由で約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "028",
@@ -851,7 +878,8 @@
     "access_public": "JR武蔵野線船橋法典駅から徒歩約20分",
     "access_public_en": "",
     "access_car": "京葉道路原木ICから県道180号経由で約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "029",
@@ -882,7 +910,8 @@
     "access_public": "JR武武蔵野線市川大野駅からバスで約10分",
     "access_public_en": "",
     "access_car": "京葉道路市川ICから約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "030",
@@ -912,7 +941,8 @@
     "access_public": "JR筑肥線菜畑駅から徒歩約5分",
     "access_public_en": "",
     "access_car": "西九州自動車道唐津ICから約10分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "031",
@@ -943,7 +973,8 @@
     "access_public": "JR函館本線函館駅からバスで約80分",
     "access_public_en": "",
     "access_car": "函館新外環状道路函館空港ICから国道278号経由で約40分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "032",
@@ -973,7 +1004,8 @@
     "access_public": "JR福島駅からバスで約25分",
     "access_public_en": "",
     "access_car": "東北自動車道福島西ICから約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "033",
@@ -1003,7 +1035,8 @@
     "access_public": "のと鉄道七尾線穴水駅からバス乗り継ぎ約1時間半",
     "access_public_en": "",
     "access_car": "能越自動車道のと里山空港ICから国道249号経由で約40分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "034",
@@ -1034,7 +1067,8 @@
     "access_public": "京成本線海神駅から徒歩約15分",
     "access_public_en": "",
     "access_car": "京葉道路花輪ICから国道14号経由で約10分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "035",
@@ -1064,7 +1098,8 @@
     "access_public": "東武東上線みずほ台駅からバスで約10分",
     "access_public_en": "",
     "access_car": "関越自動車道所沢ICから県道266号経由で約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "036",
@@ -1094,7 +1129,8 @@
     "access_public": "JR相模線下溝駅からバス約10分",
     "access_public_en": "",
     "access_car": "圏央道相模原愛川ICから約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "037",
@@ -1125,7 +1161,8 @@
     "access_public": "JR中央本線石和温泉駅からバスで約1時間",
     "access_public_en": "",
     "access_car": "中央道一宮御坂ICから国道137号経由で約5分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "038",
@@ -1155,7 +1192,8 @@
     "access_public": "JR芸備線備後庄原駅から中国バスで約40分",
     "access_public_en": "",
     "access_car": "中国道東城ICから県道25号経由で約20分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "039",
@@ -1186,7 +1224,8 @@
     "access_public": "北総鉄道北国分駅から徒歩約15分",
     "access_public_en": "",
     "access_car": "京葉道路市川ICから約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "040",
@@ -1216,7 +1255,8 @@
     "access_public": "JR常磐線土浦駅からJRバス関東で約40分",
     "access_public_en": "",
     "access_car": "圏央道稲敷ICから県道5号線経由で約20分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "041",
@@ -1246,7 +1286,8 @@
     "access_public": "JR宇野線彦崎駅からバスまたはタクシーで約5分",
     "access_public_en": "",
     "access_car": "瀬戸中央自動車道早島ICから県道21号経由で約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "042",
@@ -1276,7 +1317,8 @@
     "access_public": "JR津山線法界院駅から徒歩約20分",
     "access_public_en": "",
     "access_car": "山陽道岡山ICから国道53号経由で約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "043",
@@ -1307,7 +1349,8 @@
     "access_public": "JR湖西線大津京駅から徒歩約10分",
     "access_public_en": "",
     "access_car": "名神高速道路大津ICから約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "044",
@@ -1339,7 +1382,8 @@
     "access_public": "JR宇都宮線蓮田駅からバスで約10分",
     "access_public_en": "",
     "access_car": "東北道岩槻ICから県道87号経由で約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "045",
@@ -1370,7 +1414,8 @@
     "access_public": "JR予讃線宇和島駅から宇和島自動車バス城辺・御荘方面行きで約70分",
     "access_public_en": "",
     "access_car": "松山自動車道（宇和島道路）宇和島朝日ICから国道56号経由で約45分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "046",
@@ -1402,7 +1447,8 @@
     "access_public": "JR飯山線・ほくほく線 十日町駅から徒歩約10分",
     "access_public_en": "",
     "access_car": "関越自動車道 六日町ICから国道253号経由で約25分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "047",
@@ -1434,7 +1480,8 @@
     "access_public": "JR信越本線長岡駅からバスで約25分",
     "access_public_en": "",
     "access_car": "関越自動車道長岡ICから約5分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "048",
@@ -1466,7 +1513,8 @@
     "access_public": "ゆいレールてだこ浦西駅から車で約20分",
     "access_public_en": "",
     "access_car": "沖縄自動車道北中城ICから約10分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "049",
@@ -1498,7 +1546,8 @@
     "access_public": "JR奥羽本線舟形駅から徒歩約20分。舟形駅から舟形町営バスで「中央公民館前」下車、徒歩約5分",
     "access_public_en": "",
     "access_car": "東北中央自動車道舟形ICから約5分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "050",
@@ -1530,7 +1579,8 @@
     "access_public": "",
     "access_public_en": "",
     "access_car": "",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "051",
@@ -1561,7 +1611,8 @@
     "access_public": "",
     "access_public_en": "",
     "access_car": "",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "052",
@@ -1591,7 +1642,8 @@
     "access_public": "JR長崎本線 佐賀駅から車で約20分。佐賀駅バスセンターから昭和バスで約30分、「ひがしせふり温泉」下車、徒歩約5分",
     "access_public_en": "",
     "access_car": "長崎自動車道 佐賀大和ICから約5分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "053",
@@ -1622,7 +1674,8 @@
     "access_public": "JR小海線 小海駅からタクシーで約20分。小海駅から北相木村営バスで「考古博物館前」下車（本数少）",
     "access_public_en": "",
     "access_car": "上信越自動車道 佐久ICから約60分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "054",
@@ -1653,7 +1706,8 @@
     "access_public": "土佐くろしお鉄道「宿毛駅」から車で約5分。高知西南交通「宿毛歴史館前」バス停下車すぐ",
     "access_public_en": "",
     "access_car": "四万十町中央ICから国道56号線経由で約70分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "055",
@@ -1684,7 +1738,8 @@
     "access_public": "あいの風とやま鉄道「石動駅」から徒歩約20分。小矢部市営バス「桜町」バス停から徒歩約5分",
     "access_public_en": "Approx. 20-minute walk from Isurugi Station on the Ainokaze Toyama Railway Line, or a 5-minute walk from the 'Sakuramachi' bus stop on the Oyabe City Bus line.",
     "access_car": "能越自動車道 小矢部東ICから約5分",
-    "access_car_en": "Approx. 5 minutes from the Oyabe-Higashi IC on the Noetsu Expressway."
+    "access_car_en": "Approx. 5 minutes from the Oyabe-Higashi IC on the Noetsu Expressway.",
+    "userApproved": true
   },
   {
     "id": "056",
@@ -1715,7 +1770,8 @@
     "access_public": "青い森鉄道「七戸十和田駅」からタクシーで約15分。七戸十和田駅からバス「七戸案内所」下車後、タクシーで約10分",
     "access_public_en": "",
     "access_car": "上北自動車道「七戸IC」から約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "057",
@@ -1746,7 +1802,8 @@
     "access_public": "JR宇都宮線「間々田駅」から車で約10分。小山市コミュニティバス「寺野東遺跡入口」下車、徒歩約3分",
     "access_public_en": "",
     "access_car": "東北自動車道「佐野藤岡IC」から約30分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "058",
@@ -1777,7 +1834,8 @@
     "access_public": "JR常磐線 土浦駅からバスで約15分。「上高津」バス停から徒歩約5分",
     "access_public_en": "",
     "access_car": "常磐自動車道 桜土浦ICから約10分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "059",
@@ -1807,7 +1865,8 @@
     "access_public": "JR千歳線「千歳駅」からタクシーで約20分。千歳駅より北海道中央バス「埋蔵文化財センター」バス停下車すぐ（便数僅少）",
     "access_public_en": "",
     "access_car": "道央自動車道「千歳IC」から約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "060",
@@ -1838,7 +1897,8 @@
     "access_public": "JR浜松駅下車。JR浜松駅バスターミナル2番のりばから「（蜆塚経由）佐鳴台団地」行き乗車、「博物館」下車すぐ",
     "access_public_en": "",
     "access_car": "東名高速道路 浜松西ICから約15分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "061",
@@ -1869,7 +1929,8 @@
     "access_public": "JR琵琶湖線「能登川駅」または近江鉄道「八日市駅」からバス利用。ちょこっとバス「埋蔵文化財センター」バス停下車すぐ",
     "access_public_en": "From JR Notogawa Station or Ohmi Railway Yokaichi Station, take the 'Chokotto Bus' and get off at the 'Maizobunkazai Center' stop.",
     "access_car": "名神高速道路「八日市IC」から約15分",
-    "access_car_en": "Approx. 15 minutes from Yokaichi IC on the Meishin Expressway."
+    "access_car_en": "Approx. 15 minutes from Yokaichi IC on the Meishin Expressway.",
+    "userApproved": true
   },
   {
     "id": "062",
@@ -1900,7 +1961,8 @@
     "access_public": "JR徳島線「府中駅」から徒歩約25分。徳島バス「矢野」バス停下車、徒歩約5分",
     "access_public_en": "Approx. 25-minute walk from Fuchu Station (JR Tokushima Line), or 5-minute walk from Yano bus stop (Tokushima Bus).",
     "access_car": "徳島自動車道「藍住IC」から約20分",
-    "access_car_en": "Approx. 20 minutes from Aizumi IC on the Tokushima Expressway."
+    "access_car_en": "Approx. 20 minutes from Aizumi IC on the Tokushima Expressway.",
+    "userApproved": true
   },
   {
     "id": "063",
@@ -1930,7 +1992,8 @@
     "access_public": "JR石北本線 網走駅から車で約40分。網走バス「常呂」バス停から徒歩約20分",
     "access_public_en": "Approx. 40-min drive from JR Abashiri Station. Approx. 20-min walk from 'Tokoro' bus stop (Abashiri Bus).",
     "access_car": "女満別空港から車で約40分",
-    "access_car_en": "Approx. 40 minutes by car from Memanbetsu Airport or central Abashiri."
+    "access_car_en": "Approx. 40 minutes by car from Memanbetsu Airport or central Abashiri.",
+    "userApproved": true
   },
   {
     "id": "064",
@@ -1961,7 +2024,8 @@
     "access_public": "JR五能線「木造駅」から車で約15分。木造駅からのシャトルバス「しゃこちゃんバス」で約20分「カルコ」下車",
     "access_public_en": "From JR Kizukuri Station, take the \"Shako-chan Bus\" for about 20 minutes and get off at \"Karuko\".",
     "access_car": "東北自動車道「浪岡IC」から約40分",
-    "access_car_en": "Approximately 40 minutes from Namioka IC on the Tohoku Expressway."
+    "access_car_en": "Approximately 40 minutes from Namioka IC on the Tohoku Expressway.",
+    "userApproved": true
   },
   {
     "id": "065",
@@ -1992,7 +2056,8 @@
     "access_public": "東武アーバンパークライン 岩槻駅または東岩槻駅からタクシーで約10分。さいたま市立博物館へは東武アーバンパークライン 大宮公園駅から徒歩約15分。。JR大宮駅東口から国際興業バス「導守循環」で「市立博物館」下車、徒歩約1分（さいたま市立博物館）。",
     "access_public_en": "From JR Omiya Station East Exit, take a bus to 'Shiritsu Hakubutsukan' and walk 1 min (to Saitama City Museum).",
     "access_car": "東北自動車道 岩槻ICから約15分",
-    "access_car_en": "Approx. 15 min from Tohoku Expressway Iwatsuki IC."
+    "access_car_en": "Approx. 15 min from Tohoku Expressway Iwatsuki IC.",
+    "userApproved": true
   },
   {
     "id": "066",
@@ -2023,7 +2088,8 @@
     "access_public": "JR指宿枕崎線「指宿駅」から徒歩約15分。「考古博物館前」バス停下車すぐ",
     "access_public_en": "Approx. 15-minute walk from JR Ibusuki Station (Ibusuki Makurazaki Line).",
     "access_car": "指宿スカイライン「谷山IC」から約50分",
-    "access_car_en": "Approx. 50 minutes from the Taniyama IC on the Ibusuki Skyline."
+    "access_car_en": "Approx. 50 minutes from the Taniyama IC on the Ibusuki Skyline.",
+    "userApproved": true
   },
   {
     "id": "067",
@@ -2053,7 +2119,8 @@
     "access_public": "松浦鉄道西九州線 泉福寺駅から徒歩約5分。西肥バス「瀬戸越」バス停から徒歩約3分",
     "access_public_en": "Approx. 5-minute walk from Senpukuji Station on the Matsuura Railway Nishi-Kyushu Line, or a 3-minute walk from the 'Setogoe' bus stop (Sasebo Bus).",
     "access_car": "西九州自動車道 佐世保中央ICから約10分",
-    "access_car_en": "Approx. 10 minutes from the Sasebo-Chuo IC on the Nishi-Kyushu Expressway."
+    "access_car_en": "Approx. 10 minutes from the Sasebo-Chuo IC on the Nishi-Kyushu Expressway.",
+    "userApproved": true
   },
   {
     "id": "068",
@@ -2084,7 +2151,8 @@
     "access_public": "JR飯山線「津南駅」からタクシーで約10分。南越後観光バス「大割野」バス停から徒歩約20分",
     "access_public_en": "",
     "access_car": "関越自動車道「塩沢石打IC」から車で約40分",
-    "access_car_en": ""
+    "access_car_en": "",
+    "userApproved": true
   },
   {
     "id": "069",
@@ -2115,7 +2183,8 @@
     "access_public": "松浦鉄道「吉井駅」から徒歩約20分。または西肥バス「福祉センター前」バス停から徒歩約3分。",
     "access_public_en": "Approx. 20-minute walk from Yoshii Station on the Matsuura Railway, or a 3-minute walk from the Fukushi Center Mae bus stop (Saihoku bus).",
     "access_car": "西九州自動車道「佐々IC」から約15分。",
-    "access_car_en": "Approx. 15 minutes from Sasa IC on the Nishi-Kyushu Expressway."
+    "access_car_en": "Approx. 15 minutes from Sasa IC on the Nishi-Kyushu Expressway.",
+    "userApproved": true
   },
   {
     "id": "070",
@@ -2143,7 +2212,8 @@
     "needsCheck": true,
     "thumbnail": "/images/facilities/070_ai.png",
     "access_public": "JR神戸線「土山駅」から徒歩約15分.。JR土山駅南口からバス「大中遺跡南」下車、徒歩5分.",
-    "access_car": "第二神明道路「明石西IC」から約3km."
+    "access_car": "第二神明道路「明石西IC」から約3km.",
+    "userApproved": true
   },
   {
     "id": "071",
@@ -2171,16 +2241,17 @@
     "needsCheck": true,
     "thumbnail": "/images/facilities/071_ai.png",
     "access_public": "JR飯田線 伊那市駅から徒歩約4分。伊那バスターミナルから徒歩約3分",
-    "access_car": "中央自動車道 伊那ICから約15分"
+    "access_car": "中央自動車道 伊那ICから約15分",
+    "userApproved": true
   },
   {
     "id": "072",
-    "name": "【要確認】大境洞窟住居跡",
+    "name": "大境洞窟住居跡",
     "prefecture": "富山県",
     "address": "富山県氷見市大境",
     "description": "国指定史跡。縄文時代中期から近世に至る複合洞窟遺跡。日本で最初に本格的な調査が行われた洞窟遺跡として考古学史的にも重要。",
     "region": "Chubu",
-    "url": "https://ja.wikipedia.org/wiki/%E5%A4%A7%E5%A2%83%E6%B4%9E%E7%AA%9F%E4%BD%8F%E5%B1%85%E8%B7%A1",
+    "url": "https://www.kitokitohimi.com/site/tourism-guide/292.html",
     "tags": [
       "洞窟遺跡",
       "国指定史跡"
@@ -2197,7 +2268,9 @@
     "name_en": "Ozakai Cave Dwelling Site",
     "description_en": "A nationally designated historic site, this cave complex was inhabited from the Middle Jomon period to early modern times. It holds archaeological significance as the first cave site in Japan to undergo full-scale investigation.",
     "needsCheck": true,
-    "userApproved": false,
-    "thumbnail": "/images/facilities/072_ai.png"
+    "userApproved": true,
+    "thumbnail": "/images/facilities/072_ai.png",
+    "access_public": "JR氷見線氷見駅から加越能バスで約30分、「大境」下車徒歩5分。「大境」バス停から徒歩5分",
+    "access_car": "能越自動車道 灘浦ICから約10分"
   }
 ]
