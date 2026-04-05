@@ -42,6 +42,12 @@ console.log(`[INIT] Google Custom Search API: ${useGoogleSearch ? '✅ 有効' :
 console.log(`[INIT] 画像生成: ✅ Pollinations AI (無料、認証不要)`);
 console.log(`[INIT] ✅ 初期化完了\n`);
 
+// ========== 縄文関連キーワード定義 ==========
+const JOMON_KEYWORDS = ['縄文', '縄紋', 'じょうもん', 'jomon'];
+const RELATED_KEYWORDS = ['貝塚', '土器', '草創期', '晩期', '定住化'];
+const ALL_JOMON_KEYWORDS = [...JOMON_KEYWORDS, ...RELATED_KEYWORDS];
+const NG_KEYWORDS = ['弥生時代', '古墳時代', '戦国', '江戸', 'お城'];
+
 // ========== JSON 抽出・クリーニング関数 v2 ==========
 function cleanAndExtractJson(responseText, isArray = true) {
   console.log(`[JSON_CLEAN] 開始（配列: ${isArray}）`);
@@ -531,40 +537,41 @@ async function validateUrlWithContent(url, facilityName, address, boostWikipedia
   const domain = urlObj.hostname.toLowerCase();
   const isLgJp = domain.includes('.lg.jp');
 
-  if (!isLgJp) {
-    // 自治体以外はキーワードチェック必須
-    const jomonKeywords = ['縄文', '縄紋', 'じょうもん', 'jomon'];
-    const relatedKeywords = ['貝塚', '土器', '草創期', '晩期', '定住化'];
-    const allJomonKeywords = [...jomonKeywords, ...relatedKeywords];
+  // 【縄文キーワード判定（try-catch で安全化）】
+  try {
+    if (!isLgJp) {
+      // 自治体以外はキーワードチェック必須
+      const hasJomonKeyword = ALL_JOMON_KEYWORDS.some(kw => text.includes(kw.toLowerCase()));
 
-    const hasJomonKeyword = allJomonKeywords.some(kw => text.includes(kw.toLowerCase()));
-
-    if (!hasJomonKeyword) {
-      console.warn(`[VALIDATE] ❌ 縄文関連キーワード未検出（${domain}） → 破棄`);
-      return { valid: false, score: 0, domainScore };
+      if (!hasJomonKeyword) {
+        console.warn(`[VALIDATE] ❌ 縄文関連キーワード未検出（${domain}） → 破棄`);
+        return { valid: false, score: 0, domainScore };
+      }
+      console.log(`[VALIDATE] ✅ 縄文キーワード確認`);
+    } else {
+      // 自治体公式サイト（.lg.jp）はキーワードチェック免除
+      console.log(`[VALIDATE] ✅ 自治体公式サイト（.lg.jp）→ キーワード検判定免除`);
     }
-    console.log(`[VALIDATE] ✅ 縄文キーワード確認`);
-  } else {
-    // 自治体公式サイト（.lg.jp）はキーワードチェック免除
-    console.log(`[VALIDATE] ✅ 自治体公式サイト（.lg.jp）→ キーワード検判定免除`);
-  }
 
-  // 【v5.0 新ルール2】NGキーワードによる即時除外
-  // NGワード: 弥生時代, 古墳時代, 戦国, 江戸, お城
-  // 縄文の文字がない場合のみ除外
-  const ngKeywords = ['弥生時代', '古墳時代', '戦国', '江戸', 'お城'];
-  const hasJomonText = jomonKeywords.some(kw => text.includes(kw.toLowerCase()));
+    // 【v5.0 新ルール2】NGキーワードによる即時除外
+    // NGワード: 弥生時代, 古墳時代, 戦国, 江戸, お城
+    // 縄文の文字がない場合のみ除外
+    const hasJomonText = JOMON_KEYWORDS.some(kw => text.includes(kw.toLowerCase()));
 
-  if (!hasJomonText) {
-    // 縄文の文字がない場合、NGキーワードをチェック
-    const hasNgKeyword = ngKeywords.some(kw => text.includes(kw.toLowerCase()));
-    if (hasNgKeyword) {
-      console.warn(`[VALIDATE] ❌ NGキーワード検出（縄文なし） → 破棄`);
-      return { valid: false, score: 0, domainScore };
+    if (!hasJomonText) {
+      // 縄文の文字がない場合、NGキーワードをチェック
+      const hasNgKeyword = NG_KEYWORDS.some(kw => text.includes(kw.toLowerCase()));
+      if (hasNgKeyword) {
+        console.warn(`[VALIDATE] ❌ NGキーワード検出（縄文なし） → 破棄`);
+        return { valid: false, score: 0, domainScore };
+      }
+    } else {
+      // 縄文の文字がある場合はOK（「縄文から古墳まで」のような表記も許可）
+      console.log(`[VALIDATE] ✅ 縄文が主体 → NGキーワードチェック不要`);
     }
-  } else {
-    // 縄文の文字がある場合はOK（「縄文から古墳まで」のような表記も許可）
-    console.log(`[VALIDATE] ✅ 縄文が主体 → NGキーワードチェック不要`);
+  } catch (err) {
+    console.error(`[VALIDATE] ⚠️ キーワード判定エラー（スキップ）: ${err.message}`);
+    // エラーが起きても処理継続（フォールバック）
   }
 
   // 【v5.3】画像数をカウント
