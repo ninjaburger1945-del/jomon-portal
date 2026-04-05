@@ -31,8 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-          npm install @google/generative-ai@latest
-          npm install sharp # ✅ 画像リサイズに必要なので追加
+          # @google/generative-ai と sharp は package.json に記載のため自動的にインストール
 
       - name: Verify API Key and Environment
         run: |

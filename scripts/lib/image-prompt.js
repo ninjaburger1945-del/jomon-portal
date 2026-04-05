@@ -117,8 +117,14 @@ function buildPrompt(facilityName, description, keywords) {
  * @returns {Promise<string>} - 画像生成APIに渡すプロンプト文字列
  */
 async function generatePrompt(facilityName, description) {
-  const keywords = await extractKeywords(facilityName, description);
-  return buildPrompt(facilityName, description, keywords);
+  try {
+    const keywords = await extractKeywords(facilityName, description);
+    return buildPrompt(facilityName, description, keywords);
+  } catch (error) {
+    console.warn(`[PROMPT] ⚠️ プロンプト生成エラー: ${error.message}`);
+    // フォールバック：基本的なプロンプトを返す
+    return `Jomon period archaeological site: ${facilityName}. ${description.substring(0, 150)}. Ancient pottery, shell middens, stone circles, warm earthy tones, educational value, photorealistic.`;
+  }
 }
 
 module.exports = { generatePrompt };
