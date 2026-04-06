@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-export const revalidate = 60; // 1分キャッシュ
+export const revalidate = 0; // キャッシュなし（常に最新データ）
 
 export async function GET() {
   try {
