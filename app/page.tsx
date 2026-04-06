@@ -247,7 +247,7 @@ export default function Home() {
 
         {/* ── 1.5 直近イベントバナー ── */}
         {upcomingEventCount > 0 && (
-          <div style={{
+          <Link href="/events" style={{
             background: 'linear-gradient(135deg, #B8401A 0%, #8B2A0A 100%)',
             color: 'white',
             padding: '20px',
@@ -263,6 +263,7 @@ export default function Home() {
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: '16px',
+            textDecoration: 'none',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'scale(1.02)';
@@ -281,14 +282,13 @@ export default function Home() {
                 クリックして今週末の予定をチェック
               </div>
             </div>
-            <Link href="/events" style={{
+            <div style={{
               backgroundColor: 'white',
               color: '#B8401A',
               padding: '10px 16px',
               borderRadius: '6px',
               fontWeight: 'bold',
               fontSize: '14px',
-              textDecoration: 'none',
               whiteSpace: 'nowrap',
               transition: 'all 0.2s',
             }}
@@ -300,8 +300,8 @@ export default function Home() {
             }}
             >
               イベント一覧を見る →
-            </Link>
-          </div>
+            </div>
+          </Link>
         )}
 
         {/* ── 2. 遺跡一覧 ── */}
