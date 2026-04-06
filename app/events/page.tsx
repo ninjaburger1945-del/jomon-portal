@@ -277,33 +277,43 @@ export default function EventsPage() {
           </Link>
         </div>
         <h1 style={{ margin: '0 0 4px 0', fontSize: 'clamp(20px, 5vw, 28px)', color: '#1C150A' }}>
-          🏺 縄文イベント情報
+          🏺 縄文イベント情報（試験運用中）
         </h1>
         <p style={{ margin: 0, fontSize: '13px', color: '#666' }}>{monthYearStr}</p>
       </header>
 
       {/* Region Tabs */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
-        {REGION_TABS.map((region) => (
-          <button
-            key={region}
-            onClick={() => setSelectedRegion(region)}
-            style={{
-              padding: '8px 12px',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '13px',
-              fontWeight: selectedRegion === region ? '600' : '400',
-              cursor: 'pointer',
-              backgroundColor: selectedRegion === region ? 'var(--accent-terracotta)' : '#EEE',
-              color: selectedRegion === region ? 'white' : '#333',
-              borderBottom: selectedRegion === region ? '2px solid #8B2A0A' : 'none',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            {REGION_MAP[region]}
-          </button>
-        ))}
+        {REGION_TABS.map((region) => {
+          let tabCount = 0;
+          if (region === 'all') {
+            tabCount = upcomingEvents.length + pastEvents.length;
+          } else {
+            const allRegionEvents = [...upcomingEvents, ...pastEvents].filter(e => e.region === region);
+            tabCount = allRegionEvents.length;
+          }
+
+          return (
+            <button
+              key={region}
+              onClick={() => setSelectedRegion(region)}
+              style={{
+                padding: '8px 12px',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '13px',
+                fontWeight: selectedRegion === region ? '600' : '400',
+                cursor: 'pointer',
+                backgroundColor: selectedRegion === region ? 'var(--accent-terracotta)' : '#EEE',
+                color: selectedRegion === region ? 'white' : '#333',
+                borderBottom: selectedRegion === region ? '2px solid #8B2A0A' : 'none',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              {REGION_MAP[region]} ({tabCount})
+            </button>
+          );
+        })}
       </div>
 
       {/* Loading State */}

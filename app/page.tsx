@@ -266,7 +266,7 @@ export default function Home() {
           >
             <div>
               <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>
-                🔥 {upcomingEventCount}件の縄文イベントが開催中！
+                🔥 {upcomingEventCount}件の縄文イベントが開催中！（試験運用中）
               </div>
               <div style={{ fontSize: '13px', opacity: 0.95 }}>
                 クリックして今週末の予定をチェック
