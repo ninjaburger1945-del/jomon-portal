@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as cheerio from 'cheerio';
 
 const JOMON_OS_SUFFIX =
-  'Authentic Jomon period Japan, featuring sunken-floor pithouses with thick thatched roofs, intricate cord-marked pottery, mysterious clay Dogu, gritty prehistoric mud and earth textures, cinematic 16:9 aspect ratio, raw documentary style';
+  'Authentic Jomon period Japan, featuring traditional thatched pithouses (Tateana-jukyo) with sunken floors dug into earth, intricate cord-marked pottery (Jomon-doki), gritty prehistoric textures, flickering hearth fire, cinematic natural lighting, raw documentary style, earth colors, 16:9 aspect ratio. Strictly NO Western prehistoric aesthetics. ALL imagery MUST authentically represent Jomon period Japan only.';
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,48 +46,73 @@ export async function POST(request: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    const systemPrompt = `あなたは世界トップクラスの考古学専門家ビジュアルディレクターです。
-縄文時代（約16,000〜3,000年前）の遺跡・博物館の視覚的再現を専門とし、
-映画・ドキュメンタリーレベルのビジュアルコンセプトを生成します。
+    const systemPrompt = `あなたは日本の縄文時代（約16,000〜3,000年前）を専門とする考古学ビジュアルディレクターです。
+Jomon Portal 専用の『Jomon OS』という統一的な視覚言語で、世界に唯一の考古学的イラストを生成します。
 
-以下の縄文遺跡情報を深く分析し、Pollinations AI（Flux モデル）向けの
-画像生成プロンプトを3つのコンセプトで英語で作成してください。
-
-【制約】
+【超重要な制約】
 - 出力は必ず JSON のみ: {"concept_a": "...", "concept_b": "...", "concept_c": "..."}
-- 各プロンプトは英語で100〜200ワード
-- 16:9アスペクト比（横長）に最適化
-- リアリスティック・ドキュメンタリースタイル（アニメ・CG風禁止）
-- 各プロンプトの末尾に必ず以下を付与:
-  "${JOMON_OS_SUFFIX}"
+- 各プロンプトは英語で120〜200ワード
+- リアリスティック・ドキュメンタリースタイル（アニメ・CG風・ファンタジー禁止）
+- EACH CONCEPT MUST OPEN WITH JOMON OS SUFFIX（各プロンプトの冒頭に Jomon OS Suffix を必ず配置）
+- Strictly NO Western prehistoric houses, European Stone Age aesthetics, or generic prehistoric imagery
+- EXCLUSIVELY JAPANESE JOMON PERIOD AUTHENTICITY
 
-【3コンセプトの絶対条件】
+【建築の絶対条件】
+Jomon period houses = Sunken-floor pithouses (Tateana-jukyo) のみ
+- 構造: Circular or rectangular pit structure dug into the mud earth (地面を掘り下げた構造)
+- 屋根: Conical or square thatched roof made of Kaya grass (Miscanthus sinensis) with rough organic texture
+  * 決してNOT stone, NOT wooden boards, NOT clay tiles
+- 必ず地面から屋根が生えているような形態を強調
 
-concept_a（Historical Reconstruction）:
-- 必須要素: Sunken-floor pithouse (Tateana-jukyo) + Thatched roof of kaya grass で地面から屋根が生えているような形態
-- Cord-marked pottery を空間のどこかに配置
-- 夜明けか夕暮れのドラマチックな光で再現
-- 集落全景のスケール感を強調
+【遺物の絶対条件】
+- Cord-marked pottery (Jomon-doki) は全3コンセプトに必須
+- Flame-style rim decorations (炎炎文) を強調する場合は「Kaen-mon」と指定
+- Clay Dogu figurine (土偶) は Concept C で必須、マクロ撮影レベルの極限精細描写
+- 古い土器の表面は「ancient patina and earth stains」で質感を追加
 
-concept_b（Modern Site Environment）:
-- 必須要素: Sunken-floor pithouse (Tateana-jukyo) + Thatched roof of kaya grass を環境に含める
-- Cord-marked pottery を背景やフォアグラウンドに配置
-- 遺跡固有の環境（lake bottom, shell mound, muddy terrain, obsidian など）と融合
-- 自然と人間活動の痕跡が共存する場面
+【3コンセプトの詳細仕様】
 
-concept_c（Iconic Artifacts）:
-- 必須要素: Cord-marked pottery（詳細な紋様を強調）、Flame-style rim decorations、Clay Dogu figurine
-- マクロ撮影のような高精細さで、質感と細部を極限まで描写
-- ミュージアム展示のドラマチックなライティング
-- 神秘的な縄文オブジェの本質を表現`;
+concept_a（Historical Reconstruction - Tateana-jukyo Settlement）:
+- 開始: "${JOMON_OS_SUFFIX}"
+- Sunken-floor pithouse (Tateana-jukyo) を中心に、複数の集落建物を配置
+- Thatched roof made of Kaya grass (Miscanthus sinensis) で屋根を固定
+- Cord-marked pottery と cooking hearths を見える位置に配置
+- 夜明けか夕暮れのドラマチックな自然光
+- 人間活動の痕跡（fire, smoke, daily tools）を生生しく描写
 
-    const userContent = `【施設情報】
+concept_b（Archaeological Site Landscape - Jomon Environment）:
+- 開始: "${JOMON_OS_SUFFIX}"
+- Sunken-floor pithouse (Tateana-jukyo) を自然風景に統合
+- 屋根: Thatched roof of Kaya grass (Miscanthus sinensis) - unchanged
+- 施設固有の環境要素を必須で含める (shell mound, lake bottom, obsidian deposits, muddy forest, coastal wetland など)
+- Cord-marked pottery fragments が地表に露出している状態
+- 自然と人間活動の痕跡が融合した考古学的な「層」を表現
+
+concept_c（Iconic Artifacts - Jomon-Doki Masterpiece）:
+- 開始: "${JOMON_OS_SUFFIX}"
+- 主体: Cord-marked pottery (Jomon-doki) と Clay Dogu figurine (土偶)
+- マクロ撮影のような極限精細さで以下を強調:
+  * Cord-marked texture patterns (紋様)
+  * Flame-style rim decorations (Kaen-mon) if applicable
+  * Rough clay surface with ancient patina and soil stains
+  * Mysterious expression of Dogu figurine
+- ミュージアム展示ライティング（スポットライト + 背景グラデーション）
+- 神秘的で霊的な縄文オブジェの本質を表現`;
+
+    const userContent = `【Jomon Portal 施設データ】
 施設名: ${name}
 都道府県: ${prefecture}
-説明: ${description}
-${scrapedText ? `\n【公式サイトから取得した追加情報】\n${scrapedText}` : ''}
 
-上記情報を基に、3つのビジュアルコンセプトプロンプトを JSON で出力してください。`;
+【施設の詳細説明】
+${description}
+${scrapedText ? `\n【公式情報から抽出した追加考古学的情報】\n${scrapedText}` : ''}
+
+【指示】
+上記の施設情報を深く分析し、以下の3つのビジュアルコンセプトプロンプトを JSON 形式で出力してください。
+各プロンプトは冒頭に Jomon OS Suffix で始まり、日本の縄文時代の真正性を保ちながら、
+この特定の遺跡の固有の特性を織り込んでください。
+
+出力: {"concept_a": "Jomon OS Suffix から始まるプロンプト...", "concept_b": "...", "concept_c": "..."}`;
 
     let result;
     try {
