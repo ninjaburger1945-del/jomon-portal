@@ -24,6 +24,7 @@ const shipporiMincho = Shippori_Mincho({
 export const metadata: Metadata = {
   title: "JOMON PORTAL",
   description: "日本全国の縄文遺跡・博物館・資料館を網羅するポータルサイト。",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
 };
 
 export default function RootLayout({

@@ -429,189 +429,43 @@ export default function AdminPage() {
   }
 
   return (
-    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div style={{ padding: "15px", maxWidth: "1200px", margin: "0 auto" }}>
       <header style={{ marginBottom: "20px", borderBottom: "1px solid #ccc", paddingBottom: "10px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h1>Admin Dashboard</h1>
-          <button onClick={() => setIsAuthenticated(false)} style={{ padding: "8px 16px", cursor: "pointer" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+          <h1 style={{ margin: 0, fontSize: "clamp(20px, 5vw, 28px)" }}>Admin Dashboard</h1>
+          <button onClick={() => setIsAuthenticated(false)} style={{ padding: "8px 16px", cursor: "pointer", fontSize: "14px", whiteSpace: "nowrap" }}>
             Logout
           </button>
         </div>
       </header>
 
       {error && (
-        <div style={{ backgroundColor: "#fee", padding: "10px", marginBottom: "20px", borderRadius: "4px", color: error.includes("✓") ? "green" : "red" }}>
+        <div style={{ backgroundColor: "#fee", padding: "10px", marginBottom: "20px", borderRadius: "4px", color: error.includes("✓") ? "green" : "red", fontSize: "14px", overflowWrap: "break-word" }}>
           {error}
         </div>
       )}
 
-      {/* Analytics Section */}
-      <section style={{ marginBottom: "30px", backgroundColor: "#f9f9f9", padding: "20px", borderRadius: "8px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-          <h2 style={{ margin: 0 }}>📊 分析</h2>
-          {statsLoading && (
-            <span style={{ fontSize: "12px", color: "#999", fontWeight: "normal" }}>
-              🔄 データ取得中...
-            </span>
-          )}
-        </div>
-
-        {statsLoading && !statsData ? (
-          // ローディング状態（データまだなし）
-          <div style={{
-            backgroundColor: "#e7f3ff",
-            border: "1px solid #2196f3",
-            borderRadius: "6px",
-            padding: "30px",
-            color: "#0d47a1",
-            textAlign: "center",
-            minHeight: "200px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }}>
-            <div>
-              <div style={{ fontSize: "24px", marginBottom: "10px" }}>⏳</div>
-              <strong>Vercel Analytics からデータを取得中です...</strong>
-              <p style={{ margin: "8px 0 0 0", fontSize: "12px" }}>
-                数秒お待ちください
-              </p>
-            </div>
-          </div>
-        ) : statsData?.error ? (
-          // エラー状態 - デバッグ情報を見やすく表示
-          <div style={{
-            backgroundColor: "#fff3cd",
-            border: "2px solid #ff6b6b",
-            borderRadius: "6px",
-            padding: "20px",
-            color: "#333"
-          }}>
-            <strong style={{ fontSize: "16px", color: "#d9534f" }}>🔴 統計データ取得エラー</strong>
-            <p style={{ margin: "12px 0", padding: "10px", backgroundColor: "#ffe6e6", borderRadius: "4px", fontSize: "13px", fontFamily: "monospace", wordBreak: "break-all" }}>
-              <strong>詳細:</strong> {statsData.error}
-            </p>
-            <p style={{ margin: "12px 0 0 0", fontSize: "12px" }}>
-              <strong>確認すべき項目:</strong>
-              <br />
-              ✓ Vercel Dashboard → Settings → Environment Variables<br />
-              &nbsp;&nbsp;→ <code>PROJECT_ID</code> が設定されているか？<br />
-              &nbsp;&nbsp;→ <code>VERCEL_AUTH_TOKEN</code> が設定されているか？<br />
-              <br />
-              ✓ 設定後に「Redeploy」ボタンで再デプロイしたか？<br />
-              <br />
-              ✓ トークンのスコープが「analytics」に設定されているか？
-            </p>
-          </div>
-        ) : (statsData && statsData.pageviews >= 0) ? (
-          // 成功状態
-          <>
-            <div style={{
-              backgroundColor: "#d4edda",
-              border: "1px solid #28a745",
-              borderRadius: "4px",
-              padding: "8px 12px",
-              marginBottom: "15px",
-              fontSize: "12px",
-              color: "#155724"
-            }}>
-              ✓ Vercel Analytics API から取得した実データ
-            </div>
-            {/* PV Trend Mini Chart */}
-            <div style={{ marginBottom: "20px" }}>
-              <h3>過去7日間のPV推移</h3>
-              {statsData.daily && statsData.daily.length > 0 ? (
-                <svg viewBox="0 0 400 150" style={{ width: "100%", maxWidth: "100%", height: "auto" }} xmlns="http://www.w3.org/2000/svg">
-                  {/* Background */}
-                  <rect width="400" height="150" fill="#fff" stroke="#ddd" strokeWidth="1" />
-
-                  {/* Grid lines */}
-                  <line x1="40" y1="20" x2="40" y2="120" stroke="#ddd" />
-                  <line x1="40" y1="120" x2="380" y2="120" stroke="#ddd" />
-
-                  {/* Dynamic bars from API data */}
-                  {(() => {
-                    const maxViews = Math.max(...statsData.daily.map((d: any) => d.views), 1);
-                    return statsData.daily.map((day: any, idx: number) => {
-                      const barHeight = (day.views / maxViews) * 100;
-                      const x = 50 + idx * 48;
-                      const y = 120 - barHeight;
-                      return (
-                        <rect key={idx} x={x} y={y} width="35" height={barHeight} fill="#4CAF50" />
-                      );
-                    });
-                  })()}
-
-                  {/* Labels */}
-                  {(() => {
-                    return statsData.daily.map((day: any, idx: number) => {
-                      const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][new Date(day.date + 'T00:00:00').getDay()];
-                      const x = 67 + idx * 48;
-                      return (
-                        <text key={`label-${idx}`} x={x} y="135" fontSize="12" textAnchor="middle">
-                          {dayOfWeek}
-                        </text>
-                      );
-                    });
-                  })()}
-                </svg>
-              ) : (
-                <div style={{ backgroundColor: "#f0f0f0", padding: "40px", textAlign: "center", borderRadius: "4px" }}>
-                  <p style={{ color: "#999" }}>グラフデータがありません</p>
-                </div>
-              )}
-            </div>
-
-            {/* KPI Cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "15px" }}>
-              <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
-                <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>7日間のPV</div>
-                <div style={{ fontSize: "28px", fontWeight: "bold", color: "#2196f3" }}>
-                  {statsData.pageviews?.toLocaleString() || '—'}
-                </div>
-                <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>from Vercel Analytics</div>
-              </div>
-              <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
-                <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>ユニーク訪問者</div>
-                <div style={{ fontSize: "28px", fontWeight: "bold", color: "#4CAF50" }}>
-                  {statsData.visitors?.toLocaleString() || '—'}
-                </div>
-                <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>from Vercel Analytics</div>
-              </div>
-              <div style={{ backgroundColor: "#fff", padding: "15px", borderRadius: "6px", border: "1px solid #eee" }}>
-                <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>平均PV（日均）</div>
-                <div style={{ fontSize: "28px", fontWeight: "bold", color: "#FF9800" }}>
-                  {statsData.daily && statsData.daily.length > 0
-                    ? Math.round(statsData.pageviews / statsData.daily.length).toLocaleString()
-                    : '—'}
-                </div>
-                <div style={{ fontSize: "11px", color: "#999", marginTop: "5px" }}>7日間の平均</div>
-              </div>
-            </div>
-          </>
-        ) : null}
-      </section>
-
       {/* Image Regeneration Section */}
-      <section style={{ marginBottom: "30px", backgroundColor: "#f0f7ff", padding: "20px", borderRadius: "8px", border: "1px solid #b3d9ff" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-          <h2 style={{ margin: 0 }}>🖼️ 画像再生成 (Imagen 4.0)</h2>
+      <section style={{ marginBottom: "30px", backgroundColor: "#f0f7ff", padding: "15px", borderRadius: "8px", border: "1px solid #b3d9ff" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px", flexWrap: "wrap", gap: "10px" }}>
+          <h2 style={{ margin: 0, fontSize: "clamp(16px, 4vw, 20px)" }}>🖼️ 画像再生成</h2>
           <button
             onClick={handleRegenerateImages}
             disabled={isRegenerating}
             style={{
-              padding: "10px 16px",
+              padding: "8px 14px",
               cursor: isRegenerating ? "not-allowed" : "pointer",
               backgroundColor: isRegenerating ? "#999" : "#ff9800",
               color: "white",
               border: "none",
               borderRadius: "4px",
-              fontSize: "14px",
+              fontSize: "13px",
               fontWeight: "500",
-              opacity: isRegenerating ? 0.6 : 1
+              opacity: isRegenerating ? 0.6 : 1,
+              whiteSpace: "nowrap"
             }}
           >
-            {isRegenerating ? "🔄 再生成中..." : "🎨 再生成開始"}
+            {isRegenerating ? "🔄 中..." : "🎨 開始"}
           </button>
         </div>
         <p style={{ margin: "0 0 10px 0", fontSize: "13px", color: "#555" }}>
@@ -620,39 +474,41 @@ export default function AdminPage() {
       </section>
 
       <section>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-          <h2>Facilities ({facilities.length})</h2>
-          <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px", flexWrap: "wrap", gap: "10px" }}>
+          <h2 style={{ margin: 0, fontSize: "clamp(18px, 5vw, 24px)" }}>Facilities ({facilities.length})</h2>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button
               onClick={loadFacilities}
               title="キャッシュをクリアして最新データを再読み込み"
               style={{
-                padding: "10px 16px",
+                padding: "8px 12px",
                 cursor: "pointer",
                 backgroundColor: "#2196F3",
                 color: "white",
                 border: "none",
                 borderRadius: "4px",
-                fontSize: "14px",
-                fontWeight: "500"
+                fontSize: "13px",
+                fontWeight: "500",
+                whiteSpace: "nowrap"
               }}
             >
-              🔄 データ更新
+              🔄 更新
             </button>
             <button
               onClick={handleAddNewFacility}
               style={{
-                padding: "10px 16px",
+                padding: "8px 12px",
                 cursor: "pointer",
                 backgroundColor: "#4CAF50",
                 color: "white",
                 border: "none",
                 borderRadius: "4px",
-                fontSize: "14px",
-                fontWeight: "500"
+                fontSize: "13px",
+                fontWeight: "500",
+                whiteSpace: "nowrap"
               }}
             >
-              ➕ 新規追加
+              ➕ 追加
             </button>
           </div>
         </div>
@@ -662,85 +518,79 @@ export default function AdminPage() {
         ) : facilities.length === 0 ? (
           <p>No facilities loaded</p>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
-            <thead>
-              <tr style={{ backgroundColor: "#f5f5f5", borderBottom: "2px solid #ccc" }}>
-                <th style={{ padding: "10px", textAlign: "center", width: "50px" }}>No.</th>
-                <th
-                  onClick={() => handleSort("id")}
-                  style={{
-                    padding: "10px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                    userSelect: "none",
-                    backgroundColor: sortKey === "id" ? "#e0e0e0" : "#f5f5f5"
-                  }}
-                  title="Click to sort"
-                >
-                  ID {sortKey === "id" && (sortOrder === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  onClick={() => handleSort("name")}
-                  style={{
-                    padding: "10px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                    userSelect: "none",
-                    backgroundColor: sortKey === "name" ? "#e0e0e0" : "#f5f5f5"
-                  }}
-                  title="Click to sort"
-                >
-                  Name {sortKey === "name" && (sortOrder === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  onClick={() => handleSort("prefecture")}
-                  style={{
-                    padding: "10px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                    userSelect: "none",
-                    backgroundColor: sortKey === "prefecture" ? "#e0e0e0" : "#f5f5f5"
-                  }}
-                  title="Click to sort"
-                >
-                  Prefecture {sortKey === "prefecture" && (sortOrder === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  onClick={() => handleSort("description")}
-                  style={{
-                    padding: "10px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                    userSelect: "none",
-                    backgroundColor: sortKey === "description" ? "#e0e0e0" : "#f5f5f5"
-                  }}
-                  title="Click to sort"
-                >
-                  Description {sortKey === "description" && (sortOrder === "asc" ? "↑" : "↓")}
-                </th>
-                <th style={{ padding: "10px", textAlign: "center" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedFacilities.map((facility, index) => (
-                <tr key={facility.id} style={{ borderBottom: "1px solid #eee" }}>
-                  <td style={{ padding: "10px", textAlign: "center", fontWeight: "bold", color: "#666" }}>{index + 1}</td>
-                  <td style={{ padding: "10px" }}><code>{facility.id}</code></td>
-                  <td style={{ padding: "10px" }}>{facility.name}</td>
-                  <td style={{ padding: "10px" }}>{facility.prefecture}</td>
-                  <td style={{ padding: "10px" }}>{facility.description.substring(0, 50)}...</td>
-                  <td style={{ padding: "10px", textAlign: "center" }}>
-                    <button onClick={() => handleEditClick(facility)} style={{ padding: "4px 8px", marginRight: "4px", cursor: "pointer", backgroundColor: "#0066cc", color: "white", border: "none", borderRadius: "4px" }}>
-                      ✎ Edit
-                    </button>
-                    <button onClick={() => handleDeleteClick(facility.id)} style={{ padding: "4px 8px", cursor: "pointer", backgroundColor: "#cc0000", color: "white", border: "none", borderRadius: "4px" }}>
-                      🗑 Delete
-                    </button>
-                  </td>
+          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px", fontSize: "14px" }}>
+              <thead>
+                <tr style={{ backgroundColor: "#f5f5f5", borderBottom: "2px solid #ccc" }}>
+                  <th style={{ padding: "8px", textAlign: "center", width: "45px", fontSize: "12px" }}>No.</th>
+                  <th
+                    onClick={() => handleSort("id")}
+                    style={{
+                      padding: "8px",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
+                      backgroundColor: sortKey === "id" ? "#e0e0e0" : "#f5f5f5",
+                      minWidth: "70px",
+                      fontSize: "12px"
+                    }}
+                    title="Click to sort"
+                  >
+                    ID {sortKey === "id" && (sortOrder === "asc" ? "↑" : "↓")}
+                  </th>
+                  <th
+                    onClick={() => handleSort("name")}
+                    style={{
+                      padding: "8px",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
+                      backgroundColor: sortKey === "name" ? "#e0e0e0" : "#f5f5f5",
+                      minWidth: "120px",
+                      fontSize: "12px"
+                    }}
+                    title="Click to sort"
+                  >
+                    Name {sortKey === "name" && (sortOrder === "asc" ? "↑" : "↓")}
+                  </th>
+                  <th
+                    onClick={() => handleSort("prefecture")}
+                    style={{
+                      padding: "8px",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
+                      backgroundColor: sortKey === "prefecture" ? "#e0e0e0" : "#f5f5f5",
+                      minWidth: "80px",
+                      fontSize: "12px"
+                    }}
+                    title="Click to sort"
+                  >
+                    Pref {sortKey === "prefecture" && (sortOrder === "asc" ? "↑" : "↓")}
+                  </th>
+                  <th style={{ padding: "8px", textAlign: "center", minWidth: "90px", fontSize: "12px" }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {sortedFacilities.map((facility, index) => (
+                  <tr key={facility.id} style={{ borderBottom: "1px solid #eee" }}>
+                    <td style={{ padding: "8px", textAlign: "center", fontWeight: "bold", color: "#666", fontSize: "12px" }}>{index + 1}</td>
+                    <td style={{ padding: "8px", fontSize: "12px" }}><code>{facility.id}</code></td>
+                    <td style={{ padding: "8px", fontSize: "13px", maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{facility.name}</td>
+                    <td style={{ padding: "8px", fontSize: "12px" }}>{facility.prefecture}</td>
+                    <td style={{ padding: "8px", textAlign: "center" }}>
+                      <button onClick={() => handleEditClick(facility)} style={{ padding: "5px 8px", marginRight: "3px", cursor: "pointer", backgroundColor: "#0066cc", color: "white", border: "none", borderRadius: "3px", fontSize: "12px", whiteSpace: "nowrap" }}>
+                        ✎ Edit
+                      </button>
+                      <button onClick={() => handleDeleteClick(facility.id)} style={{ padding: "5px 8px", cursor: "pointer", backgroundColor: "#cc0000", color: "white", border: "none", borderRadius: "3px", fontSize: "12px", whiteSpace: "nowrap" }}>
+                        🗑 Del
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 
@@ -756,18 +606,21 @@ export default function AdminPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          zIndex: 1000
+          zIndex: 1000,
+          padding: "10px",
+          boxSizing: "border-box"
         }}>
           <div style={{
             backgroundColor: "white",
-            padding: "20px",
+            padding: "15px",
             borderRadius: "8px",
             maxWidth: "600px",
-            width: "90%",
-            maxHeight: "90vh",
-            overflow: "auto"
+            width: "100%",
+            maxHeight: "95vh",
+            overflow: "auto",
+            boxSizing: "border-box"
           }}>
-            <h2>{isNewFacility ? "新規施設追加" : "Edit Facility"}: {editingFacility.name || "(no name)"}</h2>
+            <h2 style={{ fontSize: "clamp(16px, 4vw, 20px)", margin: "0 0 15px 0" }}>{isNewFacility ? "新規施設追加" : "Edit Facility"}</h2>
 
             {/* ID Field (editable only for new facilities) */}
             {isNewFacility && (
@@ -1001,7 +854,7 @@ export default function AdminPage() {
                   step="0.0001"
                   value={editingFacility.lat || 0}
                   onChange={(e) => setEditingFacility({ ...editingFacility, lat: parseFloat(e.target.value) || 0 })}
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", fontSize: "16px" }}
                 />
               </label>
               <label>
@@ -1011,7 +864,7 @@ export default function AdminPage() {
                   step="0.0001"
                   value={editingFacility.lng || 0}
                   onChange={(e) => setEditingFacility({ ...editingFacility, lng: parseFloat(e.target.value) || 0 })}
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", fontSize: "16px" }}
                 />
               </label>
             </div>
@@ -1084,7 +937,7 @@ export default function AdminPage() {
               </label>
             </div>
 
-            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", flexWrap: "wrap" }}>
               <button
                 onClick={() => {
                   setShowEditModal(false);
@@ -1092,7 +945,7 @@ export default function AdminPage() {
                   setIsNewFacility(false);
                   setPostToX(false);
                 }}
-                style={{ padding: "8px 16px", cursor: "pointer", backgroundColor: "#ccc", border: "none", borderRadius: "4px" }}
+                style={{ padding: "8px 14px", cursor: "pointer", backgroundColor: "#ccc", border: "none", borderRadius: "4px", fontSize: "14px" }}
               >
                 Cancel
               </button>
@@ -1102,9 +955,9 @@ export default function AdminPage() {
                   handleSaveEdit();
                 }}
                 disabled={saving}
-                style={{ padding: "8px 16px", cursor: saving ? "not-allowed" : "pointer", backgroundColor: saving ? "#666666" : "#0066cc", color: "white", border: "none", borderRadius: "4px", opacity: saving ? 0.6 : 1 }}
+                style={{ padding: "8px 16px", cursor: saving ? "not-allowed" : "pointer", backgroundColor: saving ? "#666666" : "#0066cc", color: "white", border: "none", borderRadius: "4px", opacity: saving ? 0.6 : 1, fontSize: "14px" }}
               >
-                {saving ? "💾 Saving..." : "Save"}
+                {saving ? "💾 中..." : "Save"}
               </button>
             </div>
           </div>
