@@ -42,7 +42,7 @@ const REGION_COLORS: Record<string, string> = {
 };
 
 const REGION_ICONS: Record<string, string> = {
-  all: '🇯🇵',
+  all: '🔴',
   Hokkaido: '❄️',
   Tohoku: '🌲',
   Kanto: '🏺',

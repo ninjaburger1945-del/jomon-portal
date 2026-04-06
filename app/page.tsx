@@ -326,7 +326,7 @@ export default function Home() {
                   window.history.replaceState({}, "", newUrl);
                 }}
               >
-                <span className={styles.regionTileIcon}>🇯🇵</span>
+                <span className={styles.regionTileIcon}>🔴</span>
                 <span className={styles.regionTileLabel}>全国</span>
                 <span className={styles.regionTileCount}>{facilitiesData.length}</span>
               </button>
