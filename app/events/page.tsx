@@ -283,7 +283,7 @@ export default function EventsPage() {
       </header>
 
       {/* Region Tabs */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
         {REGION_TABS.map((region) => {
           let tabCount = 0;
           if (region === 'all') {
@@ -293,21 +293,24 @@ export default function EventsPage() {
             tabCount = allRegionEvents.length;
           }
 
+          const isActive = selectedRegion === region;
+
           return (
             <button
               key={region}
               onClick={() => setSelectedRegion(region)}
               style={{
-                padding: '8px 12px',
+                padding: region === 'all' ? '10px 16px' : '8px 12px',
                 border: 'none',
                 borderRadius: '6px',
-                fontSize: '13px',
-                fontWeight: selectedRegion === region ? '600' : '400',
+                fontSize: region === 'all' ? '14px' : '13px',
+                fontWeight: isActive ? '700' : region === 'all' ? '600' : '400',
                 cursor: 'pointer',
-                backgroundColor: selectedRegion === region ? 'var(--accent-terracotta)' : '#EEE',
-                color: selectedRegion === region ? 'white' : '#333',
-                borderBottom: selectedRegion === region ? '2px solid #8B2A0A' : 'none',
+                backgroundColor: isActive ? 'var(--accent-terracotta)' : region === 'all' ? '#F5E6D3' : '#EEE',
+                color: isActive ? 'white' : region === 'all' ? 'var(--accent-terracotta)' : '#333',
+                borderBottom: isActive ? '2px solid #8B2A0A' : 'none',
                 transition: 'all 0.2s ease',
+                boxShadow: region === 'all' && !isActive ? 'inset 0 0 0 1px var(--accent-terracotta)' : 'none',
               }}
             >
               {REGION_MAP[region]} ({tabCount})

@@ -85,7 +85,7 @@ export default function Home() {
     if (pref) setSelectedPrefecture(pref);
   }, []);
 
-  // イベント情報を取得し、直近7日以内のイベント数をカウント
+  // イベント情報を取得し、現在開催中のイベント数をカウント
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -93,16 +93,17 @@ export default function Home() {
         const events: JomonEvent[] = await res.json();
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const sevenDaysLater = new Date(today);
-        sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
 
-        const upcoming = events.filter((e) => {
+        // 開催中のイベント：date_start が今日以下で、date_end（またはdate_start）が今日以上
+        const activeNow = events.filter((e) => {
           const startDate = new Date(e.date_start);
           startDate.setHours(0, 0, 0, 0);
-          return startDate >= today && startDate <= sevenDaysLater;
+          const endDate = new Date(e.date_end || e.date_start);
+          endDate.setHours(23, 59, 59, 999);
+          return startDate <= today && endDate >= today;
         });
 
-        setUpcomingEventCount(upcoming.length);
+        setUpcomingEventCount(activeNow.length);
       } catch (error) {
         console.error('[fetch events]', error);
       }
