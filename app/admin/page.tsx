@@ -1213,8 +1213,11 @@ export default function AdminPage() {
 
             {remasterPrompts && (
               <>
-                <p style={{ fontSize: '13px', color: '#666', marginBottom: '16px' }}>
+                <p style={{ fontSize: '13px', color: '#666', marginBottom: '4px' }}>
                   画像をクリックして選択し、「確定保存」でサムネイルを更新します。
+                </p>
+                <p style={{ fontSize: '12px', color: '#999', marginBottom: '16px' }}>
+                  ※ 画像生成に30～60秒かかる場合があります。読み込み中でもしばらくお待ちください。
                 </p>
                 <div style={{
                   display: 'grid',
@@ -1272,10 +1275,17 @@ export default function AdminPage() {
                           {!isGenerating && !imgUrl && generatingIndex > i && (
                             <div style={{
                               position: 'absolute', inset: 0,
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              color: '#666', fontSize: '12px',
+                              display: 'flex', flexDirection: 'column',
+                              alignItems: 'center', justifyContent: 'center',
+                              color: '#999', fontSize: '12px',
                             }}>
-                              読み込み失敗
+                              <div style={{
+                                width: '24px', height: '24px',
+                                border: '2px solid #ddd', borderTopColor: '#999',
+                                borderRadius: '50%', animation: 'spin 1s linear infinite',
+                                marginBottom: '6px',
+                              }} />
+                              <span>読み込み中...</span>
                             </div>
                           )}
                           {imgUrl && (
