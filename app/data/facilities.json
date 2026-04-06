@@ -2275,7 +2275,7 @@
     "address": "滋賀県大津市晴嵐2丁目",
     "description": "琵琶湖の湖底から発見された日本最大級の淡水産貝塚。縄文時代早期から中期の集落跡で、トチの実を利用したクッキー状炭化物が有名。",
     "region": "Kinki",
-    "url": "https://ja.wikipedia.org/wiki/%E7%B2%9F%E6%B4%A5%E8%B2%9D%E5%A1%9A",
+    "url": "https://kids-kouko.com/historical_site/kinki/pref_shiga/480/",
     "tags": [
       "貝塚"
     ],
@@ -2290,6 +2290,8 @@
     "copy": "琵琶湖に眠る縄文の食卓",
     "needsCheck": true,
     "userApproved": false,
-    "thumbnail": "/images/facilities/073_ai.png"
+    "thumbnail": "/images/facilities/073_ai.png",
+    "access_public": "京阪石山坂本線「粟津駅」下車、東へ徒歩約10分。なし",
+    "access_car": "名神高速道路「瀬田西IC」から約10分"
   }
 ]
