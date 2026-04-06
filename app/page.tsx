@@ -122,6 +122,7 @@ export default function Home() {
   const newestFacilityId = facilitiesData[facilitiesData.length - 1]?.id;
   const allTags = Array.from(new Set(facilitiesData.flatMap(f => f.tags)));
 
+  // Count facilities by region
   const regionCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     facilitiesData.forEach(f => { counts[f.region] = (counts[f.region] || 0) + 1; });
