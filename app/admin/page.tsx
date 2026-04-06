@@ -308,15 +308,37 @@ export default function AdminPage() {
     }
   };
 
-  const preloadImage = (src: string): Promise<void> =>
+  const preloadImage = (src: string, timeoutMs: number = 120000): Promise<void> =>
     new Promise((resolve, reject) => {
       if (typeof window === 'undefined') {
         resolve();
         return;
       }
+
       const img = new window.Image();
-      img.onload = () => resolve();
-      img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+      const cleanup = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        img.onload = null;
+        img.onerror = null;
+      };
+
+      img.onload = () => {
+        cleanup();
+        resolve();
+      };
+
+      img.onerror = () => {
+        cleanup();
+        reject(new Error(`Failed to load image`));
+      };
+
+      timeoutId = setTimeout(() => {
+        cleanup();
+        reject(new Error(`Image load timeout (${timeoutMs}ms)`));
+      }, timeoutMs);
+
       img.src = src;
     });
 
@@ -332,15 +354,36 @@ export default function AdminPage() {
       setGeneratingIndex(i);
       const prompt = prompts[keys[i]];
       const seed = Math.floor(Math.random() * 1000000);
+      const timestamp = Date.now();
       const encodedPrompt = encodeURIComponent(prompt);
       const pollinationsUrl =
-        `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&nologo=true&model=flux&seed=${seed}`;
+        `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&nologo=true&model=flux-pro&seed=${seed}&t=${timestamp}`;
 
-      try {
-        await preloadImage(pollinationsUrl);
+      let loadSuccess = false;
+      const maxRetries = 2;
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          await preloadImage(pollinationsUrl, 120000);
+          newImages[i] = pollinationsUrl;
+          loadSuccess = true;
+          break;
+        } catch (err) {
+          console.warn(
+            `[generateImages] concept_${String.fromCharCode(97 + i)} attempt ${attempt + 1}/${maxRetries} failed:`,
+            err
+          );
+          if (attempt < maxRetries - 1) {
+            await new Promise((r) => setTimeout(r, 3000));
+          }
+        }
+      }
+
+      if (!loadSuccess) {
         newImages[i] = pollinationsUrl;
-      } catch (err) {
-        console.warn(`[generateImages] concept_${String.fromCharCode(97 + i)} load failed`);
+        console.warn(
+          `[generateImages] concept_${String.fromCharCode(97 + i)} will show URL but failed to preload. User can retry.`
+        );
       }
 
       setGeneratedImages([...newImages]);
