@@ -571,9 +571,33 @@ export default function AdminPage() {
       <header style={{ marginBottom: "20px", borderBottom: "1px solid #ccc", paddingBottom: "10px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
           <h1 style={{ margin: 0, fontSize: "clamp(20px, 5vw, 28px)" }}>Admin Dashboard</h1>
-          <button onClick={() => setIsAuthenticated(false)} style={{ padding: "8px 16px", cursor: "pointer", fontSize: "14px", whiteSpace: "nowrap" }}>
-            Logout
-          </button>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                padding: "8px 16px",
+                cursor: "pointer",
+                fontSize: "14px",
+                whiteSpace: "nowrap",
+                backgroundColor: "#FF6B35",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                textDecoration: "none",
+                fontWeight: "500",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px"
+              }}
+            >
+              🌐 ポータルを開く
+            </a>
+            <button onClick={() => setIsAuthenticated(false)} style={{ padding: "8px 16px", cursor: "pointer", fontSize: "14px", whiteSpace: "nowrap" }}>
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 
