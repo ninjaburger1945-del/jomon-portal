@@ -2,8 +2,8 @@ import { NextResponse, NextRequest } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as cheerio from 'cheerio';
 
-const JOMON_OS_SUFFIX_V2_1 =
-  'Strictly Jomon period Japan. No Yayoi/Kofun. Cinematic 16:9, gritty textures, faithful to source materials. Authentic prehistoric settlement/artifact.';
+const JOMON_OS_SUFFIX_V2_2 =
+  'Centered subject with natural vertical proportions, 16:9 wide-angle composition with environmental context, NO stretching or warping of artifacts. Strictly Jomon period Japan. No Yayoi/Kofun. Cinematic lighting, gritty textures, raw documentary style.';
 
 export async function POST(request: NextRequest) {
   try {
@@ -109,23 +109,26 @@ OUTPUT FORMAT:
 ---CONCEPT DEFINITIONS (Strict Temporal Separation)---
 
 concept_a - ANCIENT DAILY LIFE (太古の日常):
-Jomon period settlement ~10,000 years ago. MUST include people engaged in hunting, gathering, cooking. Multiple pithouses with smoke rising. Hearth fires, cord-marked pottery visible, stone tools in use. Raw, alive with human activity. Dense primitive forest. Dawn or dusk dramatic lighting. Active human presence is MANDATORY.
-Start with: "${JOMON_OS_SUFFIX_V2_1}"
+Jomon settlement ~10,000 years ago. MUST include people engaged in hunting, gathering, cooking. Multiple pithouses with smoke rising, hearth fires, cord-marked pottery visible, stone tools in use. People and pottery must maintain NATURAL PROPORTIONS—no stretching. Raw, alive with human activity. Dense primitive forest. Dawn or dusk dramatic lighting. Active human presence is MANDATORY. 16:9 composition should fill width with environmental depth and multiple figures, NOT by warping any artifacts.
+Start with: "${JOMON_OS_SUFFIX_V2_2}"
 
 concept_b - MODERN ARCHAEOLOGICAL SITE (現代の史跡):
-Contemporary view of a Jomon heritage park or museum site. NO PEOPLE. Reconstructed pithouses standing silently. Moss-covered mounds, eroded earth structures, forest backdrop. Modern signage, preserved earth layers. Static, quiet, contemplative atmosphere. Archaeological landscape showing passage of time.
-Start with: "${JOMON_OS_SUFFIX_V2_1}"
+Contemporary view of Jomon heritage park or museum site. NO PEOPLE. Reconstructed pithouses standing silently, centered in the frame. Moss-covered mounds, eroded earth structures, forest backdrop on both sides. Modern signage, preserved earth layers. Static, quiet, contemplative atmosphere. Use surrounding forest, earth textures, and archaeological landscape to fill 16:9 width—NOT by stretching the pithouse structure itself. Archaeological landscape showing passage of time.
+Start with: "${JOMON_OS_SUFFIX_V2_2}"
 
 concept_c - SYMBOLIC ARTIFACTS (象徴的遺物):
-Museum close-up: cord-marked pottery vessel or Dogu figurine. Dramatic spotlighting on clay surface. Macro detail of intricate cord patterns, patina, ancient soil stains. Dogu's mysterious expression. Dark background gradient. Emphasize spiritual, mystical essence of Jomon objects. Cinematic museum photography.
-Start with: "${JOMON_OS_SUFFIX_V2_1}"
+Museum display: cord-marked pottery vessel or Dogu figurine CENTERED in frame with NATURAL VERTICAL PROPORTIONS—NEVER stretch or warp the artifact. Dramatic spotlighting on clay surface. Macro detail of intricate cord patterns, patina, ancient soil stains. Dogu's mysterious expression. Fill the 16:9 width with museum environment: display base/platform beneath artifact, ambient gallery lighting on sides, dark background gradient. Emphasize spiritual essence of Jomon object. Cinematic museum photography—wide composition achieved through environmental depth, NOT artifact distortion.
+Start with: "${JOMON_OS_SUFFIX_V2_2}"
 
 ---REQUIREMENTS---
 - 100-150 words English per concept
 - Realistic documentary style (NO fantasy/anime)
-- MUST open each with Jomon OS v2.1 suffix
+- MUST open each with Jomon OS v2.2 suffix
 - Analyze both text AND visual materials (image alt text, visual context) to infer actual site structure
-- NO contamination from later periods`;
+- NO contamination from later periods
+- CRITICAL: All subjects (people, pottery, Dogu, pithouses) must maintain NATURAL PROPORTIONS
+- Fill 16:9 width with ENVIRONMENTAL CONTEXT (forest, lighting, display environment, landscape depth)—NEVER stretch or warp the primary subject
+- Composition technique: Centered subject + surrounding environmental elements, creating cinematic wide-angle effect`;
 
     const userContent = `Facility: ${name}, ${prefecture}
 Description: ${description}
@@ -195,8 +198,8 @@ Analyze the site structure from available materials (text and visual context) to
 
     // Ensure Jomon OS suffix is present
     for (const key of ['concept_a', 'concept_b', 'concept_c'] as const) {
-      if (concepts[key] && !concepts[key].includes('Strictly Jomon')) {
-        concepts[key] = `${concepts[key]} ${JOMON_OS_SUFFIX_V2_1}`;
+      if (concepts[key] && !concepts[key].includes('Centered subject')) {
+        concepts[key] = `${concepts[key]} ${JOMON_OS_SUFFIX_V2_2}`;
       }
     }
 
