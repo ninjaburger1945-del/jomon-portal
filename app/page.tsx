@@ -311,6 +311,27 @@ export default function Home() {
           {/* 地方タイルナビゲーション */}
           <div className={styles.regionTilesGrid}>
             <div className={styles.regionTilesInner}>
+              {/* 全国タイル */}
+              <button
+                className={`${styles.regionTile} ${selectedRegion === "" ? styles.regionTileActive : ""}`}
+                style={selectedRegion === ""
+                  ? { backgroundColor: "#1C150A", borderColor: "#1C150A" }
+                  : { borderColor: "#1C150A", color: "#1C150A" }
+                }
+                onClick={() => {
+                  setSelectedRegion("");
+                  const params = new URLSearchParams(window.location.search);
+                  params.delete("region");
+                  const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+                  window.history.replaceState({}, "", newUrl);
+                }}
+              >
+                <span className={styles.regionTileIcon}>🌍</span>
+                <span className={styles.regionTileLabel}>全国</span>
+                <span className={styles.regionTileCount}>{facilitiesData.length}</span>
+              </button>
+
+              {/* 地方タイル */}
               {Object.entries(REGION_LABELS).map(([key, label]) =>
                 regionCounts[key] ? (
                   <button
