@@ -42,5 +42,6 @@ jobs:
             echo "Changes detected in events.json"
             git add app/data/events.json
             git commit -m "chore(events): update events from auto-collection"
-            git push
+            git pull --rebase origin main
+            git push origin main
           fi
