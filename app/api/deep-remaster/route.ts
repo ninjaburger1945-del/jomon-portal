@@ -2,8 +2,8 @@ import { NextResponse, NextRequest } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as cheerio from 'cheerio';
 
-const JOMON_OS_SUFFIX =
-  'Authentic Jomon period Japan: sunken-floor pithouses (Tateana-jukyo), thatched roofs (Kaya grass), cord-marked pottery (Jomon-doki), clay Dogu, gritty textures, hearth fire, cinematic lighting, documentary style, earth colors, 16:9 aspect ratio. Strictly Jomon period Japan only.';
+const JOMON_OS_SUFFIX_V2 =
+  'Authentic Jomon period Japan, 16:9 wide aspect ratio, cinematic lighting, gritty prehistoric textures. NO LATER HISTORICAL ELEMENTS (No Yayoi, No Kofun, No Yayoi wet-rice, No bronze, No iron, No tunic-style clothing).';
 
 export async function POST(request: NextRequest) {
   try {
@@ -71,27 +71,52 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    const systemPrompt = `You are a Jomon period Japan specialist. Create 3 image prompts in JSON format.
+    const systemPrompt = `You are an archaeological specialist for Jomon period Japan ONLY.
 
-MANDATORY: Each prompt MUST start with this Jomon OS Suffix:
-"${JOMON_OS_SUFFIX}"
+CRITICAL FILTERING RULE:
+If input contains multiple historical periods (Yayoi, Kofun, Edo, etc), EXTRACT AND USE JOMON ELEMENTS ONLY.
 
-CONSTRAINTS:
-- Output ONLY JSON: {"concept_a":"...", "concept_b":"...", "concept_c":"..."}
-- Each prompt: 100-150 words in English
-- Realistic documentary style, NO fantasy/anime
-- NO Western prehistoric aesthetics - ONLY Japanese Jomon
+STRICTLY FORBIDDEN elements (these indicate non-Jomon periods):
+- Elevated storehouses (Yayoi+)
+- Metal objects (bronze, iron, mirrors, swords)
+- Keyhole-shaped mounds (Kofun)
+- Wet-rice paddies
+- Tunic-style clothing (Yayoi+)
+- Fortified structures or castles
 
-REQUIRED ELEMENTS:
-- Sunken-floor pithouse (Tateana-jukyo) with thatched Kaya grass roof
-- Cord-marked pottery (Jomon-doki) in all concepts
-- Clay Dogu figurine for concept_c only
-- Authentic Jomon period Japan visuals only
+MANDATORY JOMON elements:
+- Sunken-floor pithouses (Tateana-jukyo): circular or rectangular pits dug into earth
+- Thatched roofs made of Kaya grass (Miscanthus sinensis)
+- Cord-marked pottery (Jomon-doki) with intricate patterns
+- Stone tools (Sekki)
+- Clay figurines (Dogu)
+- Shell middens (Kaizuka)
+- Dense broadleaf forest landscape
+- Flickering hearth fires
 
-CONCEPT SPECS:
-concept_a: Settlement with multiple pithouses, hearths, human activity, dramatic dawn/dusk light
-concept_b: Archaeological landscape integrating pithouses with site-specific features (shell mound, lake, obsidian, etc)
-concept_c: Close-up macro photography of pottery patterns, Dogu figurine detail, museum lighting`;
+OUTPUT FORMAT:
+{"concept_a":"...", "concept_b":"...", "concept_c":"..."}
+
+CONCEPT DEFINITIONS (3-axis temporal separation):
+
+concept_a - THE ANCIENT LIVING (太古の動):
+Ancient Jomon daily life, approximately 10,000 years ago. Sunken-floor pithouses with smoke rising. Multiple dwellings with people engaged in hunting, gathering, cooking around hearths. Raw, gritty, alive with human activity. Dawn or dusk dramatic lighting. Cord-marked pottery and stone tools visible. Dense primitive forest surrounds the settlement. MUST include active human presence and signs of daily life.
+Start with: "${JOMON_OS_SUFFIX_V2}"
+
+concept_b - THE MODERN RUIN (現代の静):
+A contemporary archaeological site or park. Static, quiet atmosphere. Reconstructed pithouses standing silently in a forested archaeological park. Moss-covered mounds, eroded earth structures. Museum-like presentation. NO human activity. NO people. Focus on the 'modern viewer's perspective' looking at Jomon remains. Archaeological landscape with signage, preserved earth layers. Silent, contemplative mood.
+Keywords: Archaeological park, modern-day ruin, moss-covered remains, silent atmosphere, museum-like landscape, preservation.
+Start with: "${JOMON_OS_SUFFIX_V2}"
+
+concept_c - THE ARTIFACT CLOSE-UP (象徴的遺物):
+Museum-display lighting and presentation. Macro-level detail. Focus on a representative cord-marked pottery vessel and/or Dogu figurine. Dramatic spotlighting. Show intricate cord-marked textures, clay surface patina, ancient soil stains. Dogu mysterious expression. Cinematic museum photography with dark background gradient. Emphasize the mystical, spiritual essence of Jomon artifacts.
+Start with: "${JOMON_OS_SUFFIX_V2}"
+
+EACH PROMPT:
+- 100-150 words English
+- Realistic documentary style (NO fantasy/anime)
+- MUST open with Jomon OS v2 suffix
+- NO contamination from later periods`;
 
     const userContent = `Facility: ${name}, ${prefecture}
 Description: ${description}
@@ -159,8 +184,8 @@ Create 3 image generation prompts for Pollinations AI based on this Jomon site.`
 
     // Ensure Jomon OS suffix is present
     for (const key of ['concept_a', 'concept_b', 'concept_c'] as const) {
-      if (concepts[key] && !concepts[key].includes('Archaeological reconstruction')) {
-        concepts[key] = `${concepts[key]}, ${JOMON_OS_SUFFIX}`;
+      if (concepts[key] && !concepts[key].includes('Authentic Jomon')) {
+        concepts[key] = `${concepts[key]}\n${JOMON_OS_SUFFIX_V2}`;
       }
     }
 
