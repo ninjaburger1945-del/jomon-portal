@@ -1,29 +1,5 @@
 [
   {
-    "id": "evt-001-1775486158397-0",
-    "title": "令和８年度三内丸山縄文春祭りを開催します！",
-    "date_start": "2026-04-02",
-    "location_id": "001",
-    "facility_name": "特別史跡 三内丸山遺跡",
-    "prefecture": "青森県",
-    "region": "Tohoku",
-    "url": "https://sannaimaruyama.pref.aomori.jp/",
-    "category": "企画展",
-    "description": "令和8年度三内丸山縄文春祭りが開催されます。詳細な内容は告知されていませんが、縄文文化に触れることができるイベントと考えられます。"
-  },
-  {
-    "id": "evt-003-1775486161660-0",
-    "title": "千葉開府900年記念特別史跡加曽利貝塚縄文春まつりを開催します！",
-    "date_start": "2026-03-28",
-    "location_id": "003",
-    "facility_name": "加曽利貝塚博物館",
-    "prefecture": "千葉県",
-    "region": "Kanto",
-    "url": "https://www.city.chiba.jp/kasori/",
-    "category": "企画展",
-    "description": "千葉開府900年を記念して、特別史跡加曽利貝塚にて縄文春まつりが開催されます。詳細は近日中に発表予定です。"
-  },
-  {
     "id": "evt-005-1775486166988-0",
     "title": "GW中の縄文イベント",
     "date_start": "2026-04-18",
@@ -59,42 +35,6 @@
     "url": "https://www.nbz.or.jp/",
     "category": "企画展",
     "description": "近年に明らかになってきた植物利用の方法と、糸や縄、編み物に関する講座です。講師は当館研究員の永瀬 史人氏です。"
-  },
-  {
-    "id": "evt-008-1775486178670-0",
-    "title": "令和8年度が始まりました！",
-    "date_start": "2026-04-01",
-    "location_id": "008",
-    "facility_name": "上野原縄文の森",
-    "prefecture": "鹿児島県",
-    "region": "KyushuOkinawa",
-    "url": "https://www.jomon-no-mori.jp/",
-    "category": "企画展",
-    "description": "令和8年度が始まりました。この年度の活動についてお知らせします。"
-  },
-  {
-    "id": "evt-008-1775486178670-1",
-    "title": "【エントランスの展示を入れ替えました】",
-    "date_start": "2026-03-12",
-    "location_id": "008",
-    "facility_name": "上野原縄文の森",
-    "prefecture": "鹿児島県",
-    "region": "KyushuOkinawa",
-    "url": "https://www.jomon-no-mori.jp/",
-    "category": "企画展",
-    "description": "南の縄文調査室から、エントランスの展示が入れ替わったことをお知らせします。"
-  },
-  {
-    "id": "evt-008-1775486178670-2",
-    "title": "埋蔵文化財技術講座（調査研究）",
-    "date_start": "2026-03-11",
-    "location_id": "008",
-    "facility_name": "上野原縄文の森",
-    "prefecture": "鹿児島県",
-    "region": "KyushuOkinawa",
-    "url": "https://www.jomon-no-mori.jp/",
-    "category": "企画展",
-    "description": "南の縄文調査室から、埋蔵文化財技術講座（調査研究）のお知らせです。"
   },
   {
     "id": "evt-009-1775486180552-0",
@@ -161,18 +101,6 @@
     "description": "岩手県一戸町の御所野遺跡では、5月から10月の土曜、日曜、祝・休日にボランティアガイドが遺跡を案内します。所要時間は約40分で無料です。"
   },
   {
-    "id": "evt-020-1775486201671-0",
-    "title": "大森貝塚遺跡庭園",
-    "date_start": "2025-10-30",
-    "location_id": "020",
-    "facility_name": "大森貝塚",
-    "prefecture": "東京都",
-    "region": "Kanto",
-    "url": "https://shinagawa-kanko.or.jp/spot/oomorikaiduka/",
-    "category": "企画展",
-    "description": "日本考古学発祥の地「大森貝塚」を学べる公園です。縄文時代・大森貝塚について学習できるよう、モース博士の胸像や貝層の剥離標本などが設置されています。"
-  },
-  {
     "id": "evt-031-1775486220821-0",
     "title": "縄文文化交流センターの４月・５月の開館日・休館日のお知らせ",
     "date_start": "2026-04-01",
@@ -184,19 +112,6 @@
     "url": "http://www.hjcc.jp/",
     "category": "企画展",
     "description": "縄文文化交流センターの4月および5月の開館日と休館日に関するお知らせです。"
-  },
-  {
-    "id": "evt-031-1775486220821-1",
-    "title": "春休み縄文クイズラリー",
-    "date_start": "2026-03-14",
-    "date_end": "2026-04-05",
-    "location_id": "031",
-    "facility_name": "函館市縄文文化交流センター",
-    "prefecture": "北海道",
-    "region": "Hokkaido",
-    "url": "http://www.hjcc.jp/",
-    "category": "企画展",
-    "description": "春休み期間中に開催される縄文クイズラリーの告知です。期間は3月14日から4月5日までです。"
   },
   {
     "id": "evt-031-1775486220821-2",
@@ -223,30 +138,6 @@
     "url": "http://www.hjcc.jp/",
     "category": "企画展",
     "description": "縄文文化交流センターの5月上旬の開館日情報です。開館時間は9:00～17:00です。"
-  },
-  {
-    "id": "evt-032-1775486226436-0",
-    "title": "どぐコレ ～しゅうけつ！どぐうコレクション～",
-    "date_start": "2026-04-01",
-    "location_id": "032",
-    "facility_name": "じょーもぴあ宮畑",
-    "prefecture": "福島県",
-    "region": "Tohoku",
-    "url": "http://www.f-shinkoukousha.or.jp/jyomopia/index.html",
-    "category": "企画展",
-    "description": "じょーもぴあ宮畑にて、どぐうコレクションの展示が開催されます。縄文時代の土偶に触れる機会です。"
-  },
-  {
-    "id": "evt-032-1775486226436-1",
-    "title": "ホームページが新しくなりました",
-    "date_start": "2026-03-31",
-    "location_id": "032",
-    "facility_name": "じょーもぴあ宮畑",
-    "prefecture": "福島県",
-    "region": "Tohoku",
-    "url": "http://www.f-shinkoukousha.or.jp/jyomopia/index.html",
-    "category": "企画展",
-    "description": "じょーもぴあ宮畑のホームページが新しくなりました。最新情報はこちらでご確認ください。"
   },
   {
     "id": "evt-037-1775486236704-0",
@@ -312,90 +203,6 @@
     "url": "https://www.rekihaku.otsu.shiga.jp/",
     "category": "企画展",
     "description": "「祭りの姿」展では、地域のお祭りにまつわる展示が行われます。子供から大人まで楽しめる展示内容となっています。"
-  },
-  {
-    "id": "evt-047-1775486260093-0",
-    "title": "企画展『縄文土器入門～縄文土器の特色をさぐる』",
-    "date_start": "2026-03-29",
-    "location_id": "047",
-    "facility_name": "長岡市馬高縄文館（馬高・三十稲場遺跡）",
-    "prefecture": "新潟県",
-    "region": "Chubu",
-    "url": "https://www.museum.city.nagaoka.niigata.jp/umataka/",
-    "category": "企画展",
-    "description": "縄文土器の特色をさぐる企画展が開催されます。"
-  },
-  {
-    "id": "evt-047-1775486260093-1",
-    "title": "コレ、推します！長岡・縄文土器グランプリ",
-    "date_start": "2026-03-29",
-    "location_id": "047",
-    "facility_name": "長岡市馬高縄文館（馬高・三十稲場遺跡）",
-    "prefecture": "新潟県",
-    "region": "Chubu",
-    "url": "https://www.museum.city.nagaoka.niigata.jp/umataka/",
-    "category": "企画展",
-    "description": "長岡・縄文土器グランプリが開催されます。"
-  },
-  {
-    "id": "evt-047-1775486260093-2",
-    "title": "縄文土器をつくろう！（火焔土器・オリジナル土器）",
-    "date_start": "2026-03-29",
-    "location_id": "047",
-    "facility_name": "長岡市馬高縄文館（馬高・三十稲場遺跡）",
-    "prefecture": "新潟県",
-    "region": "Chubu",
-    "url": "https://www.museum.city.nagaoka.niigata.jp/umataka/",
-    "category": "企画展",
-    "description": "火焔土器やオリジナル土器を作る体験イベントです。"
-  },
-  {
-    "id": "evt-047-1775486260093-3",
-    "title": "火焔土器レプリカ・プレゼントキャンペーン",
-    "date_start": "2026-03-29",
-    "location_id": "047",
-    "facility_name": "長岡市馬高縄文館（馬高・三十稲場遺跡）",
-    "prefecture": "新潟県",
-    "region": "Chubu",
-    "url": "https://www.museum.city.nagaoka.niigata.jp/umataka/",
-    "category": "企画展",
-    "description": "火焔土器のレプリカがもらえるプレゼントキャンペーンです。"
-  },
-  {
-    "id": "evt-047-1775486260093-4",
-    "title": "みにつける火焔土器／火炎土器ボディペイント",
-    "date_start": "2026-03-29",
-    "location_id": "047",
-    "facility_name": "長岡市馬高縄文館（馬高・三十稲場遺跡）",
-    "prefecture": "新潟県",
-    "region": "Chubu",
-    "url": "https://www.museum.city.nagaoka.niigata.jp/umataka/",
-    "category": "企画展",
-    "description": "火焔土器を身につけたり、ボディペイントで表現するイベントです。"
-  },
-  {
-    "id": "evt-047-1775486260093-5",
-    "title": "アンギン編み練習会",
-    "date_start": "2026-03-29",
-    "location_id": "047",
-    "facility_name": "長岡市馬高縄文館（馬高・三十稲場遺跡）",
-    "prefecture": "新潟県",
-    "region": "Chubu",
-    "url": "https://www.museum.city.nagaoka.niigata.jp/umataka/",
-    "category": "企画展",
-    "description": "アンギン編みの練習会が開催されます。"
-  },
-  {
-    "id": "evt-047-1775486260093-6",
-    "title": "レンタル火焔土器",
-    "date_start": "2026-03-29",
-    "location_id": "047",
-    "facility_name": "長岡市馬高縄文館（馬高・三十稲場遺跡）",
-    "prefecture": "新潟県",
-    "region": "Chubu",
-    "url": "https://www.museum.city.nagaoka.niigata.jp/umataka/",
-    "category": "企画展",
-    "description": "火焔土器のレンタルサービスが提供されます。"
   },
   {
     "id": "evt-049-1775486264054-0",

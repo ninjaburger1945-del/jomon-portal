@@ -151,10 +151,19 @@ ${textContent}`;
       }
     }
 
-    // 4. events.json に追記
-    const updatedEvents = [...existingEvents, ...newEvents];
+    // 4. 期限切れイベントを削除
+    const activeEvents = existingEvents.filter(e => {
+      const endDate = new Date(e.date_end || e.date_start);
+      endDate.setHours(23, 59, 59, 999);
+      return endDate >= today;
+    });
+
+    console.log(`[collect-events] Removed ${existingEvents.length - activeEvents.length} expired events`);
+
+    // 5. events.json に追記
+    const updatedEvents = [...activeEvents, ...newEvents];
     fs.writeFileSync(eventsPath, JSON.stringify(updatedEvents, null, 2) + '\n', 'utf8');
-    console.log(`[collect-events] Updated events.json: ${newEvents.length} new events added`);
+    console.log(`[collect-events] Updated events.json: ${newEvents.length} new events added, total: ${updatedEvents.length}`);
 
     // 5. GitHub API でコミット（環境変数が設定されている場合のみ）
     const token = process.env.GITHUB_TOKEN;
