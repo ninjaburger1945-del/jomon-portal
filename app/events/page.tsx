@@ -31,6 +31,7 @@ const REGION_MAP: Record<string, string> = {
 const REGION_TABS = ['all', 'Hokkaido', 'Tohoku', 'Kanto', 'Chubu', 'Kinki', 'ChugokuShikoku', 'KyushuOkinawa'] as const;
 
 const REGION_COLORS: Record<string, string> = {
+  all: '#1C150A',
   Hokkaido: '#1A5276',
   Tohoku: '#2E6B35',
   Kanto: '#1B6FA8',
@@ -38,6 +39,17 @@ const REGION_COLORS: Record<string, string> = {
   Kinki: '#6B3A6E',
   ChugokuShikoku: '#1A7070',
   KyushuOkinawa: '#9B2B2B',
+};
+
+const REGION_ICONS: Record<string, string> = {
+  all: '🇯🇵',
+  Hokkaido: '❄️',
+  Tohoku: '🌲',
+  Kanto: '🏺',
+  Chubu: '⛰️',
+  Kinki: '🌿',
+  ChugokuShikoku: '🌊',
+  KyushuOkinawa: '🌋',
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -294,6 +306,7 @@ export default function EventsPage() {
           }
 
           const isActive = selectedRegion === region;
+          const regionColor = REGION_COLORS[region] || '#666';
 
           return (
             <button
@@ -306,14 +319,18 @@ export default function EventsPage() {
                 fontSize: region === 'all' ? '14px' : '13px',
                 fontWeight: isActive ? '700' : region === 'all' ? '600' : '400',
                 cursor: 'pointer',
-                backgroundColor: isActive ? 'var(--accent-terracotta)' : region === 'all' ? '#F5E6D3' : '#EEE',
-                color: isActive ? 'white' : region === 'all' ? 'var(--accent-terracotta)' : '#333',
-                borderBottom: isActive ? '2px solid #8B2A0A' : 'none',
+                backgroundColor: isActive ? regionColor : region === 'all' ? '#F5E6D3' : '#EEE',
+                color: isActive ? 'white' : region === 'all' ? regionColor : '#333',
+                borderBottom: isActive ? `2px solid ${regionColor}` : 'none',
                 transition: 'all 0.2s ease',
-                boxShadow: region === 'all' && !isActive ? 'inset 0 0 0 1px var(--accent-terracotta)' : 'none',
+                boxShadow: region === 'all' && !isActive ? `inset 0 0 0 1px ${regionColor}` : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
               }}
             >
-              {REGION_MAP[region]} ({tabCount})
+              <span>{REGION_ICONS[region]}</span>
+              <span>{REGION_MAP[region]} ({tabCount})</span>
             </button>
           );
         })}
