@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as cheerio from 'cheerio';
 
 const JOMON_OS_SUFFIX =
-  'Authentic Jomon period Japan, featuring traditional thatched pithouses (Tateana-jukyo) with sunken floors dug into earth, intricate cord-marked pottery (Jomon-doki), gritty prehistoric textures, flickering hearth fire, cinematic natural lighting, raw documentary style, earth colors, 16:9 aspect ratio. Strictly NO Western prehistoric aesthetics. ALL imagery MUST authentically represent Jomon period Japan only.';
+  'Authentic Jomon period Japan: sunken-floor pithouses (Tateana-jukyo), thatched roofs (Kaya grass), cord-marked pottery (Jomon-doki), clay Dogu, gritty textures, hearth fire, cinematic lighting, documentary style, earth colors, 16:9 aspect ratio. Strictly Jomon period Japan only.';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
           const html = await fetchRes.text();
           const $ = cheerio.load(html);
           $('script, style, nav, footer, header').remove();
-          scrapedText = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 3000);
+          scrapedText = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 4000);
         }
       } catch (scrapeErr) {
         console.warn('[deep-remaster] Scraping failed (non-blocking):', scrapeErr);
@@ -71,91 +71,74 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    const systemPrompt = `あなたは日本の縄文時代（約16,000〜3,000年前）を専門とする考古学ビジュアルディレクターです。
-Jomon Portal 専用の『Jomon OS』という統一的な視覚言語で、世界に唯一の考古学的イラストを生成します。
+    const systemPrompt = `You are a Jomon period Japan specialist. Create 3 image prompts in JSON format.
 
-【超重要な制約】
-- 出力は必ず JSON のみ: {"concept_a": "...", "concept_b": "...", "concept_c": "..."}
-- 各プロンプトは英語で120〜200ワード
-- リアリスティック・ドキュメンタリースタイル（アニメ・CG風・ファンタジー禁止）
-- EACH CONCEPT MUST OPEN WITH JOMON OS SUFFIX（各プロンプトの冒頭に Jomon OS Suffix を必ず配置）
-- Strictly NO Western prehistoric houses, European Stone Age aesthetics, or generic prehistoric imagery
-- EXCLUSIVELY JAPANESE JOMON PERIOD AUTHENTICITY
+MANDATORY: Each prompt MUST start with this Jomon OS Suffix:
+"${JOMON_OS_SUFFIX}"
 
-【建築の絶対条件】
-Jomon period houses = Sunken-floor pithouses (Tateana-jukyo) のみ
-- 構造: Circular or rectangular pit structure dug into the mud earth (地面を掘り下げた構造)
-- 屋根: Conical or square thatched roof made of Kaya grass (Miscanthus sinensis) with rough organic texture
-  * 決してNOT stone, NOT wooden boards, NOT clay tiles
-- 必ず地面から屋根が生えているような形態を強調
+CONSTRAINTS:
+- Output ONLY JSON: {"concept_a":"...", "concept_b":"...", "concept_c":"..."}
+- Each prompt: 100-150 words in English
+- Realistic documentary style, NO fantasy/anime
+- NO Western prehistoric aesthetics - ONLY Japanese Jomon
 
-【遺物の絶対条件】
-- Cord-marked pottery (Jomon-doki) は全3コンセプトに必須
-- Flame-style rim decorations (炎炎文) を強調する場合は「Kaen-mon」と指定
-- Clay Dogu figurine (土偶) は Concept C で必須、マクロ撮影レベルの極限精細描写
-- 古い土器の表面は「ancient patina and earth stains」で質感を追加
+REQUIRED ELEMENTS:
+- Sunken-floor pithouse (Tateana-jukyo) with thatched Kaya grass roof
+- Cord-marked pottery (Jomon-doki) in all concepts
+- Clay Dogu figurine for concept_c only
+- Authentic Jomon period Japan visuals only
 
-【3コンセプトの詳細仕様】
+CONCEPT SPECS:
+concept_a: Settlement with multiple pithouses, hearths, human activity, dramatic dawn/dusk light
+concept_b: Archaeological landscape integrating pithouses with site-specific features (shell mound, lake, obsidian, etc)
+concept_c: Close-up macro photography of pottery patterns, Dogu figurine detail, museum lighting`;
 
-concept_a（Historical Reconstruction - Tateana-jukyo Settlement）:
-- 開始: "${JOMON_OS_SUFFIX}"
-- Sunken-floor pithouse (Tateana-jukyo) を中心に、複数の集落建物を配置
-- Thatched roof made of Kaya grass (Miscanthus sinensis) で屋根を固定
-- Cord-marked pottery と cooking hearths を見える位置に配置
-- 夜明けか夕暮れのドラマチックな自然光
-- 人間活動の痕跡（fire, smoke, daily tools）を生生しく描写
+    const userContent = `Facility: ${name}, ${prefecture}
+Description: ${description}
+${scrapedText ? `\nSite Info: ${scrapedText}` : ''}
 
-concept_b（Archaeological Site Landscape - Jomon Environment）:
-- 開始: "${JOMON_OS_SUFFIX}"
-- Sunken-floor pithouse (Tateana-jukyo) を自然風景に統合
-- 屋根: Thatched roof of Kaya grass (Miscanthus sinensis) - unchanged
-- 施設固有の環境要素を必須で含める (shell mound, lake bottom, obsidian deposits, muddy forest, coastal wetland など)
-- Cord-marked pottery fragments が地表に露出している状態
-- 自然と人間活動の痕跡が融合した考古学的な「層」を表現
-
-concept_c（Iconic Artifacts - Jomon-Doki Masterpiece）:
-- 開始: "${JOMON_OS_SUFFIX}"
-- 主体: Cord-marked pottery (Jomon-doki) と Clay Dogu figurine (土偶)
-- マクロ撮影のような極限精細さで以下を強調:
-  * Cord-marked texture patterns (紋様)
-  * Flame-style rim decorations (Kaen-mon) if applicable
-  * Rough clay surface with ancient patina and soil stains
-  * Mysterious expression of Dogu figurine
-- ミュージアム展示ライティング（スポットライト + 背景グラデーション）
-- 神秘的で霊的な縄文オブジェの本質を表現`;
-
-    const userContent = `【Jomon Portal 施設データ】
-施設名: ${name}
-都道府県: ${prefecture}
-
-【施設の詳細説明】
-${description}
-${scrapedText ? `\n【公式情報から抽出した追加考古学的情報】\n${scrapedText}` : ''}
-
-【指示】
-上記の施設情報を深く分析し、以下の3つのビジュアルコンセプトプロンプトを JSON 形式で出力してください。
-各プロンプトは冒頭に Jomon OS Suffix で始まり、日本の縄文時代の真正性を保ちながら、
-この特定の遺跡の固有の特性を織り込んでください。
-
-出力: {"concept_a": "Jomon OS Suffix から始まるプロンプト...", "concept_b": "...", "concept_c": "..."}`;
+Create 3 image generation prompts for Pollinations AI based on this Jomon site.`;
 
     let result;
     try {
       const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-pro-preview-0506',
+        model: 'gemini-2.5-flash',
       });
       result = await callGeminiWithRetry(model, [
         { text: systemPrompt },
         { text: userContent },
       ]);
     } catch (modelErr: any) {
-      // Fallback to gemini-2.5-pro with retry
+      // Check for 429 Quota Exceeded
+      if (modelErr?.status === 429 || modelErr?.message?.includes('Quota')) {
+        return NextResponse.json(
+          {
+            error: 'APIクォータに達しました。日本時間の17時（UTC+9）にリセットされます。または少し時間を置いてから再度お試しください。',
+            code: 'QUOTA_EXCEEDED',
+          },
+          { status: 429 }
+        );
+      }
+      // Fallback to gemini-2.5-flash-lite on model not found
       if (modelErr?.message?.includes('not found') || modelErr?.status === 404) {
-        const fallbackModel = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
-        result = await callGeminiWithRetry(fallbackModel, [
-          { text: systemPrompt },
-          { text: userContent },
-        ]);
+        try {
+          const fallbackModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
+          result = await callGeminiWithRetry(fallbackModel, [
+            { text: systemPrompt },
+            { text: userContent },
+          ]);
+        } catch (fallbackErr: any) {
+          if (fallbackErr?.status === 429 || fallbackErr?.message?.includes('Quota')) {
+            return NextResponse.json(
+              {
+                error: 'APIクォータに達しました。日本時間の17時（UTC+9）にリセットされます。または少し時間を置いてから再度お試しください。',
+                code: 'QUOTA_EXCEEDED',
+              },
+              { status: 429 }
+            );
+          }
+          throw fallbackErr;
+        }
       } else {
         throw modelErr;
       }
@@ -186,6 +169,17 @@ ${scrapedText ? `\n【公式情報から抽出した追加考古学的情報】\
     console.error('[deep-remaster] Error:', error);
     const errorMsg = error instanceof Error ? error.message : 'Unknown error';
     const is503 = errorMsg.includes('Service Unavailable') || errorMsg.includes('503');
+    const is429 = errorMsg.includes('Quota') || errorMsg.includes('429');
+
+    if (is429) {
+      return NextResponse.json(
+        {
+          error: 'APIクォータに達しました。日本時間の17時（UTC+9）にリセットされます。または少し時間を置いてから再度お試しください。',
+          code: 'QUOTA_EXCEEDED',
+        },
+        { status: 429 }
+      );
+    }
 
     return NextResponse.json(
       {
