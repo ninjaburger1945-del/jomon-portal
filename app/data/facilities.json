@@ -2250,7 +2250,9 @@
     "description": "国指定史跡。縄文時代中期から近世に至る複合洞窟遺跡。日本で最初に本格的な調査が行われた洞窟遺跡として考古学史的にも重要。",
     "region": "Chubu",
     "url": "https://www.kitokitohimi.com/site/tourism-guide/292.html",
-    "tags": [],
+    "tags": [
+      "土器"
+    ],
     "lat": 36.931389,
     "lng": 136.995833,
     "access": {
