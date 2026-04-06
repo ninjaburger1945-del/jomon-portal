@@ -1125,9 +1125,24 @@ export default function AdminPage() {
               boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
             }}
           >
-            <h2 style={{ margin: '0 0 16px 0', fontSize: 'clamp(16px, 4vw, 22px)', color: '#3d1a6e' }}>
-              🎨 ディープリマスター: {deepRemasterFacility.name}
+            <h2 style={{ margin: '0 0 8px 0', fontSize: 'clamp(16px, 4vw, 22px)', color: '#3d1a6e' }}>
+              🎨 ディープリマスター: {deepRemasterFacility.url ? (
+                <a
+                  href={deepRemasterFacility.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#7B2FBE', textDecoration: 'underline', cursor: 'pointer' }}
+                >
+                  {deepRemasterFacility.name}
+                </a>
+              ) : (
+                deepRemasterFacility.name
+              )}
             </h2>
+
+            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#666', lineHeight: '1.5' }}>
+              {deepRemasterFacility.description}
+            </p>
 
             {remasterError && (
               <div style={{
