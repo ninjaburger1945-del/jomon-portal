@@ -34,7 +34,21 @@ export default function AdminPage() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [searchQuery, setSearchQuery] = useState("");
   const [saving, setSaving] = useState(false);
-  const [isRegenerating, setIsRegenerating] = useState(false);
+
+  // Deep Remaster
+  const [deepRemasterFacility, setDeepRemasterFacility] = useState<Facility | null>(null);
+  const [showRemasterModal, setShowRemasterModal] = useState(false);
+  const [remasterLoading, setRemasterLoading] = useState(false);
+  const [remasterPrompts, setRemasterPrompts] = useState<{
+    concept_a: string;
+    concept_b: string;
+    concept_c: string;
+  } | null>(null);
+  const [generatingIndex, setGeneratingIndex] = useState<number>(-1);
+  const [generatedImages, setGeneratedImages] = useState<(string | null)[]>([null, null, null]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [savingRemaster, setSavingRemaster] = useState(false);
+  const [remasterError, setRemasterError] = useState("");
 
   const handleLogin = () => {
     const correctPassword = "jomon2026";
@@ -294,58 +308,130 @@ export default function AdminPage() {
     }
   };
 
-  const handleRegenerateImages = async () => {
-    console.log("handleRegenerateImages called");
-    const startIdInput = prompt("Start ID (1-999):", "52");
-    if (!startIdInput) return;
+  const preloadImage = (src: string): Promise<void> =>
+    new Promise((resolve, reject) => {
+      if (typeof window === 'undefined') {
+        resolve();
+        return;
+      }
+      const img = new window.Image();
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+      img.src = src;
+    });
 
-    const endIdInput = prompt("End ID (1-999):", "52");
-    if (!endIdInput) return;
+  const generateImagesSequentially = async (prompts: {
+    concept_a: string;
+    concept_b: string;
+    concept_c: string;
+  }) => {
+    const keys = ['concept_a', 'concept_b', 'concept_c'] as const;
+    const newImages: (string | null)[] = [null, null, null];
 
-    const start = parseInt(startIdInput);
-    const end = parseInt(endIdInput);
+    for (let i = 0; i < keys.length; i++) {
+      setGeneratingIndex(i);
+      const prompt = prompts[keys[i]];
+      const seed = Math.floor(Math.random() * 1000000);
+      const encodedPrompt = encodeURIComponent(prompt);
+      const pollinationsUrl =
+        `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&nologo=true&model=flux&seed=${seed}`;
 
-    if (isNaN(start) || isNaN(end) || start < 1 || end > 999 || start > end) {
-      alert("Invalid ID range. Start and End must be between 1-999 and Start ≤ End.");
-      return;
-    }
-
-    setIsRegenerating(true);
-    setError("リクエスト送信中...");
-
-    try {
-      const response = await fetch("/api/regenerate-images", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ startId: start, endId: end }),
-      });
-
-      const data = await response.json();
-      console.log("API response:", data);
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to start regeneration");
+      try {
+        await preloadImage(pollinationsUrl);
+        newImages[i] = pollinationsUrl;
+      } catch (err) {
+        console.warn(`[generateImages] concept_${String.fromCharCode(97 + i)} load failed`);
       }
 
-      // GitHub Actions ページへリダイレクト
-      window.open(
-        `https://github.com/ninjaburger1945-del/jomon-portal/actions/workflows/regenerate-images.yml`,
-        '_blank'
+      setGeneratedImages([...newImages]);
+    }
+    setGeneratingIndex(-1);
+  };
+
+  const handleDeepRemaster = async (facility: Facility) => {
+    setDeepRemasterFacility(facility);
+    setShowRemasterModal(true);
+    setRemasterLoading(true);
+    setRemasterPrompts(null);
+    setGeneratingIndex(-1);
+    setGeneratedImages([null, null, null]);
+    setSelectedImageIndex(null);
+    setSavingRemaster(false);
+    setRemasterError("");
+
+    try {
+      const res = await fetch("/api/deep-remaster", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          facilityId: facility.id,
+          url: facility.url || "",
+          description: facility.description || "",
+          name: facility.name,
+          prefecture: facility.prefecture,
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || `HTTP ${res.status}`);
+      }
+
+      const prompts = await res.json();
+      setRemasterPrompts(prompts);
+      setRemasterLoading(false);
+
+      await generateImagesSequentially(prompts);
+    } catch (err) {
+      console.error("[handleDeepRemaster]", err);
+      setRemasterError(err instanceof Error ? err.message : "不明なエラーが発生しました");
+      setRemasterLoading(false);
+    }
+  };
+
+  const handleConfirmRemaster = async () => {
+    if (selectedImageIndex === null || !deepRemasterFacility) return;
+    const selectedUrl = generatedImages[selectedImageIndex];
+    if (!selectedUrl) return;
+
+    const conceptLabel = (['a', 'b', 'c'] as const)[selectedImageIndex];
+
+    setSavingRemaster(true);
+    setRemasterError("");
+
+    try {
+      const saveRes = await fetch("/api/save-remaster-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pollinationsUrl: selectedUrl,
+          facilityId: deepRemasterFacility.id,
+          conceptLabel,
+        }),
+      });
+
+      if (!saveRes.ok) {
+        const errData = await saveRes.json();
+        throw new Error(errData.error || `HTTP ${saveRes.status}`);
+      }
+
+      const { localPath } = await saveRes.json();
+
+      const updatedFacilities = facilities.map((f) =>
+        f.id === deepRemasterFacility.id ? { ...f, thumbnail: localPath } : f
       );
 
-      setError(`✓ GitHub Actions ページを開きました。Run workflow から ID ${start}-${end} で実行してください。`);
+      await saveFacilitiesToGithub(updatedFacilities);
 
-      // 30秒後に facilities を再読み込み
-      setTimeout(() => {
-        loadFacilities();
-      }, 30000);
+      setFacilities(updatedFacilities);
+      setShowRemasterModal(false);
+      setDeepRemasterFacility(null);
+      setError("✓ ディープリマスター完了！画像とデータをGitHubに保存しました。");
     } catch (err) {
-      console.error("Error:", err);
-      setError(`エラー: ${err instanceof Error ? err.message : "Unknown error"}`);
+      console.error("[handleConfirmRemaster]", err);
+      setRemasterError(err instanceof Error ? err.message : "保存に失敗しました");
     } finally {
-      setIsRegenerating(false);
+      setSavingRemaster(false);
     }
   };
 
@@ -453,34 +539,6 @@ export default function AdminPage() {
           {error}
         </div>
       )}
-
-      {/* Image Regeneration Section */}
-      <section style={{ marginBottom: "30px", backgroundColor: "#f0f7ff", padding: "15px", borderRadius: "8px", border: "1px solid #b3d9ff" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px", flexWrap: "wrap", gap: "10px" }}>
-          <h2 style={{ margin: 0, fontSize: "clamp(16px, 4vw, 20px)" }}>🖼️ 画像再生成</h2>
-          <button
-            onClick={handleRegenerateImages}
-            disabled={isRegenerating}
-            style={{
-              padding: "8px 14px",
-              cursor: isRegenerating ? "not-allowed" : "pointer",
-              backgroundColor: isRegenerating ? "#999" : "#ff9800",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              fontSize: "13px",
-              fontWeight: "500",
-              opacity: isRegenerating ? 0.6 : 1,
-              whiteSpace: "nowrap"
-            }}
-          >
-            {isRegenerating ? "🔄 中..." : "🎨 開始"}
-          </button>
-        </div>
-        <p style={{ margin: "0 0 10px 0", fontSize: "13px", color: "#555" }}>
-          施設の画像を Google Imagen 4.0 で一括再生成できます。ID範囲を指定して実行してください。
-        </p>
-      </section>
 
       <section>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px", flexWrap: "wrap", gap: "10px" }}>
@@ -664,8 +722,11 @@ export default function AdminPage() {
                       <button onClick={() => handleEditClick(facility)} style={{ padding: "5px 8px", marginRight: "3px", cursor: "pointer", backgroundColor: "#0066cc", color: "white", border: "none", borderRadius: "3px", fontSize: "12px", whiteSpace: "nowrap" }}>
                         ✎ Edit
                       </button>
-                      <button onClick={() => handleDeleteClick(facility.id)} style={{ padding: "5px 8px", cursor: "pointer", backgroundColor: "#cc0000", color: "white", border: "none", borderRadius: "3px", fontSize: "12px", whiteSpace: "nowrap" }}>
+                      <button onClick={() => handleDeleteClick(facility.id)} style={{ padding: "5px 8px", marginRight: "3px", cursor: "pointer", backgroundColor: "#cc0000", color: "white", border: "none", borderRadius: "3px", fontSize: "12px", whiteSpace: "nowrap" }}>
                         🗑 Del
+                      </button>
+                      <button onClick={() => handleDeepRemaster(facility)} title="ディープリマスター" style={{ padding: "5px 8px", cursor: "pointer", backgroundColor: "#7B2FBE", color: "white", border: "none", borderRadius: "3px", fontSize: "12px", whiteSpace: "nowrap" }}>
+                        🎨
                       </button>
                     </td>
                   </tr>
@@ -1040,6 +1101,191 @@ export default function AdminPage() {
                 style={{ padding: "8px 16px", cursor: saving ? "not-allowed" : "pointer", backgroundColor: saving ? "#666666" : "#0066cc", color: "white", border: "none", borderRadius: "4px", opacity: saving ? 0.6 : 1, fontSize: "14px" }}
               >
                 {saving ? "💾 中..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deep Remaster Modal */}
+      {showRemasterModal && deepRemasterFacility && (
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.75)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1100, padding: '10px', boxSizing: 'border-box',
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'white', padding: '20px', borderRadius: '12px',
+              maxWidth: '900px', width: '100%', maxHeight: '95vh',
+              overflow: 'auto', boxSizing: 'border-box',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            }}
+          >
+            <h2 style={{ margin: '0 0 16px 0', fontSize: 'clamp(16px, 4vw, 22px)', color: '#3d1a6e' }}>
+              🎨 ディープリマスター: {deepRemasterFacility.name}
+            </h2>
+
+            {remasterError && (
+              <div style={{
+                backgroundColor: '#fee', padding: '10px', marginBottom: '16px',
+                borderRadius: '6px', color: '#cc0000', fontSize: '14px',
+              }}>
+                {remasterError}
+              </div>
+            )}
+
+            {remasterLoading && (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#666' }}>
+                <div style={{
+                  display: 'inline-block', width: '40px', height: '40px',
+                  border: '4px solid #e0d0ff', borderTopColor: '#7B2FBE',
+                  borderRadius: '50%', animation: 'spin 1s linear infinite',
+                  marginBottom: '16px',
+                }} />
+                <p style={{ margin: 0, fontSize: '16px' }}>Geminiが遺跡情報を解析中...</p>
+                <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#999' }}>
+                  {deepRemasterFacility.name} のビジュアルコンセプトを生成しています
+                </p>
+              </div>
+            )}
+
+            {remasterPrompts && (
+              <>
+                <p style={{ fontSize: '13px', color: '#666', marginBottom: '16px' }}>
+                  画像をクリックして選択し、「確定保存」でサムネイルを更新します。
+                </p>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                  gap: '16px',
+                  marginBottom: '20px',
+                }}>
+                  {(['a', 'b', 'c'] as const).map((label, i) => {
+                    const conceptLabels = [
+                      { icon: '🏛️', text: 'コンセプトA：再現' },
+                      { icon: '🌿', text: 'コンセプトB：遺構/環境' },
+                      { icon: '🏺', text: 'コンセプトC：象徴的遺物' },
+                    ];
+                    const isSelected = selectedImageIndex === i;
+                    const isGenerating = generatingIndex === i;
+                    const imgUrl = generatedImages[i];
+
+                    return (
+                      <div
+                        key={label}
+                        onClick={() => imgUrl && setSelectedImageIndex(i)}
+                        style={{
+                          border: isSelected ? '3px solid #FF6B35' : '2px solid #e0d0ff',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          cursor: imgUrl ? 'pointer' : 'default',
+                          boxShadow: isSelected ? '0 0 0 2px #FF6B35' : 'none',
+                          transition: 'border-color 0.2s, box-shadow 0.2s',
+                        }}
+                      >
+                        <div
+                          style={{
+                            position: 'relative',
+                            paddingBottom: '56.25%',
+                            backgroundColor: '#1a0a2e',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {isGenerating && (
+                            <div style={{
+                              position: 'absolute', inset: 0,
+                              display: 'flex', flexDirection: 'column',
+                              alignItems: 'center', justifyContent: 'center',
+                              color: '#c0a0ff',
+                            }}>
+                              <div style={{
+                                width: '32px', height: '32px',
+                                border: '3px solid #3d1a6e', borderTopColor: '#c0a0ff',
+                                borderRadius: '50%', animation: 'spin 1s linear infinite',
+                                marginBottom: '8px',
+                              }} />
+                              <span style={{ fontSize: '12px' }}>生成中...</span>
+                            </div>
+                          )}
+                          {!isGenerating && !imgUrl && generatingIndex > i && (
+                            <div style={{
+                              position: 'absolute', inset: 0,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              color: '#666', fontSize: '12px',
+                            }}>
+                              読み込み失敗
+                            </div>
+                          )}
+                          {imgUrl && (
+                            <img
+                              src={imgUrl}
+                              alt={`concept_${label}`}
+                              style={{
+                                position: 'absolute', top: 0, left: 0,
+                                width: '100%', height: '100%', objectFit: 'cover',
+                              }}
+                            />
+                          )}
+                          {isSelected && (
+                            <div style={{
+                              position: 'absolute', top: '6px', right: '6px',
+                              backgroundColor: '#FF6B35', color: 'white',
+                              borderRadius: '50%', width: '24px', height: '24px',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: '14px', fontWeight: 'bold',
+                            }}>
+                              ✓
+                            </div>
+                          )}
+                        </div>
+
+                        <div style={{
+                          padding: '8px 10px',
+                          backgroundColor: isSelected ? '#fff4f0' : '#faf5ff',
+                          fontSize: '12px', fontWeight: '600', color: '#3d1a6e',
+                        }}>
+                          {conceptLabels[i].icon} {conceptLabels[i].text}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => {
+                  setShowRemasterModal(false);
+                  setDeepRemasterFacility(null);
+                  setRemasterPrompts(null);
+                  setGeneratedImages([null, null, null]);
+                  setSelectedImageIndex(null);
+                }}
+                style={{
+                  padding: '10px 18px', cursor: 'pointer',
+                  backgroundColor: '#ccc', border: 'none',
+                  borderRadius: '6px', fontSize: '14px',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmRemaster}
+                disabled={selectedImageIndex === null || savingRemaster || !generatedImages[selectedImageIndex ?? -1]}
+                style={{
+                  padding: '10px 18px', cursor: (selectedImageIndex === null || savingRemaster) ? 'not-allowed' : 'pointer',
+                  backgroundColor: (selectedImageIndex === null || savingRemaster) ? '#999' : '#7B2FBE',
+                  color: 'white', border: 'none', borderRadius: '6px',
+                  fontSize: '14px', fontWeight: '600',
+                  opacity: (selectedImageIndex === null || savingRemaster) ? 0.6 : 1,
+                }}
+              >
+                {savingRemaster ? '⏳ 保存中...' : '✅ 確定保存'}
               </button>
             </div>
           </div>
