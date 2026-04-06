@@ -31,7 +31,8 @@ export default function AdminPage() {
   const [statsData, setStatsData] = useState<any>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("id");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [searchQuery, setSearchQuery] = useState("");
   const [saving, setSaving] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
 
@@ -57,17 +58,25 @@ export default function AdminPage() {
     }
   };
 
-  // Compute sorted facilities using useMemo for performance
-  const sortedFacilities = useMemo(() => {
-    const sorted = [...facilities].sort((a, b) => {
+  // Compute filtered and sorted facilities using useMemo for performance
+  const filteredAndSortedFacilities = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const filtered = query === ""
+      ? facilities
+      : facilities.filter((f) =>
+          f.name.toLowerCase().includes(query) ||
+          f.id.toLowerCase().includes(query) ||
+          (f.prefecture || "").toLowerCase().includes(query)
+        );
+
+    const sorted = [...filtered].sort((a, b) => {
       const aValue = String(a[sortKey] || "").toLowerCase();
       const bValue = String(b[sortKey] || "").toLowerCase();
-
       const comparison = aValue.localeCompare(bValue, 'ja');
       return sortOrder === "asc" ? comparison : -comparison;
     });
     return sorted;
-  }, [facilities, sortKey, sortOrder]);
+  }, [facilities, sortKey, sortOrder, searchQuery]);
 
   const loadFacilities = async () => {
     setLoading(true);
@@ -513,6 +522,47 @@ export default function AdminPage() {
           </div>
         </div>
 
+        <div style={{ marginBottom: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="施設名・都道府県・IDで検索..."
+              style={{
+                flex: 1,
+                padding: "8px 10px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                fontSize: "14px",
+                boxSizing: "border-box"
+              }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                style={{
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  backgroundColor: "#666",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "13px",
+                  whiteSpace: "nowrap"
+                }}
+              >
+                クリア
+              </button>
+            )}
+          </div>
+          {searchQuery.trim() && (
+            <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#666" }}>
+              {filteredAndSortedFacilities.length} / {facilities.length} 件
+            </p>
+          )}
+        </div>
+
         {loading ? (
           <p>Loading...</p>
         ) : facilities.length === 0 ? (
@@ -572,11 +622,43 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {sortedFacilities.map((facility, index) => (
+                {filteredAndSortedFacilities.map((facility, index) => (
                   <tr key={facility.id} style={{ borderBottom: "1px solid #eee" }}>
                     <td style={{ padding: "8px", textAlign: "center", fontWeight: "bold", color: "#666", fontSize: "12px" }}>{index + 1}</td>
                     <td style={{ padding: "8px", fontSize: "12px" }}><code>{facility.id}</code></td>
-                    <td style={{ padding: "8px", fontSize: "13px", maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{facility.name}</td>
+                    <td style={{ padding: "8px", fontSize: "13px", maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {!facility.thumbnail && (
+                        <span style={{
+                          display: "inline-block",
+                          backgroundColor: "#ff9800",
+                          color: "white",
+                          fontSize: "10px",
+                          padding: "1px 5px",
+                          borderRadius: "3px",
+                          marginRight: "4px",
+                          verticalAlign: "middle",
+                          whiteSpace: "nowrap"
+                        }}>
+                          画像未生成
+                        </span>
+                      )}
+                      {!facility.url && (
+                        <span style={{
+                          display: "inline-block",
+                          backgroundColor: "#cc0000",
+                          color: "white",
+                          fontSize: "10px",
+                          padding: "1px 5px",
+                          borderRadius: "3px",
+                          marginRight: "4px",
+                          verticalAlign: "middle",
+                          whiteSpace: "nowrap"
+                        }}>
+                          要確認URL
+                        </span>
+                      )}
+                      {facility.name}
+                    </td>
                     <td style={{ padding: "8px", fontSize: "12px" }}>{facility.prefecture}</td>
                     <td style={{ padding: "8px", textAlign: "center" }}>
                       <button onClick={() => handleEditClick(facility)} style={{ padding: "5px 8px", marginRight: "3px", cursor: "pointer", backgroundColor: "#0066cc", color: "white", border: "none", borderRadius: "3px", fontSize: "12px", whiteSpace: "nowrap" }}>
