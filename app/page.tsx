@@ -89,7 +89,7 @@ export default function Home() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch('/api/events');
+        const res = await fetch('/api/events', { cache: 'no-store' });
         const events: JomonEvent[] = await res.json();
         const today = new Date();
         today.setHours(0, 0, 0, 0);
