@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as cheerio from 'cheerio';
 
 const JOMON_OS_SUFFIX =
-  'Archaeological reconstruction, gritty prehistoric diorama, authentic realistic textures, cinematic lighting, raw documentary style, earth colors, 16:9 aspect ratio';
+  'Authentic Jomon period Japan, featuring sunken-floor pithouses with thick thatched roofs, intricate cord-marked pottery, mysterious clay Dogu, gritty prehistoric mud and earth textures, cinematic 16:9 aspect ratio, raw documentary style';
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,10 +61,25 @@ export async function POST(request: NextRequest) {
 - 各プロンプトの末尾に必ず以下を付与:
   "${JOMON_OS_SUFFIX}"
 
-【3コンセプトの方向性】
-concept_a: 遺跡の主要建築物・集落の全景を史実に基づき再現。夜明けか夕暮れのドラマチックな光
-concept_b: 遺跡・遺構の環境・景観。自然と人間活動の痕跡が融合した場面
-concept_c: その遺跡を代表する象徴的な遺物（土器・土偶・装飾品など）の接写・展示シーン`;
+【3コンセプトの絶対条件】
+
+concept_a（Historical Reconstruction）:
+- 必須要素: Sunken-floor pithouse (Tateana-jukyo) + Thatched roof of kaya grass で地面から屋根が生えているような形態
+- Cord-marked pottery を空間のどこかに配置
+- 夜明けか夕暮れのドラマチックな光で再現
+- 集落全景のスケール感を強調
+
+concept_b（Modern Site Environment）:
+- 必須要素: Sunken-floor pithouse (Tateana-jukyo) + Thatched roof of kaya grass を環境に含める
+- Cord-marked pottery を背景やフォアグラウンドに配置
+- 遺跡固有の環境（lake bottom, shell mound, muddy terrain, obsidian など）と融合
+- 自然と人間活動の痕跡が共存する場面
+
+concept_c（Iconic Artifacts）:
+- 必須要素: Cord-marked pottery（詳細な紋様を強調）、Flame-style rim decorations、Clay Dogu figurine
+- マクロ撮影のような高精細さで、質感と細部を極限まで描写
+- ミュージアム展示のドラマチックなライティング
+- 神秘的な縄文オブジェの本質を表現`;
 
     const userContent = `【施設情報】
 施設名: ${name}
