@@ -6,6 +6,12 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import styles from "./page.module.css";
 import facilitiesData from "./data/facilities.json";
 
+interface JomonEvent {
+  id: string;
+  date_start: string;
+  date_end?: string;
+}
+
 const REGION_LABELS: Record<string, string> = {
   "Hokkaido": "北海道",
   "Tohoku":   "東北",
@@ -70,6 +76,7 @@ export default function Home() {
   const [visibleCount, setVisibleCount] = useState(30);
   const [firstVisibleIndex, setFirstVisibleIndex] = useState(0);
   const [showFloating, setShowFloating] = useState(false);
+  const [upcomingEventCount, setUpcomingEventCount] = useState(0);
 
   const cardWrapperRefs = useRef<(HTMLDivElement | null)[]>([]);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -82,6 +89,31 @@ export default function Home() {
     const pref = params.get("pref");
     if (region && Object.keys(REGION_LABELS).includes(region)) setSelectedRegion(region);
     if (pref) setSelectedPrefecture(pref);
+  }, []);
+
+  // イベント情報を取得し、直近7日以内のイベント数をカウント
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await fetch('/api/events');
+        const events: JomonEvent[] = await res.json();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const sevenDaysLater = new Date(today);
+        sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
+
+        const upcoming = events.filter((e) => {
+          const startDate = new Date(e.date_start);
+          startDate.setHours(0, 0, 0, 0);
+          return startDate >= today && startDate <= sevenDaysLater;
+        });
+
+        setUpcomingEventCount(upcoming.length);
+      } catch (error) {
+        console.error('[fetch events]', error);
+      }
+    };
+    fetchEvents();
   }, []);
 
   const newestFacilityId = facilitiesData[facilitiesData.length - 1]?.id;
@@ -209,6 +241,65 @@ export default function Home() {
             <p className={styles.heroSubtitle}>縄文1万年の入口</p>
           </div>
         </header>
+
+        {/* ── 1.5 直近イベントバナー ── */}
+        {upcomingEventCount > 0 && (
+          <div style={{
+            background: 'linear-gradient(135deg, #B8401A 0%, #8B2A0A 100%)',
+            color: 'white',
+            padding: '20px',
+            margin: '20px auto',
+            maxWidth: '900px',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 8px 24px rgba(184, 64, 26, 0.4)',
+            transform: 'scale(1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '16px',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)';
+            e.currentTarget.style.boxShadow = '0 12px 32px rgba(184, 64, 26, 0.5)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(184, 64, 26, 0.4)';
+          }}
+          >
+            <div>
+              <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>
+                🔥 {upcomingEventCount}件の縄文イベントが開催中！
+              </div>
+              <div style={{ fontSize: '13px', opacity: 0.95 }}>
+                クリックして今週末の予定をチェック
+              </div>
+            </div>
+            <Link href="/events" style={{
+              backgroundColor: 'white',
+              color: '#B8401A',
+              padding: '10px 16px',
+              borderRadius: '6px',
+              fontWeight: 'bold',
+              fontSize: '14px',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+            >
+              イベント一覧を見る →
+            </Link>
+          </div>
+        )}
 
         {/* ── 2. 遺跡一覧 ── */}
         <section className={`${styles.section} container`}>

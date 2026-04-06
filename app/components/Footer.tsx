@@ -10,6 +10,10 @@ export default function Footer() {
             このサイトについて
           </Link>
           <span className={styles.sep}>|</span>
+          <Link href="/events" className={styles.linkBtn}>
+            イベント情報
+          </Link>
+          <span className={styles.sep}>|</span>
           <Link href="/privacy-policy" className={styles.linkBtn}>
             プライバシーポリシー
           </Link>
