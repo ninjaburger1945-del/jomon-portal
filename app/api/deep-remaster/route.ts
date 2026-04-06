@@ -46,6 +46,31 @@ export async function POST(request: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
+    // Helper function for Gemini API calls with retry logic for 503 errors
+    const callGeminiWithRetry = async (
+      model: any,
+      content: any,
+      maxRetries: number = 3
+    ): Promise<any> => {
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          return await model.generateContent(content);
+        } catch (err: any) {
+          const status = err?.status || err?.message;
+          const is503 = status === 503 || err?.message?.includes('Service Unavailable');
+
+          if (is503 && attempt < maxRetries - 1) {
+            // Wait with exponential backoff: 2s, 4s, 8s
+            const waitTime = 2000 * Math.pow(2, attempt);
+            console.log(`[deep-remaster] 503 error, retrying in ${waitTime}ms...`);
+            await new Promise((resolve) => setTimeout(resolve, waitTime));
+            continue;
+          }
+          throw err;
+        }
+      }
+    };
+
     const systemPrompt = `あなたは日本の縄文時代（約16,000〜3,000年前）を専門とする考古学ビジュアルディレクターです。
 Jomon Portal 専用の『Jomon OS』という統一的な視覚言語で、世界に唯一の考古学的イラストを生成します。
 
@@ -119,15 +144,15 @@ ${scrapedText ? `\n【公式情報から抽出した追加考古学的情報】\
       const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-pro-preview-0506',
       });
-      result = await model.generateContent([
+      result = await callGeminiWithRetry(model, [
         { text: systemPrompt },
         { text: userContent },
       ]);
     } catch (modelErr: any) {
-      // Fallback to gemini-2.5-pro
+      // Fallback to gemini-2.5-pro with retry
       if (modelErr?.message?.includes('not found') || modelErr?.status === 404) {
         const fallbackModel = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
-        result = await fallbackModel.generateContent([
+        result = await callGeminiWithRetry(fallbackModel, [
           { text: systemPrompt },
           { text: userContent },
         ]);
@@ -159,9 +184,16 @@ ${scrapedText ? `\n【公式情報から抽出した追加考古学的情報】\
     return NextResponse.json(concepts);
   } catch (error) {
     console.error('[deep-remaster] Error:', error);
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    const is503 = errorMsg.includes('Service Unavailable') || errorMsg.includes('503');
+
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      {
+        error: is503
+          ? 'Gemini API が高い負荷を受けています。申し訳ありません。30秒待機してから再度🎨ボタンをクリックしてください。'
+          : errorMsg,
+      },
+      { status: is503 ? 503 : 500 }
     );
   }
 }
