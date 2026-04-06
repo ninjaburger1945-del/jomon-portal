@@ -11,10 +11,8 @@ const REGION_LABELS: Record<string, string> = {
   "Kanto":    "関東",
   "Chubu":    "中部",
   "Kinki":    "近畿",
-  "Chugoku":  "中国",
-  "Shikoku":  "四国",
-  "Kyushu":   "九州",
-  "Okinawa":  "沖縄",
+  "ChugokuShikoku": "中国・四国",
+  "KyushuOkinawa":  "九州・沖縄",
 };
 
 const REGION_COLORS: Record<string, string> = {
@@ -23,10 +21,8 @@ const REGION_COLORS: Record<string, string> = {
   "Kanto":    "#1B6FA8",
   "Chubu":    "#7A5C1E",
   "Kinki":    "#6B3A6E",
-  "Chugoku":  "#1A7070",
-  "Shikoku":  "#8A4B1A",
-  "Kyushu":   "#9B2B2B",
-  "Okinawa":  "#0E8C7A",
+  "ChugokuShikoku": "#1A7070",
+  "KyushuOkinawa":  "#9B2B2B",
 };
 
 interface Facility {
