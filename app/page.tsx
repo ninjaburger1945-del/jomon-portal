@@ -332,6 +332,9 @@ export default function Home() {
           }}
         >
           <div className={styles.heroContent}>
+            <p style={{ fontSize: '0.95rem', opacity: 0.9, marginBottom: '12px', letterSpacing: '0.08em' }}>
+              全国 {facilitiesData.length} カ所の縄文遺跡を公開中
+            </p>
             <h1 className={styles.heroTitle}>
               Jomon Portal
             </h1>
@@ -434,8 +437,6 @@ export default function Home() {
 
         {/* ── 2. 遺跡一覧 ── */}
         <section className={`${styles.section} container`}>
-          <h2 className={styles.sectionTitle}>全国 {facilitiesData.length} カ所の縄文遺跡を公開中</h2>
-
           {/* 地方タイルナビゲーション */}
           <div className={styles.regionTilesGrid}>
             <div className={styles.regionTilesInner}>
