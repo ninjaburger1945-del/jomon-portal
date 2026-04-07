@@ -78,24 +78,50 @@ async function collectEvents() {
           continue;
         }
 
-        // Gemini で イベント抽出
+        // Gemini で イベント抽出（厳格なフィルタリングルール適用）
         const geminiPrompt = `以下のテキストから、直近1ヶ月以内（${today.toISOString().split('T')[0]}〜${oneMonthLater.toISOString().split('T')[0]}）の縄文時代関連イベント情報を抽出してください。
 
-【重要】
-- 弥生時代、古墳時代、その他の時代のイベントは完全に除外してください
-- 縄文時代に関連するイベントのみを抽出してください
-- イベント情報が見当たらない場合は空配列[]を返してください
+【ネガティブ・フィルタリング（完全に排除）】
+以下のいずれかに該当するテキストは『イベントではない』として完全に破棄してください：
+
+1. 休館・閉館情報: 「冬季閉鎖」「臨時休館」「施設メンテナンス」「工事のお知らせ」など
+2. 事務的告知: 「入館料改定」「パンフレット更新」「スタッフ募集」「組織変更」など
+3. 縄文以外の時代: 弥生時代、古墳時代、中世、江戸時代など、縄文時代に『直接関係のない』催事
+4. その他ノイズ: 緊急通知、配置転換、業務連絡
+
+【抽出対象の厳選】
+ユーザーが現地で『観る』または『体験する』ことができるポジティブな催し のみを抽出：
+- ✅ 企画展、常設展
+- ✅ ワークショップ、土器作り体験
+- ✅ 現地説明会、ガイドツアー
+- ✅ 講演会、セミナー（現地実施）
+- ✅ 縄文文化の体験・学習イベント
+- ❌ 営業通知、施設案内のみのニュース
+
+【判定ロジックの強化】
+テキスト内に『開催期間』『時間』『場所』の3要素が揃っていない情報は除外してください：
+- 開催期間: 日付範囲（例: 2026年4月7日-10日、または単日）
+- 時間: 時刻情報（例: 10:00-17:00、午後など）
+- 場所: 開催地点の明記（例: 館内特別展示室、屋外広場など）
 
 【返却形式】
 JSON配列: [
   {
     "date_start": "YYYY-MM-DD",
     "date_end": "YYYY-MM-DD（複数日の場合。単日はdate_startのみ）",
+    "time": "HH:MM-HH:MM 形式（例: 10:00-17:00、または時間が不明な場合は null）",
     "title": "イベント名",
-    "description": "説明文（1-2文）"
+    "description": "説明文（1-2文）",
+    "location": "具体的な開催場所（例: 館内展示室、屋外広場など）",
+    "event_url": "イベント詳細ページへのURL（見つからない場合は null）"
   }
 ]
-（イベント情報が無い場合は [] を返す）
+
+【重要な注意】
+- イベント情報が見当たらない、または3要素が揃わない場合は空配列[] を返してください
+- URL が見つからない場合は null で結構です（後処理で対応）
+- 弥生・古墳などの時代関連は『完全に破棄』してください
+- 営業情報やお知らせだけのニュースは除外してください
 
 【テキスト内容】
 ${textContent}`;
@@ -117,8 +143,41 @@ ${textContent}`;
 
         const extractedEvents = JSON.parse(extractedData);
 
-        // イベントを events.json 形式に変換
+        // イベントを events.json 形式に変換（リンク完全性ルール適用）
         extractedEvents.forEach((evt, idx) => {
+          // 3要素チェック（開催期間・時間・場所が揃っているか）
+          const hasRequiredFields =
+            evt.date_start &&
+            evt.time &&
+            evt.location;
+
+          if (!hasRequiredFields) {
+            console.log(`[collect-events] Skipping event "${evt.title}" (missing required fields: date/time/location)`);
+            return; // スキップ
+          }
+
+          // URL検証: トップページのみ（/）をイベントURLとしない
+          let eventUrl = evt.event_url || null;
+          if (eventUrl && (eventUrl === facility.url || eventUrl === facility.url.replace(/\/$/, '') || eventUrl === '/')) {
+            console.log(`[collect-events] Skipping event "${evt.title}" (no event-specific URL found)`);
+            return; // スキップ
+          }
+
+          // 相対パスを絶対化
+          if (eventUrl && !eventUrl.startsWith('http')) {
+            try {
+              const urlObj = new URL(facility.url);
+              if (eventUrl.startsWith('/')) {
+                eventUrl = `${urlObj.protocol}//${urlObj.host}${eventUrl}`;
+              } else {
+                eventUrl = `${urlObj.href.replace(/\/$/, '')}/${eventUrl}`;
+              }
+            } catch (e) {
+              console.warn(`[collect-events] Failed to convert relative URL for "${evt.title}"`);
+              eventUrl = null;
+            }
+          }
+
           const eventId = `evt-${facility.id}-${Date.now()}-${idx}`;
 
           // 重複チェック（施設ID + イベント名 + 開始日）
@@ -134,11 +193,13 @@ ${textContent}`;
               title: evt.title,
               date_start: evt.date_start,
               date_end: evt.date_end || undefined,
+              time: evt.time || undefined,
+              location: evt.location || undefined,
               location_id: facility.id,
               facility_name: facility.name,
               prefecture: facility.prefecture,
               region: facility.region,
-              url: facility.url,
+              url: eventUrl || facility.url, // イベント詳細URL、なければ施設URL
               category: '企画展', // Gemini が分類する場合はここ
               description: evt.description || '',
             });
