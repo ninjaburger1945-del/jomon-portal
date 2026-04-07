@@ -367,9 +367,11 @@ export default function Home() {
                   {currentEvent.date_end && currentEvent.date_end !== currentEvent.date_start && ` ～ ${currentEvent.date_end}`}
                 </div>
                 {currentEvent.time && <div>⏰ {currentEvent.time}</div>}
-                {currentEvent.location && <div>📍 {currentEvent.prefecture} / {currentEvent.location}</div>}
-                {!currentEvent.location && currentEvent.prefecture && <div>📍 {currentEvent.prefecture}</div>}
-                {currentEvent.facility_name && <div>🏛️ {currentEvent.facility_name}</div>}
+                <div>
+                  📍 {currentEvent.prefecture}
+                  {currentEvent.facility_name && ` / ${currentEvent.facility_name}`}
+                  {currentEvent.location && ` (${currentEvent.location})`}
+                </div>
               </div>
             </div>
 
