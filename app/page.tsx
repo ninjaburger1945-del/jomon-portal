@@ -125,7 +125,20 @@ export default function Home() {
   // Count facilities by region
   const regionCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    facilitiesData.forEach(f => { counts[f.region] = (counts[f.region] || 0) + 1; });
+    facilitiesData.forEach(f => {
+      let mappedRegion = f.region;
+      if (f.region === "Chugoku" || f.region === "Shikoku") {
+        mappedRegion = "ChugokuShikoku";
+      } else if (f.region === "Kyushu" || f.region === "Okinawa") {
+        mappedRegion = "KyushuOkinawa";
+      }
+      counts[mappedRegion] = (counts[mappedRegion] || 0) + 1;
+    });
+    // DEBUG: region counts confirmation
+    console.log('[regionCounts]', counts);
+    console.log('[REGION_LABELS keys]', Object.keys(REGION_LABELS));
+    console.log('[ChugokuShikoku count]', counts["ChugokuShikoku"]);
+    console.log('[KyushuOkinawa count]', counts["KyushuOkinawa"]);
     return counts;
   }, []);
 
@@ -170,7 +183,16 @@ export default function Home() {
         (facility.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
         facility.prefecture.includes(searchQuery);
       const matchType = selectedType === "" || facility.tags.includes(selectedType);
-      const matchRegion = selectedRegion === "" || facility.region === selectedRegion;
+      const matchRegion = (() => {
+        if (selectedRegion === "") return true;
+        if (selectedRegion === "ChugokuShikoku") {
+          return facility.region === "Chugoku" || facility.region === "Shikoku";
+        }
+        if (selectedRegion === "KyushuOkinawa") {
+          return facility.region === "Kyushu" || facility.region === "Okinawa";
+        }
+        return facility.region === selectedRegion;
+      })();
       const matchPref = selectedPrefecture === "" || facility.prefecture === selectedPrefecture;
       return matchQuery && matchType && matchRegion && matchPref;
     });
@@ -228,6 +250,17 @@ export default function Home() {
       `Jomon period archaeological site, ${facility.id.replace(/-/g, " ")}, photorealistic, cinematic lighting, ancient Japan landscape, highly detailed nature`
     );
     return `https://image.pollinations.ai/prompt/${prompt}?width=600&height=400&nologo=true`;
+  };
+
+  // Helper function: Map raw region to display region
+  const mapRegionToDisplay = (rawRegion: string): string => {
+    if (rawRegion === "Chugoku" || rawRegion === "Shikoku") {
+      return "ChugokuShikoku";
+    }
+    if (rawRegion === "Kyushu" || rawRegion === "Okinawa") {
+      return "KyushuOkinawa";
+    }
+    return rawRegion;
   };
 
   const displayedFacilities = filteredAndSortedFacilities.slice(0, visibleCount);
@@ -441,8 +474,8 @@ export default function Home() {
                     </div>
                     <div className={styles.cardContent}>
                       <div className={styles.cardMeta}>
-                        <span className={styles.regionTag} style={{ backgroundColor: REGION_COLORS[facility.region] ?? '#666' }}>
-                          {REGION_LABELS[facility.region]}
+                        <span className={styles.regionTag} style={{ backgroundColor: REGION_COLORS[mapRegionToDisplay(facility.region)] ?? '#666' }}>
+                          {REGION_LABELS[mapRegionToDisplay(facility.region)]}
                         </span>
                         <span className={styles.cardPref}>
                           {facility.prefecture}
