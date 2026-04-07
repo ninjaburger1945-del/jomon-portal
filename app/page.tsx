@@ -8,8 +8,17 @@ import facilitiesData from "./data/facilities.json";
 
 interface JomonEvent {
   id: string;
+  title: string;
   date_start: string;
   date_end?: string;
+  time?: string;
+  location?: string;
+  facility_name?: string;
+  prefecture?: string;
+  region?: string;
+  url?: string;
+  category?: string;
+  description?: string;
 }
 
 const REGION_LABELS: Record<string, string> = {
@@ -71,6 +80,8 @@ export default function Home() {
   const [firstVisibleIndex, setFirstVisibleIndex] = useState(0);
   const [showFloating, setShowFloating] = useState(false);
   const [upcomingEventCount, setUpcomingEventCount] = useState(0);
+  const [upcomingEvents, setUpcomingEvents] = useState<JomonEvent[]>([]);
+  const [currentEventIndex, setCurrentEventIndex] = useState(0);
 
   const cardWrapperRefs = useRef<(HTMLDivElement | null)[]>([]);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -85,7 +96,7 @@ export default function Home() {
     if (pref) setSelectedPrefecture(pref);
   }, []);
 
-  // イベント情報を取得し、現在開催中 + 直近開催予定のイベント数をカウント
+  // イベント情報を取得し、直近イベントをカルーセルに反映
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -111,7 +122,14 @@ export default function Home() {
           return isActive || isUpcoming;
         });
 
+        // 開催日が近い順にソート
+        activeAndUpcoming.sort((a, b) =>
+          new Date(a.date_start).getTime() - new Date(b.date_start).getTime()
+        );
+
         setUpcomingEventCount(activeAndUpcoming.length);
+        setUpcomingEvents(activeAndUpcoming.slice(0, 5)); // 直近5件
+        setCurrentEventIndex(0);
       } catch (error) {
         console.error('[fetch events]', error);
       }
@@ -263,7 +281,19 @@ export default function Home() {
     return rawRegion;
   };
 
+  // 2秒ごとのイベントカルーセル自動ローテーション
+  useEffect(() => {
+    if (upcomingEvents.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentEventIndex((prev) => (prev + 1) % upcomingEvents.length);
+    }, 3000); // 3秒ごと
+
+    return () => clearInterval(interval);
+  }, [upcomingEvents.length]);
+
   const displayedFacilities = filteredAndSortedFacilities.slice(0, visibleCount);
+  const currentEvent = upcomingEvents[currentEventIndex];
 
   return (
     <>
@@ -279,63 +309,97 @@ export default function Home() {
           </div>
         </header>
 
-        {/* ── 1.5 直近イベントバナー ── */}
-        {upcomingEventCount > 0 && (
-          <Link href="/events" style={{
+        {/* ── 1.5 直近イベントバナー（カルーセル） ── */}
+        {upcomingEventCount > 0 && currentEvent && (
+          <div style={{
             background: 'linear-gradient(135deg, #B8401A 0%, #8B2A0A 100%)',
             color: 'white',
-            padding: '20px',
+            padding: '24px',
             margin: '20px auto',
             maxWidth: '900px',
             borderRadius: '12px',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
             boxShadow: '0 8px 24px rgba(184, 64, 26, 0.4)',
-            transform: 'scale(1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '16px',
-            textDecoration: 'none',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.02)';
-            e.currentTarget.style.boxShadow = '0 12px 32px rgba(184, 64, 26, 0.5)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 8px 24px rgba(184, 64, 26, 0.4)';
-          }}
-          >
-            <div>
-              <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>
-                🔥 {upcomingEventCount}件の縄文イベントが開催中！（試験運用中）
+            transition: 'all 0.3s ease',
+          }}>
+            {/* イベント詳細 */}
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '14px', opacity: 0.85, marginBottom: '8px' }}>
+                🔥 直近イベント（{currentEventIndex + 1} / {upcomingEvents.length}件表示中）
               </div>
-              <div style={{ fontSize: '13px', opacity: 0.95 }}>
-                クリックして今週末の予定をチェック
+              <h3 style={{ fontSize: '20px', fontWeight: 'bold', margin: '8px 0', lineHeight: 1.3 }}>
+                {currentEvent.title}
+              </h3>
+              <div style={{ fontSize: '14px', opacity: 0.9, marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div>📅 <strong>{currentEvent.date_start}</strong>
+                  {currentEvent.date_end && currentEvent.date_end !== currentEvent.date_start && ` ～ ${currentEvent.date_end}`}
+                </div>
+                {currentEvent.time && <div>⏰ {currentEvent.time}</div>}
+                {currentEvent.location && <div>📍 {currentEvent.prefecture} / {currentEvent.location}</div>}
+                {!currentEvent.location && currentEvent.prefecture && <div>📍 {currentEvent.prefecture}</div>}
+                {currentEvent.facility_name && <div>🏛️ {currentEvent.facility_name}</div>}
               </div>
             </div>
+
+            {/* ナビゲーションドット + リンク */}
             <div style={{
-              backgroundColor: 'white',
-              color: '#B8401A',
-              padding: '10px 16px',
-              borderRadius: '6px',
-              fontWeight: 'bold',
-              fontSize: '14px',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-            >
-              イベント一覧を見る →
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '16px',
+              flexWrap: 'wrap',
+            }}>
+              {/* ナビゲーションドット */}
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                {upcomingEvents.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentEventIndex(idx)}
+                    style={{
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      border: 'none',
+                      backgroundColor: idx === currentEventIndex ? 'white' : 'rgba(255, 255, 255, 0.4)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                    aria-label={`Event ${idx + 1}`}
+                  />
+                ))}
+              </div>
+
+              {/* イベント一覧リンク */}
+              <Link
+                href="/events"
+                style={{
+                  backgroundColor: 'white',
+                  color: '#B8401A',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  fontWeight: 'bold',
+                  fontSize: '14px',
+                  whiteSpace: 'nowrap',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                  display: 'inline-block',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                詳しく見る →
+              </Link>
             </div>
-          </Link>
+          </div>
         )}
 
         {/* ── 2. 遺跡一覧 ── */}
