@@ -485,13 +485,14 @@ export default function Home() {
                     {newestRegion === key && (
                       <span style={{
                         position: 'absolute',
-                        top: '2px',
-                        right: '4px',
+                        top: '-6px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
                         backgroundColor: '#FF4444',
                         color: 'white',
                         fontSize: '0.6rem',
                         fontWeight: '800',
-                        padding: '1px 5px',
+                        padding: '2px 6px',
                         borderRadius: '10px',
                         animation: 'pulse 2s ease-in-out infinite',
                         whiteSpace: 'nowrap',
