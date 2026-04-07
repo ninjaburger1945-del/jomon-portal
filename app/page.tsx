@@ -140,14 +140,14 @@ export default function Home() {
 
   const newestFacilityId = facilitiesData[facilitiesData.length - 1]?.id;
 
-  // 最新5施設の地方を取得（New! バッジ用）
-  const recentRegions = new Set(
-    facilitiesData.slice(-5).map(f => {
-      if (f.region === "Chugoku" || f.region === "Shikoku") return "ChugokuShikoku";
-      if (f.region === "Kyushu" || f.region === "Okinawa") return "KyushuOkinawa";
-      return f.region;
-    })
-  );
+  // 最新施設の地方を取得（New! バッジ用：1つの地域のみ）
+  const newestRegion = (() => {
+    const latest = facilitiesData[facilitiesData.length - 1];
+    if (!latest) return null;
+    if (latest.region === "Chugoku" || latest.region === "Shikoku") return "ChugokuShikoku";
+    if (latest.region === "Kyushu" || latest.region === "Okinawa") return "KyushuOkinawa";
+    return latest.region;
+  })();
   const allTags = Array.from(new Set(facilitiesData.flatMap(f => f.tags)));
 
   // Count facilities by region
@@ -466,8 +466,8 @@ export default function Home() {
                     key={key}
                     className={`${styles.regionTile} ${selectedRegion === key ? styles.regionTileActive : ""}`}
                     style={selectedRegion === key
-                      ? { backgroundColor: REGION_COLORS[key], borderColor: REGION_COLORS[key] }
-                      : { borderColor: REGION_COLORS[key], color: REGION_COLORS[key] }
+                      ? { backgroundColor: REGION_COLORS[key], borderColor: REGION_COLORS[key], position: 'relative' }
+                      : { borderColor: REGION_COLORS[key], color: REGION_COLORS[key], position: 'relative' }
                     }
                     onClick={() => {
                       const next = selectedRegion === key ? "" : key;
@@ -482,18 +482,20 @@ export default function Home() {
                     <span className={styles.regionTileIcon}>{REGION_ICONS[key]}</span>
                     <span className={styles.regionTileLabel}>{label}</span>
                     <span className={styles.regionTileCount}>{regionCounts[key]}</span>
-                    {recentRegions.has(key) && (
+                    {newestRegion === key && (
                       <span style={{
                         position: 'absolute',
-                        top: '-4px',
-                        right: '-4px',
+                        top: '2px',
+                        right: '4px',
                         backgroundColor: '#FF4444',
                         color: 'white',
-                        fontSize: '0.65rem',
+                        fontSize: '0.6rem',
                         fontWeight: '800',
-                        padding: '2px 6px',
+                        padding: '1px 5px',
                         borderRadius: '10px',
                         animation: 'pulse 2s ease-in-out infinite',
+                        whiteSpace: 'nowrap',
+                        zIndex: 10,
                       }}>
                         NEW
                       </span>
