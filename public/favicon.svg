@@ -1,36 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <!-- グラデーション定義 -->
   <defs>
-    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.4" />
-      <stop offset="50%" style="stop-color:#1A1A1A;stop-opacity:1" />
+    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.7" />
+      <stop offset="40%" style="stop-color:#FFD700;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
     </linearGradient>
   </defs>
 
-  <!-- 背景 -->
-  <rect width="32" height="32" fill="#2C2416" rx="4"/>
+  <!-- 背景：濃いグレー（高コントラスト） -->
+  <rect width="32" height="32" fill="#0A0A0A" rx="3"/>
 
-  <!-- 円形シールド（サバイバル感） -->
-  <circle cx="16" cy="16" r="14" fill="none" stroke="#8B7355" stroke-width="1.2" opacity="0.6"/>
-  <circle cx="16" cy="16" r="13" fill="none" stroke="#C8A040" stroke-width="0.5" opacity="0.4"/>
+  <!-- 矢尻：太く、シンプルで目立つ -->
+  <!-- メイン矢（上向き、太い黒） -->
+  <path d="M 16 2 L 26 24 L 16 18 L 6 24 Z" fill="#000000" stroke="none"/>
 
-  <!-- 矢尻：黒曜石の光沢 -->
-  <!-- メイン矢（上向き） -->
-  <path d="M 16 4 L 22 18 L 16 15 L 10 18 Z" fill="url(#arrowGrad)" stroke="#FFFFFF" stroke-width="0.6" opacity="0.8"/>
+  <!-- 矢尻のハイライト（右側、太い金色） -->
+  <path d="M 16 2 L 26 24" fill="none" stroke="#FFD700" stroke-width="1.5" stroke-linecap="round" opacity="1"/>
 
-  <!-- 矢の先端：鋭いハイライト -->
-  <line x1="15.5" y1="4.5" x2="16.5" y2="4.5" stroke="#FFFFFF" stroke-width="0.4" opacity="0.9"/>
+  <!-- 矢の先端：鮮明な金色ハイライト -->
+  <polygon points="16,2 17.5,5 14.5,5" fill="#FFD700" opacity="1"/>
 
-  <!-- 矢の側面ハイライト（右側） -->
-  <path d="M 16 4 L 20 16" fill="none" stroke="#FFFFFF" stroke-width="0.4" opacity="0.5"/>
+  <!-- 矢の中心線（立体感） -->
+  <line x1="16" y1="2" x2="16" y2="22" stroke="#FFA500" stroke-width="1" opacity="0.8"/>
 
-  <!-- 矢の側面シャドウ（左側） -->
-  <path d="M 16 4 L 12 16" fill="none" stroke="#000000" stroke-width="0.4" opacity="0.6"/>
+  <!-- 矢の柄：金色で目立つ -->
+  <rect x="13.5" y="22" width="5" height="7" fill="#FFD700" rx="0.5"/>
 
-  <!-- 矢の柄部分：テクスチャ -->
-  <rect x="14.5" y="16" width="3" height="10" fill="#1A1A1A" stroke="#8B7355" stroke-width="0.4"/>
-  <line x1="15" y1="18" x2="17" y2="18" stroke="#C8A040" stroke-width="0.2" opacity="0.4"/>
-  <line x1="15" y1="22" x2="17" y2="22" stroke="#C8A040" stroke-width="0.2" opacity="0.4"/>
-  <line x1="15" y1="26" x2="17" y2="26" stroke="#C8A040" stroke-width="0.2" opacity="0.4"/>
+  <!-- 矢の柄のシャドウ -->
+  <rect x="13.5" y="22" width="1.2" height="7" fill="#9B7653" opacity="0.8" rx="0.5"/>
+
+  <!-- 矢の柄の装飾ライン -->
+  <line x1="14" y1="24" x2="18" y2="24" stroke="#8B4513" stroke-width="0.5" opacity="0.7"/>
+  <line x1="14" y1="27" x2="18" y2="27" stroke="#8B4513" stroke-width="0.5" opacity="0.7"/>
 </svg>
