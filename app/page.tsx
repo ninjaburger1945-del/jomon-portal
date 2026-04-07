@@ -82,6 +82,7 @@ export default function Home() {
   const [upcomingEventCount, setUpcomingEventCount] = useState(0);
   const [upcomingEvents, setUpcomingEvents] = useState<JomonEvent[]>([]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
 
   const cardWrapperRefs = useRef<(HTMLDivElement | null)[]>([]);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -138,6 +139,15 @@ export default function Home() {
   }, []);
 
   const newestFacilityId = facilitiesData[facilitiesData.length - 1]?.id;
+
+  // 最新5施設の地方を取得（New! バッジ用）
+  const recentRegions = new Set(
+    facilitiesData.slice(-5).map(f => {
+      if (f.region === "Chugoku" || f.region === "Shikoku") return "ChugokuShikoku";
+      if (f.region === "Kyushu" || f.region === "Okinawa") return "KyushuOkinawa";
+      return f.region;
+    })
+  );
   const allTags = Array.from(new Set(facilitiesData.flatMap(f => f.tags)));
 
   // Count facilities by region
@@ -281,7 +291,7 @@ export default function Home() {
     return rawRegion;
   };
 
-  // 2秒ごとのイベントカルーセル自動ローテーション
+  // イベントカルーセル自動ローテーション
   useEffect(() => {
     if (upcomingEvents.length === 0) return;
 
@@ -292,6 +302,17 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [upcomingEvents.length]);
 
+  // ヒーロー背景画像スライドショー（5秒ごと）
+  useEffect(() => {
+    if (facilitiesData.length === 0) return;
+
+    const interval = setInterval(() => {
+      setHeroImageIndex((prev) => (prev + 1) % Math.min(facilitiesData.length, 10));
+    }, 5000); // 5秒ごと
+
+    return () => clearInterval(interval);
+  }, []);
+
   const displayedFacilities = filteredAndSortedFacilities.slice(0, visibleCount);
   const currentEvent = upcomingEvents[currentEventIndex];
 
@@ -299,26 +320,35 @@ export default function Home() {
     <>
       <main className={styles.mainWithBar}>
 
-        {/* ── 1. ヒーローセクション ── */}
-        <header className={styles.hero}>
+        {/* ── 1. ヒーローセクション（画像スライドショー） ── */}
+        <header
+          className={styles.hero}
+          style={{
+            backgroundImage: `linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.45) 100%), url('${getImageUrl(facilitiesData[heroImageIndex % facilitiesData.length])}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundAttachment: 'fixed',
+            transition: 'background-image 0.8s ease-in-out',
+          }}
+        >
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle}>
-              <ruby>JOMON<rt>ジョウモン</rt></ruby>{" "}<ruby>PORTAL<rt>ポータル</rt></ruby>
+              Jomon Portal
             </h1>
-            <p className={styles.heroSubtitle}>縄文1万年の入口</p>
+            <p className={styles.heroSubtitle}>10,000 Years of Survival</p>
           </div>
         </header>
 
         {/* ── 1.5 直近イベントバナー（カルーセル） ── */}
         {upcomingEventCount > 0 && currentEvent && (
           <div style={{
-            background: 'linear-gradient(135deg, #B8401A 0%, #8B2A0A 100%)',
+            background: 'linear-gradient(135deg, #3D2817 0%, #2B1F12 100%)',
             color: 'white',
             padding: '24px',
             margin: '20px auto',
             maxWidth: '900px',
             borderRadius: '12px',
-            boxShadow: '0 8px 24px rgba(184, 64, 26, 0.4)',
+            boxShadow: '0 8px 24px rgba(61, 40, 23, 0.5)',
             transition: 'all 0.3s ease',
           }}>
             {/* イベント詳細 */}
@@ -452,6 +482,22 @@ export default function Home() {
                     <span className={styles.regionTileIcon}>{REGION_ICONS[key]}</span>
                     <span className={styles.regionTileLabel}>{label}</span>
                     <span className={styles.regionTileCount}>{regionCounts[key]}</span>
+                    {recentRegions.has(key) && (
+                      <span style={{
+                        position: 'absolute',
+                        top: '-4px',
+                        right: '-4px',
+                        backgroundColor: '#FF4444',
+                        color: 'white',
+                        fontSize: '0.65rem',
+                        fontWeight: '800',
+                        padding: '2px 6px',
+                        borderRadius: '10px',
+                        animation: 'pulse 2s ease-in-out infinite',
+                      }}>
+                        NEW
+                      </span>
+                    )}
                   </button>
                 ) : null
               )}
