@@ -18,8 +18,8 @@ const { generatePrompt } = require('./lib/image-prompt');
  * - GOOGLE_SEARCH_ENGINE_ID: Google Custom Search Engine ID（オプション）
  */
 
-// Gemini API（v1beta + gemini-pro - Google公式の確実な組み合わせ）
-const MODEL_NAME = "gemini-pro";  // ✅ v1betaで確実に対応しているモデル
+// Gemini API（gemini-2.5-flash - 最新・軽量・高精度）
+const MODEL_NAME = "gemini-2.5-flash";  // ✅ 最新モデル（JSON抽出最適化）
 const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent`;
 const API_KEY = process.env.GEMINI_API_KEY20261336 || process.env.GEMINI_API_KEY;
 
