@@ -18,8 +18,8 @@ const { generatePrompt } = require('./lib/image-prompt');
  * - GOOGLE_SEARCH_ENGINE_ID: Google Custom Search Engine ID（オプション）
  */
 
-// Gemini API（軽量モデル + Grounding 無効化）
-const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+// Gemini API（v1 + gemini-2.0-flash で最大互換性）
+const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent";
 const API_KEY = process.env.GEMINI_API_KEY20261336 || process.env.GEMINI_API_KEY;
 
 // Pollinations AI（認証不要、無料）
@@ -361,40 +361,30 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
   throw lastError;
 }
 
-// ========== Gemini API 呼び出し（純粋なテキスト解析） ==========
+// ========== Gemini API 呼び出し（最小構成） ==========
 async function callGeminiAPI(prompt, isRetry = false) {
-  // 軽量モデル（gemini-1.5-flash）向けのシンプルなシステムプロンプト
-  const systemText = `日本の縄文遺跡・博物館の専門家。与えられたテキストから必要な情報を抽出し、JSON形式のみで回答。`;
-
+  // ⭐ 最小構成のリクエスト - 不要なオプション一切なし
   const requestBody = {
-    systemInstruction: {
-      parts: [{
-        text: systemText
-      }]
-    },
     contents: [{
-      parts: [{ text: prompt }]
+      parts: [{
+        text: prompt
+      }]
     }],
     generationConfig: {
-      temperature: isRetry ? 0.1 : 0.5,
-      topK: 20,
-      topP: 0.9,
+      temperature: 0.3,
       maxOutputTokens: isRetry ? 200 : 400
     }
   };
-
-  // ⚠️ tools は完全に削除 - Grounding は使用しない（503対策）
 
   const response = await fetchWithRetry(
     `${API_ENDPOINT}?key=${API_KEY}`,
     {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (compatible; JomonPortal/1.0)'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestBody),
-      timeout: 60000
+      timeout: 30000
     }
   );
 
@@ -1207,8 +1197,8 @@ async function main() {
   const regions = ['北海道', '東北', '関東', '中部', '近畿', '中国', '四国', '九州'];
   const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
-  // 純粋なテキスト抽出タスク（テキストのみを処理）
-  const prompt = `${randomRegion}地方の縄文遺跡・博物館3件。JSON: [{id, name, prefecture, address, description, region, url, tags, lat, lng, access, copy}]`;
+  // 最小構成のプロンプト（テキスト抽出 → JSON出力）
+  const prompt = `${randomRegion}地方の縄文遺跡3件をJSON形式で返す。形式: [{id, name, prefecture, address, description, region, url, tags, lat, lng, access, copy}]`;
 
 
 
