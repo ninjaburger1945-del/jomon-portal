@@ -166,29 +166,35 @@ function cleanAndExtractJson(responseText, isArray = true) {
   // Step 1-B: 引用番号 [1], [2][3], [1, 2] 等を除去（Grounding 付きレスポンスに混入する）
   cleaned = cleaned.replace(/\s*\[\d+(?:[,\s]+\d+)*\]/g, '');
 
-  // Step 2: [ または { まで前の部分を削除
+  // ⭐ 強力な正規表現抽出: [ ... ] または { ... } を強引に抽出
+  // この処理により「はい、中国地方の……」のような日本語ノイズを除去
   if (isArray) {
-    const startIdx = cleaned.indexOf('[');
-    if (startIdx !== -1) {
-      cleaned = cleaned.substring(startIdx);
+    const arrayMatch = cleaned.match(/\[\s*(?:\{[^}]*\}[,\s]*)*\s*\]/s);
+    if (arrayMatch) {
+      cleaned = arrayMatch[0];
+      console.log(`[JSON_CLEAN] ⭐ 正規表現で JSON 配列を強引に抽出`);
+    } else {
+      // フォールバック: 最初の [ から最後の ] までを抽出
+      const startIdx = cleaned.indexOf('[');
+      const endIdx = cleaned.lastIndexOf(']');
+      if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
+        cleaned = cleaned.substring(startIdx, endIdx + 1);
+        console.log(`[JSON_CLEAN] フォールバック: [ から ] までを抽出`);
+      }
     }
   } else {
-    const startIdx = cleaned.indexOf('{');
-    if (startIdx !== -1) {
-      cleaned = cleaned.substring(startIdx);
-    }
-  }
-
-  // Step 3: 末尾から逆向きに ] または } を探す
-  if (isArray) {
-    const endIdx = cleaned.lastIndexOf(']');
-    if (endIdx !== -1) {
-      cleaned = cleaned.substring(0, endIdx + 1);
-    }
-  } else {
-    const endIdx = cleaned.lastIndexOf('}');
-    if (endIdx !== -1) {
-      cleaned = cleaned.substring(0, endIdx + 1);
+    const objectMatch = cleaned.match(/\{[^{}]*(?:\{[^}]*\}[^{}]*)*\}/s);
+    if (objectMatch) {
+      cleaned = objectMatch[0];
+      console.log(`[JSON_CLEAN] ⭐ 正規表現で JSON オブジェクトを強引に抽出`);
+    } else {
+      // フォールバック: 最初の { から最後の } までを抽出
+      const startIdx = cleaned.indexOf('{');
+      const endIdx = cleaned.lastIndexOf('}');
+      if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
+        cleaned = cleaned.substring(startIdx, endIdx + 1);
+        console.log(`[JSON_CLEAN] フォールバック: { から } までを抽出`);
+      }
     }
   }
 
@@ -296,7 +302,7 @@ async function parseJsonWithFallback(responseText, facilityName = '', isArray = 
     if (retryCount === 0 && facilityName) {
       console.log(`[JSON_PARSE] ⚠️ 修復失敗。Gemini に正しい形式での再送を要求...`);
 
-      const retryPrompt = `JSONのみ。${isArray ? '配列' : 'オブジェクト'}形式で。説明不要。`;
+      const retryPrompt = `CRITICAL: Output ONLY valid JSON. NO explanations, NO greetings, NO markdown. If array, start with [ and end with ]. NEVER include any text outside JSON.`;
 
       try {
         const retryResponse = await callGeminiAPI(retryPrompt, true);
@@ -375,17 +381,30 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
   throw lastError;
 }
 
-// ========== Gemini API 呼び出し（最小構成） ==========
+// ========== Gemini API 呼び出し（厳格なシステムプロンプト付き） ==========
 async function callGeminiAPI(prompt, isRetry = false) {
+  // ⭐ 厳格なシステムプロンプト - 挨拶や説明は絶対禁止
+  const systemPrompt = `You are a JSON extraction expert. IMPORTANT RULES:
+- Output ONLY a JSON array starting with [ and ending with ]
+- NO greetings, explanations, or commentary whatsoever
+- NO markdown backticks (never use \`\`\`json\`\`\`)
+- NO line breaks or extra text outside the JSON
+- JSON must be valid and parseable immediately`;
+
   // ⭐ 最小構成のリクエスト - 不要なオプション一切なし
   const requestBody = {
+    systemInstruction: {
+      parts: [{
+        text: systemPrompt
+      }]
+    },
     contents: [{
       parts: [{
         text: prompt
       }]
     }],
     generationConfig: {
-      temperature: 0.3,
+      temperature: 0.1,  // より決定的な出力のため低い温度
       maxOutputTokens: isRetry ? 200 : 400
     }
   };
@@ -828,8 +847,8 @@ async function retryGeminiForUrls(failedUrls, facilityName, retryCount = 0) {
   console.log(`\n[RETRY_GEMINI] ========== Gemini 再試行（第${retryCount + 1}回）==========`);
   console.log(`[RETRY_GEMINI] 失敗した候補: ${failedUrls.join(', ')}`);
 
-  // シンプルなリトライプロンプト
-  const retryPrompt = `施設「${facilityName}」の公式サイトURL3つ（.lg.jp/.go.jp優先）。JSON配列のみ: ["url1", "url2", "url3"]`;
+  // 厳格なリトライプロンプト
+  const retryPrompt = `Find 3 official URLs for facility "${facilityName}" (prefer .lg.jp/.go.jp). Output ONLY JSON array: ["url1", "url2", "url3"]. NO explanations.`;
 
   try {
     const response = await callGeminiAPI(retryPrompt, true);
@@ -853,7 +872,7 @@ async function findUrlViaKunishitei(facilityName, address) {
   console.log(`\n[FALLBACK] ========== kunishitei.bunka.go.jp 最終検索 ==========`);
   console.log(`[FALLBACK] Gemini の候補がすべて失敗。最後の手段として kunishitei を検索`);
 
-  const fallbackPrompt = `施設「${facilityName}」のkunishitei.bunka.go.jpページURL。{"found": true, "url": "..."} または {"found": false}`;
+  const fallbackPrompt = `Find kunishitei.bunka.go.jp URL for facility "${facilityName}". Output ONLY JSON: {"found": true, "url": "..."} or {"found": false}. NO explanations.`;
 
   try {
     const fallbackResponse = await callGeminiAPI(fallbackPrompt, true);
@@ -1218,8 +1237,8 @@ async function main() {
   const regions = ['北海道', '東北', '関東', '中部', '近畿', '中国', '四国', '九州'];
   const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
-  // 最小構成のプロンプト（テキスト抽出 → JSON出力）
-  const prompt = `${randomRegion}地方の縄文遺跡3件をJSON形式で返す。形式: [{id, name, prefecture, address, description, region, url, tags, lat, lng, access, copy}]`;
+  // 厳格なプロンプト（NO greetings, NO markdown, ONLY JSON）
+  const prompt = `Find 3 important Jomon archaeological sites in ${randomRegion} region. Output ONLY JSON array: [{"id": "id", "name": "name", "prefecture": "pref", "address": "addr", "description": "desc", "region": "region", "url": "url", "tags": [], "lat": 0, "lng": 0, "access": {}, "copy": ""}]. NO explanations, NO markdown, NO greetings.`;
 
 
 
