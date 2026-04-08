@@ -18,8 +18,8 @@ const { generatePrompt } = require('./lib/image-prompt');
  * - GOOGLE_SEARCH_ENGINE_ID: Google Custom Search Engine ID（オプション）
  */
 
-// Gemini API（複数の環境変数をサポート）
-const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
+// Gemini API（軽量モデル + Grounding 無効化）
+const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 const API_KEY = process.env.GEMINI_API_KEY20261336 || process.env.GEMINI_API_KEY;
 
 // Pollinations AI（認証不要、無料）
@@ -44,12 +44,10 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-// 503対策: Grounding with Google Searchを無効化するオプション
-const DISABLE_GROUNDING = process.env.DISABLE_GROUNDING === 'true';
-
-const useGoogleSearch = GOOGLE_SEARCH_API_KEY && GOOGLE_SEARCH_ENGINE_ID && !DISABLE_GROUNDING;
+// Grounding は完全に無効化（gemini-1.5-flash + 軽量化）
+const useGoogleSearch = GOOGLE_SEARCH_API_KEY && GOOGLE_SEARCH_ENGINE_ID;
 console.log(`[INIT] Google Custom Search API: ${useGoogleSearch ? '✅ 有効' : '⚠️ 無効'}`);
-console.log(`[INIT] Grounding: ${DISABLE_GROUNDING ? '❌ 無効（503対策）' : '✅ 有効'}`);
+console.log(`[INIT] Grounding with Google: ❌ 無効（gemini-1.5-flash 使用・503対策）`);
 console.log(`[INIT] 画像生成: ✅ Pollinations AI (無料、認証不要)`);
 console.log(`[INIT] ✅ 初期化完了\n`);
 
@@ -363,11 +361,10 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
   throw lastError;
 }
 
-// ========== Gemini API 呼び出し（Grounding with Google Search 有効） ==========
+// ========== Gemini API 呼び出し（純粋なテキスト解析） ==========
 async function callGeminiAPI(prompt, isRetry = false) {
-  const systemText = isRetry
-    ? `日本の縄文遺跡・博物館の専門家。JSON形式のみで回答。`
-    : `あなたは日本の縄文遺跡・博物館の専門調査員です。Google 検索結果に基づき、404ではない公式サイトURLのみを提示。`;
+  // 軽量モデル（gemini-1.5-flash）向けのシンプルなシステムプロンプト
+  const systemText = `日本の縄文遺跡・博物館の専門家。与えられたテキストから必要な情報を抽出し、JSON形式のみで回答。`;
 
   const requestBody = {
     systemInstruction: {
@@ -379,19 +376,14 @@ async function callGeminiAPI(prompt, isRetry = false) {
       parts: [{ text: prompt }]
     }],
     generationConfig: {
-      temperature: isRetry ? 0 : 1,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: isRetry ? 256 : 512
+      temperature: isRetry ? 0.1 : 0.5,
+      topK: 20,
+      topP: 0.9,
+      maxOutputTokens: isRetry ? 200 : 400
     }
   };
 
-  // Grounding は503対策で無効化可能
-  if (!DISABLE_GROUNDING) {
-    requestBody.tools = [{
-      googleSearch: {}  // Grounding with Google Search（gemini-2.5-pro 対応）
-    }];
-  }
+  // ⚠️ tools は完全に削除 - Grounding は使用しない（503対策）
 
   const response = await fetchWithRetry(
     `${API_ENDPOINT}?key=${API_KEY}`,
@@ -414,24 +406,6 @@ async function callGeminiAPI(prompt, isRetry = false) {
   const content = candidate.content;
   if (!content || !content.parts || content.parts.length === 0) {
     throw new Error('No text content in API response');
-  }
-
-  // ✅ Grounding エビデンス（本物の検索結果 vs 記憶の区別）
-  try {
-    const groundingMeta = candidate.groundingMetadata;
-    if (groundingMeta && (groundingMeta.groundingChunks?.length > 0 || groundingMeta.webSearchQueries?.length > 0)) {
-      const queries = groundingMeta.webSearchQueries || [];
-      const chunks = groundingMeta.groundingChunks || [];
-      console.log(`[GROUNDING] ✅ 本物の Google 検索結果を使用`);
-      if (queries.length > 0) {
-        console.log(`[GROUNDING]   検索クエリ: ${queries.join(', ')}`);
-      }
-      console.log(`[GROUNDING]   検索ヒット数: ${chunks.length}件`);
-    } else {
-      console.warn(`[GROUNDING] ⚠️ 検索結果なし → Gemini の記憶のみ使用（URL信頼度低）`);
-    }
-  } catch (err) {
-    console.warn(`[GROUNDING] ⚠️ メタデータ確認エラー: ${err.message}`);
   }
 
   return content.parts[0].text;
@@ -1233,8 +1207,8 @@ async function main() {
   const regions = ['北海道', '東北', '関東', '中部', '近畿', '中国', '四国', '九州'];
   const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
-  // 極限までシンプルなプロンプト（約100文字）
-  const prompt = `${randomRegion}の縄文遺跡3件。除外: ${lastNames.join(', ')}。JSON: [{id, name, prefecture, address, description, region, url, tags, lat, lng, access, copy}]`;
+  // 純粋なテキスト抽出タスク（テキストのみを処理）
+  const prompt = `${randomRegion}地方の縄文遺跡・博物館3件。JSON: [{id, name, prefecture, address, description, region, url, tags, lat, lng, access, copy}]`;
 
 
 
