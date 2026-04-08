@@ -18,9 +18,9 @@ const { generatePrompt } = require('./lib/image-prompt');
  * - GOOGLE_SEARCH_ENGINE_ID: Google Custom Search Engine ID（オプション）
  */
 
-// Gemini API（固定モデル名 + models/ フルパス）
+// Gemini API（v1beta + gemini-1.5-flash - 確実な組み合わせ）
 const MODEL_NAME = "gemini-1.5-flash";  // ✅ 固定・堅実な名前（-latest は使わない）
-const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1/models/${MODEL_NAME}:generateContent`;
+const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent`;
 const API_KEY = process.env.GEMINI_API_KEY20261336 || process.env.GEMINI_API_KEY;
 
 // Pollinations AI（認証不要、無料）
