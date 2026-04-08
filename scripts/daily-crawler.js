@@ -405,7 +405,7 @@ async function callGeminiAPI(prompt, isRetry = false) {
     }],
     generationConfig: {
       temperature: 0.1,  // より決定的な出力のため低い温度
-      maxOutputTokens: isRetry ? 200 : 400
+      maxOutputTokens: isRetry ? 500 : 1000  // ⭐ 大幅増加：途中で切れ込み防止
     }
   };
 
@@ -1237,8 +1237,23 @@ async function main() {
   const regions = ['北海道', '東北', '関東', '中部', '近畿', '中国', '四国', '九州'];
   const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
-  // 厳格なプロンプト（NO greetings, NO markdown, ONLY JSON）
-  const prompt = `Find 3 important Jomon archaeological sites in ${randomRegion} region. Output ONLY JSON array: [{"id": "id", "name": "name", "prefecture": "pref", "address": "addr", "description": "desc", "region": "region", "url": "url", "tags": [], "lat": 0, "lng": 0, "access": {}, "copy": ""}]. NO explanations, NO markdown, NO greetings.`;
+  // ⭐ 1件集中モード：最も確実な1件だけを完璧に返す
+  const prompt = `You are a Jomon archaeology expert. Find THE MOST IMPORTANT AND CERTAIN Jomon archaeological site in ${randomRegion} region that you can provide complete, verified information about. Return ONLY 1 site (not 3) as a JSON array with exactly this structure:
+[{
+  "id": "unique-id-number",
+  "name": "exact official name",
+  "prefecture": "prefecture name",
+  "address": "full address",
+  "description": "100 char max description of the site",
+  "region": "region name",
+  "url": "official website URL or Wikipedia",
+  "tags": ["tag1", "tag2"],
+  "lat": latitude_number,
+  "lng": longitude_number,
+  "access": {"train": "info", "bus": "info", "car": "info", "rank": "rank"},
+  "copy": "short catchphrase"
+}]
+CRITICAL: Output ONLY valid JSON. NO explanations. NO greetings. NO markdown. Complete all fields.`;
 
 
 
