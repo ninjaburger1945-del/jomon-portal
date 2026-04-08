@@ -56,6 +56,13 @@ jobs:
           GOOGLESEARCH_SERVICE_ACCOUNT: ${{ secrets.GOOGLESEARCH_SERVICE_ACCOUNT }}
           GOOGLESEARCH_CX: ${{ secrets.GOOGLESEARCH_CX }}
 
+      - name: Check Available Models
+        run: |
+          echo "[MODELS] Checking available Gemini models..."
+          node scripts/list-available-models.js
+        env:
+          GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
+
       - name: AI Crawler - Find 1 New Facilities
         timeout-minutes: 45
         run: |
