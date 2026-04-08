@@ -18,8 +18,9 @@ const { generatePrompt } = require('./lib/image-prompt');
  * - GOOGLE_SEARCH_ENGINE_ID: Google Custom Search Engine ID（オプション）
  */
 
-// Gemini API（v1 + gemini-2.0-flash で最大互換性）
-const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent";
+// Gemini API（固定モデル名 + models/ フルパス）
+const MODEL_NAME = "gemini-1.5-flash";  // ✅ 固定・堅実な名前（-latest は使わない）
+const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1/models/${MODEL_NAME}:generateContent`;
 const API_KEY = process.env.GEMINI_API_KEY20261336 || process.env.GEMINI_API_KEY;
 
 // Pollinations AI（認証不要、無料）
@@ -44,10 +45,15 @@ if (!API_KEY) {
   process.exit(1);
 }
 
+// ⭐ エンドポイント確認（モデル名の形式を確認）
+console.log(`[INIT] モデル名: ${MODEL_NAME}`);
+console.log(`[INIT] API エンドポイント: ${API_ENDPOINT}`);
+console.log(`[INIT] API キー（先頭8文字）: ${API_KEY.substring(0, 8)}...`);
+
 // Grounding は完全に無効化（gemini-1.5-flash + 軽量化）
 const useGoogleSearch = GOOGLE_SEARCH_API_KEY && GOOGLE_SEARCH_ENGINE_ID;
 console.log(`[INIT] Google Custom Search API: ${useGoogleSearch ? '✅ 有効' : '⚠️ 無効'}`);
-console.log(`[INIT] Grounding with Google: ❌ 無効（gemini-1.5-flash 使用・503対策）`);
+console.log(`[INIT] Grounding with Google: ❌ 無効（軽量化・503対策）`);
 console.log(`[INIT] 画像生成: ✅ Pollinations AI (無料、認証不要)`);
 console.log(`[INIT] ✅ 初期化完了\n`);
 
@@ -317,6 +323,14 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
         const errorText = await response.text();
         console.error(`[HTTP_ERROR] ステータス: ${response.status}`);
 
+        // ⭐ 404エラー時に詳細情報を出力
+        if (response.status === 404) {
+          console.error(`[HTTP_ERROR] 404 Not Found`);
+          console.error(`[HTTP_ERROR] リクエスト URL: ${url}`);
+          console.error(`[HTTP_ERROR] エラーレスポンス: ${errorText.substring(0, 200)}`);
+          console.error(`[HTTP_ERROR] → モデル名またはエンドポイント形式が間違っている可能性があります`);
+        }
+
         if ([400, 401, 403, 404].includes(response.status)) {
           throw new Error(`[PERMANENT] HTTP ${response.status}`);
         }
@@ -375,6 +389,13 @@ async function callGeminiAPI(prompt, isRetry = false) {
       maxOutputTokens: isRetry ? 200 : 400
     }
   };
+
+  // ⭐ デバッグログ：実際に叩く URL とリクエストを出力
+  const requestUrl = `${API_ENDPOINT}?key=${API_KEY.substring(0, 8)}...`;
+  console.log(`[API_CALL] URL: ${requestUrl}`);
+  console.log(`[API_CALL] Method: POST`);
+  console.log(`[API_CALL] Body size: ${JSON.stringify(requestBody).length} bytes`);
+  console.log(`[API_CALL] Model: ${MODEL_NAME}`);
 
   const response = await fetchWithRetry(
     `${API_ENDPOINT}?key=${API_KEY}`,

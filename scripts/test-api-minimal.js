@@ -7,24 +7,22 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-// 複数のエンドポイントをテスト
+// 複数のエンドポイントをテスト（確実に動作するモデルを優先）
 const endpoints = [
-  // v1beta + models/
-  {
-    name: "v1beta/models/gemini-1.5-flash",
-    url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
-  },
-  // v1 + models/
+  // ✅ 最も確実（公式推奨）
   {
     name: "v1/models/gemini-1.5-flash",
     url: "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
   },
-  // v1beta + gemini-2.0-flash
   {
-    name: "v1beta/models/gemini-2.0-flash",
-    url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+    name: "v1/models/gemini-pro",
+    url: "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent"
   },
-  // v1 + gemini-2.0-flash
+  // 代替案
+  {
+    name: "v1beta/models/gemini-1.5-flash",
+    url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+  },
   {
     name: "v1/models/gemini-2.0-flash",
     url: "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent"
