@@ -1,1514 +1,167 @@
+#!/usr/bin/env node
+
 const fs = require("fs");
 const path = require("path");
-const sharp = require("sharp");
-const { generatePrompt } = require('./lib/image-prompt');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-/**
- * Jomon Portal クローラー v5.2 (Gemini シンプル版)
- *
- * 設計思想:
- * - Gemini に施設名から推測できる最もシンプルな自治体URL（/rekishiru）を最優先で提案させる
- * - 自治体公式サイト（.lg.jp）はキーワードチェック免除（信頼度が高い）
- * - Google Custom Search API は環境変数があれば利用
- * - それらを検証して、最高スコアのものを採用
- *
- * 環境変数（GitHub Secrets）:
- * - GEMINI_API_KEY20261336: Gemini API Key（必須）
- * - GOOGLE_SEARCH_API_KEY: Google Custom Search API Key（オプション）
- * - GOOGLE_SEARCH_ENGINE_ID: Google Custom Search Engine ID（オプション）
- */
-
-// Gemini API
-const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
+// ========== 設定 ==========
 const API_KEY = process.env.GEMINI_API_KEY20261336;
+const MODEL_NAME = "gemini-2.5-flash";
+const FACILITIES_PATH = path.join(__dirname, "../app/data/facilities.json");
 
-// Pollinations AI（認証不要、無料）
-
-// Google Custom Search API（オプション）
-const GOOGLE_SEARCH_API_KEY =
-  process.env.GOOGLE_SEARCH_API_KEY ||
-  process.env.GOOGLE_CUSTOM_SEARCH_API_KEY ||
-  process.env.GOOGLESEARCH_SERVICE_ACCOUNT;
-
-const GOOGLE_SEARCH_ENGINE_ID =
-  process.env.GOOGLE_SEARCH_ENGINE_ID ||
-  process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID ||
-  process.env.GOOGLESEARCH_CX;
+// ========== 地域リスト ==========
+const regions = ["北海道", "東北", "関東", "中部", "近畿", "中国", "四国", "九州"];
 
 // ========== 初期化 ==========
-console.log(`\n[INIT] ========== Jomon Portal Crawler v5.6 (Pollinations AI) ==========`);
-console.log(`[INIT] GEMINI_API_KEY20261336: ${API_KEY ? '✅ 存在' : '❌ 未設定'}`);
-
-if (!API_KEY) {
-  console.error("[FATAL] ❌ GEMINI_API_KEY20261336 が設定されていません");
-  process.exit(1);
-}
-
-const useGoogleSearch = GOOGLE_SEARCH_API_KEY && GOOGLE_SEARCH_ENGINE_ID;
-console.log(`[INIT] Google Custom Search API: ${useGoogleSearch ? '✅ 有効' : '⚠️ 無効'}`);
-console.log(`[INIT] 画像生成: ✅ Pollinations AI (無料、認証不要)`);
+console.log(`\n[INIT] ========== Jomon Portal Crawler v6.0 (シンプル版) ==========`);
+console.log(`[INIT] GEMINI_API_KEY: ${API_KEY ? "✅" : "❌"}`);
+console.log(`[INIT] モデル: ${MODEL_NAME}`);
 console.log(`[INIT] ✅ 初期化完了\n`);
 
-// ========== 縄文関連キーワード定義 ==========
-const JOMON_KEYWORDS = ['縄文', '縄紋', 'じょうもん', 'jomon'];
-const RELATED_KEYWORDS = ['貝塚', '土器', '草創期', '晩期', '定住化'];
-const ALL_JOMON_KEYWORDS = [...JOMON_KEYWORDS, ...RELATED_KEYWORDS];
-const NG_KEYWORDS = ['弥生時代', '古墳時代', '戦国', '江戸', 'お城'];
-
-// ========== 信頼できる縄文専門ドメイン ==========
-const TRUSTED_JOMON_DOMAINS = [
-  'jomon-japan.jp',
-  'hokkaido-jomon.jp',
-  'jomon.or.jp',
-];
-
-// ========== 許可されたタグリスト（ホワイトリスト） ==========
-const ALLOWED_TAGS = [
-  '世界遺産',
-  '博物館',
-  '国宝',
-  '土偶',
-  '貝塚',
-  '土器',
-  '環状列石'
-];
-
-// ========== タグフィルタリング関数 ==========
-function filterAndValidateTags(tags) {
-  if (!tags || !Array.isArray(tags)) {
-    return [];
-  }
-
-  // 許可リストに含まれるタグのみを保持
-  const filtered = tags
-    .filter(tag => ALLOWED_TAGS.includes(tag))
-    .slice(0, 2);  // 最大2個
-
-  if (tags.length > filtered.length) {
-    const removedTags = tags.filter(tag => !filtered.includes(tag));
-    console.warn(`[TAG_FILTER] ⚠️ 不許可タグを除去: ${removedTags.join(', ')}`);
-  }
-
-  return filtered;
-}
-
-// ========== description からのタグ自動抽出（65施設以降のみ） ==========
-function extractTagsFromDescription(description, facilityName) {
-  if (!description) return [];
-
-  const text = (description + ' ' + facilityName).toLowerCase();
-  const selectedTags = [];
-
-  // キーワード → タグのマッピング
-  const tagKeywords = {
-    '世界遺産': ['世界遺産', 'UNESCO'],
-    '博物館': ['博物館', 'museum', '資料館', '展示館'],
-    '国宝': ['国宝', 'national treasure'],
-    '土偶': ['土偶', 'dogū', 'figurine'],
-    '貝塚': ['貝塚', 'kaizuka', 'shell midden'],
-    '土器': ['土器', 'pottery', '縄文土器'],
-    '環状列石': ['環状列石', 'stone circle', 'henge']
-  };
-
-  // 最大2個のタグを選択
-  for (const [tag, keywords] of Object.entries(tagKeywords)) {
-    if (selectedTags.length >= 2) break;
-    if (keywords.some(kw => text.includes(kw))) {
-      selectedTags.push(tag);
-    }
-  }
-
-  return selectedTags;
-}
-
-// ========== 施設名のキーワード抽出関数 ==========
-function extractKeywords(facilityName) {
-  // 接頭辞を除去（「国指定史跡」「国特別史跡」など）
-  const cleaned = facilityName
-    .replace(/^(国指定史跡|国特別史跡|都道府県指定|市指定|町指定|村指定|国特別天然記念物|県指定|道指定)\s*/g, '')
-    .trim();
-
-  // スペース・　・・で分割、2文字以上の部分を返す
-  return cleaned
-    .split(/[\s　・]+/)
-    .filter(k => k.length >= 2)
-    .map(k => k.toLowerCase());
-}
-
-// ========== Wikipedia URL 直行便 ==========
-function buildWikipediaUrl(facilityName) {
-  // 接頭辞を除去（extractKeywords と同じロジック）
-  const cleaned = facilityName
-    .replace(/^(国指定史跡|国特別史跡|都道府県指定|市指定|町指定|村指定|国特別天然記念物|県指定|道指定)\s*/g, '')
-    .trim();
-  // Wikipedia URL を構築（URL エンコード）
-  return `https://ja.wikipedia.org/wiki/${encodeURIComponent(cleaned)}`;
-}
-
-// ========== JSON 抽出・クリーニング関数 v2 ==========
-function cleanAndExtractJson(responseText, isArray = true) {
-  console.log(`[JSON_CLEAN] 開始（配列: ${isArray}）`);
-
-  // Step 1: Markdownデコレーション完全除去
-  let cleaned = responseText
-    .replace(/```json\s*/gi, '')
-    .replace(/```\s*/gi, '')
-    .trim();
-
-  // Step 1-B: 引用番号 [1], [2][3], [1, 2] 等を除去（Grounding 付きレスポンスに混入する）
-  cleaned = cleaned.replace(/\s*\[\d+(?:[,\s]+\d+)*\]/g, '');
-
-  // Step 2: [ または { まで前の部分を削除
-  if (isArray) {
-    const startIdx = cleaned.indexOf('[');
-    if (startIdx !== -1) {
-      cleaned = cleaned.substring(startIdx);
-    }
-  } else {
-    const startIdx = cleaned.indexOf('{');
-    if (startIdx !== -1) {
-      cleaned = cleaned.substring(startIdx);
-    }
-  }
-
-  // Step 3: 末尾から逆向きに ] または } を探す
-  if (isArray) {
-    const endIdx = cleaned.lastIndexOf(']');
-    if (endIdx !== -1) {
-      cleaned = cleaned.substring(0, endIdx + 1);
-    }
-  } else {
-    const endIdx = cleaned.lastIndexOf('}');
-    if (endIdx !== -1) {
-      cleaned = cleaned.substring(0, endIdx + 1);
-    }
-  }
-
-  console.log(`[JSON_CLEAN] 抽出結果（先頭100文字）: ${cleaned.substring(0, 100).replace(/\n/g, '\\n')}`);
-  console.log(`[JSON_CLEAN] 抽出結果（末尾100文字）: ${cleaned.substring(Math.max(0, cleaned.length - 100)).replace(/\n/g, '\\n')}`);
-  console.log(`[JSON_CLEAN] 全体長: ${cleaned.length}文字`);
-
-  return cleaned;
-}
-
-// ========== JSON 修復ロジック v4 ==========
-function repairJsonSyntax(jsonStr) {
-  console.log(`[JSON_REPAIR] 構文修復開始`);
-
-  let repaired = jsonStr.trim();
-
-  // Step 0: 不正な *** を削除
-  repaired = repaired.replace(/\*\*\*/g, '');
-
-  // Step 0-B: 引用番号 [1], [2][3], [1, 2] 等を除去（Grounding 付きレスポンスに混入する）
-  repaired = repaired.replace(/\s*\[\d+(?:[,\s]+\d+)*\]/g, '');
-
-  // Step 1: 不正な制御文字を削除（改行は許可）
-  repaired = repaired.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
-
-  // Step 2: 末尾のカンマを除去（ネストされた構造対応）
-  repaired = repaired.replace(/,(\s*[\]}])/g, '$1');
-
-  // Step 3: キー名のシングルクォートをダブルクォートに変換
-  repaired = repaired.replace(/'([^']*)'(\s*:)/g, '"$1"$2');
-
-  // Step 4: 値のシングルクォートをダブルクォートに変換
-  repaired = repaired.replace(/:\s*'([^']*)'([,\}\]])/g, ': "$1"$2');
-
-  // Step 5: 複数行文字列を1行に統一
-  repaired = repaired.replace(/"([^"]*)[\n\r]+([^"]*)"/g, (match, part1, part2) => {
-    const combined = (part1 + ' ' + part2).replace(/[\n\r]+/g, ' ').trim();
-    return `"${combined}"`;
-  });
-
-  // Step 6: 配列内の不正な改行を削除
-  repaired = repaired.replace(/\[\s*[\n\r]+/g, '[');
-  repaired = repaired.replace(/[\n\r]+\s*\]/g, ']');
-  repaired = repaired.replace(/,\s*[\n\r]+/g, ',');
-
-  // Step 7: 連続するクォートを修正
-  repaired = repaired.replace(/""(\s*[:,\]}])/g, '$1');
-
-  // Step 8: 不正な括弧組み合わせ修正（{[ など）
-  repaired = repaired.replace(/\{(\s*\[)/g, '[');
-  repaired = repaired.replace(/(\])\s*\}/g, ']');
-
-  // Step 9: キーなし値（"value" だけ）をスキップ
-  repaired = repaired.replace(/,\s*"[^"]*"\s*([,\]}])/g, '$1');
-
-  console.log(`[JSON_REPAIR] 修復完了`);
-  return repaired;
-}
-
-// ========== JSON パース（自動修復 + リトライ対応） v2 ==========
-async function parseJsonWithFallback(responseText, facilityName = '', isArray = true, retryCount = 0) {
-  if (retryCount > 1) {
-    console.error(`[JSON_PARSE] リトライ上限に到達`);
-    return null;
-  }
-
-  // Step 1: クリーニング
-  let cleaned = cleanAndExtractJson(responseText, isArray);
-
-  // Step 2: 直接パース試行
-  try {
-    const result = JSON.parse(cleaned);
-    console.log(`[JSON_PARSE] ✅ パース成功（リトライ: ${retryCount}回目）`);
-    return result;
-  } catch (parseError) {
-    const errorPos = parseError.message.match(/position (\d+)/);
-    const errorPosition = errorPos ? parseInt(errorPos[1]) : -1;
-
-    console.warn(`[JSON_PARSE] ❌ パース失敗: ${parseError.message}`);
-    if (errorPosition !== -1) {
-      const start = Math.max(0, errorPosition - 100);
-      const end = Math.min(cleaned.length, errorPosition + 100);
-      console.warn(`[JSON_PARSE] エラー位置 ${errorPosition} 付近：`);
-      console.warn(`  ...${cleaned.substring(start, end)}...`);
-    }
-
-    // Step 3: 修復ロジック試行
-    if (retryCount === 0) {
-      console.log(`[JSON_PARSE] 修復ロジックを試行...`);
-      try {
-        const repaired = repairJsonSyntax(cleaned);
-        const result = JSON.parse(repaired);
-        console.log(`[JSON_PARSE] ✅ 修復後のパース成功`);
-        return result;
-      } catch (repairError) {
-        const repairErrorPos = repairError.message.match(/position (\d+)/);
-        console.warn(`[JSON_PARSE] 修復でもパース失敗: ${repairError.message}`);
-        if (repairErrorPos) {
-          console.warn(`[JSON_PARSE] 修復後も position ${repairErrorPos[1]} で失敗`);
-        }
-      }
-    }
-
-    // Step 4: Gemini 再送（修復に失敗した場合のみ）
-    if (retryCount === 0 && facilityName) {
-      console.log(`[JSON_PARSE] ⚠️ 修復失敗。Gemini に正しい形式での再送を要求（${retryCount + 1}回目）...`);
-
-      const retryPrompt = `
-前のレスポンスが無効な形式でした。以下を厳密に守ってください：
-
-${isArray ?
-`1. JSON配列のみを返す（説明や前置きは一切不要）
-2. 各オブジェクトの "description" フィールドは最大100文字で、改行（\\n）を含めない
-3. 以下の形式で返す：
-[{"key": "value"}, ...]` :
-`1. JSON オブジェクトのみを返す（説明や前置きは一切不要）
-2. "description" フィールドは最大100文字で、改行（\\n）を含めない
-3. 以下の形式で返す：
-{...}`}
-`;
-
-      try {
-        const retryResponse = await callGeminiAPI(retryPrompt);
-        return await parseJsonWithFallback(retryResponse, facilityName, isArray, retryCount + 1);
-      } catch (retryError) {
-        console.error(`[JSON_PARSE] Gemini 再送失敗: ${retryError.message}`);
-        return null;
-      }
-    }
-
-    return null;
-  }
-}
-
-// ========== リトライ機能付き fetch v2 ==========
-async function fetchWithRetry(url, options, maxRetries = 3) {
-  let lastError;
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await fetch(url, options);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[HTTP_ERROR] ステータス: ${response.status}`);
-
-        if ([400, 401, 403, 404].includes(response.status)) {
-          throw new Error(`[PERMANENT] HTTP ${response.status}`);
-        }
-
-        // 503 は長めの待機を推奨
-        if (response.status === 503) {
-          console.warn(`[TEMPORARY] HTTP 503 (Service Unavailable) - Gemini が一時的にダウン中`);
-          throw new Error(`[TEMPORARY] HTTP 503`);
-        }
-
-        if ([429, 500].includes(response.status)) {
-          throw new Error(`[TEMPORARY] HTTP ${response.status}`);
-        }
-
-        throw new Error(`[UNKNOWN] HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-
-    } catch (error) {
-      lastError = error;
-      console.error(`[ATTEMPT ${attempt}/${maxRetries}] ${error.message}`);
-
-      if (error.message.includes('[PERMANENT]')) {
-        throw error;
-      }
-
-      if (attempt < maxRetries) {
-        // 503 の場合は長めに待機（30秒 * attempt）
-        const is503 = error.message.includes('503');
-        const delayMs = is503 ? 30000 * attempt : 2000 * Math.pow(2, attempt - 1);
-        console.log(`[RETRY] ${delayMs}ms 待機後にリトライ...`);
-        await new Promise(resolve => setTimeout(resolve, delayMs));
-      }
-    }
-  }
-
-  throw lastError;
-}
-
-// ========== Gemini API 呼び出し（Grounding with Google Search 有効） ==========
-async function callGeminiAPI(prompt) {
-  const requestBody = {
-    systemInstruction: {
-      parts: [{
-        text: `あなたは日本の縄文遺跡・博物館の専門調査員です。
-回答前に必ず Google 検索を実行し、404にならない現行の公式サイトURLを特定してください。
-URLは検索結果で実際に確認できた現行の URL のみを使用し、推測によるURLは絶対に含めないでください。
-最新のリアルタイム情報をベースに回答してください。`
-      }]
-    },
-    contents: [{
-      parts: [{ text: prompt }]
-    }],
-    tools: [],  // ⭐ グラウンディング完全無効化（503対策）
-    generationConfig: {
-      temperature: 1,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: 8192
-    }
-  };
-
-  const response = await fetchWithRetry(
-    `${API_ENDPOINT}?key=${API_KEY}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (compatible; JomonPortal/1.0)'
-      },
-      body: JSON.stringify(requestBody),
-      timeout: 60000
-    }
-  );
-
-  if (!response.candidates || response.candidates.length === 0) {
-    throw new Error('No candidates in API response');
-  }
-
-  const candidate = response.candidates[0];
-  const content = candidate.content;
-  if (!content || !content.parts || content.parts.length === 0) {
-    throw new Error('No text content in API response');
-  }
-
-  // ✅ Grounding エビデンス（本物の検索結果 vs 記憶の区別）
-  try {
-    const groundingMeta = candidate.groundingMetadata;
-    if (groundingMeta && (groundingMeta.groundingChunks?.length > 0 || groundingMeta.webSearchQueries?.length > 0)) {
-      const queries = groundingMeta.webSearchQueries || [];
-      const chunks = groundingMeta.groundingChunks || [];
-      console.log(`[GROUNDING] ✅ 本物の Google 検索結果を使用`);
-      if (queries.length > 0) {
-        console.log(`[GROUNDING]   検索クエリ: ${queries.join(', ')}`);
-      }
-      console.log(`[GROUNDING]   検索ヒット数: ${chunks.length}件`);
-    } else {
-      console.warn(`[GROUNDING] ⚠️ 検索結果なし → Gemini の記憶のみ使用（URL信頼度低）`);
-    }
-  } catch (err) {
-    console.warn(`[GROUNDING] ⚠️ メタデータ確認エラー: ${err.message}`);
-  }
-
-  return content.parts[0].text;
-}
-
-// ========== ページ内容取得 ==========
-async function fetchPageContent(url) {
-  if (!url || !url.startsWith('http')) {
-    return { success: false, content: '', statusCode: 0 };
-  }
-
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    const res = await fetch(url, {
-      method: 'GET',
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
-    });
-
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const html = await res.text();
-      return { success: true, content: html, statusCode: res.status };
-    }
-
-    console.warn(`[FETCH_FAIL] HTTP ${res.status}`);
-    return { success: false, content: '', statusCode: res.status };
-
-  } catch (e) {
-    console.warn(`[FETCH_ERROR] ${e.message}`);
-    return { success: false, content: '', statusCode: 0 };
-  }
-}
-
-// ========== Google Custom Search API 検索（オプション） ==========
-async function searchWithGoogleAPI(facilityName, address) {
-  if (!useGoogleSearch) {
-    return [];
-  }
-
-  try {
-    console.log(`[GOOGLE_SEARCH] "${facilityName}" で検索中...`);
-
-    const query = `${facilityName} 縄文 遺跡`;
-    const response = await fetch(
-      `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&num=10`,
-      { timeout: 10000 }
-    );
-
-    if (!response.ok) {
-      console.warn(`[GOOGLE_SEARCH] HTTP ${response.status} → Gemini リトライモードへ移行（Google検索をスキップ）`);
-      return [];
-    }
-
-    const data = await response.json();
-    const urls = (data.items || []).map(item => item.link).slice(0, 5);
-
-    if (urls.length === 0) {
-      console.warn(`[GOOGLE_SEARCH] ⚠️ 検索結果なし → Gemini リトライモードへ移行`);
-      return [];
-    }
-
-    console.log(`[GOOGLE_SEARCH] ✅ ${urls.length}個のURL取得`);
-    return urls;
-  } catch (error) {
-    console.warn(`[GOOGLE_SEARCH] ⚠️ エラー（${error.message}） → Gemini リトライモードへ移行（Google検索をスキップ）`);
-    return [];
-  }
-}
-
-// ========== HTMLからタイトルを抽出 ==========
-function extractPageTitle(html) {
-  const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
-  if (titleMatch && titleMatch[1]) {
-    return titleMatch[1]
-      .replace(/<[^>]+>/g, '')
-      .trim()
-      .toLowerCase();
-  }
-  return '';
-}
-
-// ========== HTMLから見出し（h1-h2）を抽出 ==========
-function extractHeadings(html) {
-  const headings = [];
-  const h1Matches = html.match(/<h1[^>]*>(.*?)<\/h1>/gi);
-  const h2Matches = html.match(/<h2[^>]*>(.*?)<\/h2>/gi);
-
-  if (h1Matches) {
-    h1Matches.forEach(match => {
-      const text = match
-        .replace(/<[^>]+>/g, '')
-        .trim()
-        .toLowerCase();
-      if (text) headings.push(text);
-    });
-  }
-
-  if (h2Matches) {
-    h2Matches.forEach(match => {
-      const text = match
-        .replace(/<[^>]+>/g, '')
-        .trim()
-        .toLowerCase();
-      if (text) headings.push(text);
-    });
-  }
-
-  return headings;
-}
-
-// ========== HTML から画像数をカウント ==========
-function countImages(html) {
-  const imgMatches = html.match(/<img[^>]*>/gi);
-  return imgMatches ? imgMatches.length : 0;
-}
-
-// ========== 施設名から愛称を抽出 ==========
-function extractNickname(facilityName) {
-  // 例：「なじょもん」「レキシルとくしま」などの愛称を抽出
-  // パターン：「正式名称（愛称：愛称名）」または「正式名称〜愛称」
-  const nickMatch = facilityName.match(/[（(](?:愛称|昵称)？[:：]?([^）)]+)[）)]/);
-  if (nickMatch && nickMatch[1]) {
-    return nickMatch[1].trim();
-  }
-
-  // 括弧内のテキストが愛称の可能性
-  const bracketMatch = facilityName.match(/[（(]([^）)]+)[）)]/);
-  if (bracketMatch && bracketMatch[1]) {
-    const bracketed = bracketMatch[1].trim();
-    // 「県」「市」などを含まない短い文字列は愛称の可能性が高い
-    if (!bracketed.includes('県') && !bracketed.includes('市') && bracketed.length <= 15) {
-      return bracketed;
-    }
-  }
-
-  return null;
-}
-
-// ========== URL スコアリング（ドメイン解析）v5.3 - 愛称優先版 ==========
-function scoreUrlByDomain(url, facilityName, address, boostWikipedia = false) {
-  try {
-    const urlObj = new URL(url);
-    const domain = urlObj.hostname.toLowerCase();
-    const facilityNameLower = facilityName.toLowerCase();
-
-    let domainScore = 0;
-    let scoreReason = '';
-
-    // 【v5.3】愛称を含む独自ドメイン → 110点（最優先）
-    const nickname = extractNickname(facilityName);
-    if (nickname) {
-      const nicknameFormatted = nickname.toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '');
-
-      if (domain.includes(nicknameFormatted)) {
-        domainScore = 110;
-        scoreReason = `愛称ドメイン「${nickname}」`;
-      }
-    }
-
-    // 【100点】施設名が含まれる独自ドメイン
-    if (domainScore === 0 && domain.includes(facilityNameLower)) {
-      domainScore = 100;
-      scoreReason = '施設名を含む独自ドメイン';
-    }
-    // 【100点】.lg.jp（自治体公式）
-    if (domainScore === 0 && domain.includes('.lg.jp')) {
-      domainScore = 100;
-      scoreReason = '.lg.jp（自治体公式）';
-    }
-    // 【100点】信頼できる縄文専門ドメイン
-    if (domainScore === 0 && TRUSTED_JOMON_DOMAINS.some(trustedDomain => domain.includes(trustedDomain))) {
-      domainScore = 100;
-      scoreReason = '縄文専門サイト（信頼度高）';
-    }
-    // 【80点】.or.jp（公開サイト・振興会等）
-    if (domainScore === 0 && domain.includes('.or.jp')) {
-      domainScore = 80;
-      scoreReason = '.or.jp（公開サイト）';
-    }
-    // 【80点 / 90点（優遇時）】Wikipedia
-    if (domainScore === 0 && domain.includes('ja.wikipedia.org')) {
-      domainScore = boostWikipedia ? 90 : 80;
-      scoreReason = `ja.wikipedia.org${boostWikipedia ? '（自治体全滅時・優遇）' : ''}`;
-    }
-    // 【30点】kunishitei.bunka.go.jp（文化庁DB）
-    if (domainScore === 0 && domain.includes('kunishitei.bunka.go.jp')) {
-      domainScore = 30;
-      scoreReason = 'kunishitei.bunka.go.jp（文化庁DB）';
-    }
-    // 【その他】
-    if (domainScore === 0) {
-      domainScore = 10;
-      scoreReason = 'その他のドメイン';
-    }
-
-    console.log(`[DOMAIN_SCORE] ${scoreReason} → ${domainScore}点`);
-    return domainScore;
-  } catch (e) {
-    console.warn(`[DOMAIN_SCORE] URL 解析失敗: ${e.message}`);
-    return 0;
-  }
-}
-
-// ========== URL 内容検証 v5.1 - キーワード厳格化版+Wikipedia優遇 ==========
-async function validateUrlWithContent(url, facilityName, address, boostWikipedia = false) {
-  if (!url || !url.startsWith('http')) {
-    return { valid: false, score: 0, domainScore: 0 };
-  }
-
-  console.log(`[VALIDATE] ${url} を検証中...${boostWikipedia ? ' (Wikipedia優遇モード)' : ''}`);
-
-  const pageResult = await fetchPageContent(url);
-  if (!pageResult.success) {
-    console.warn(`[VALIDATE] ❌ ページ取得失敗: HTTP ${pageResult.statusCode}`);
-    return { valid: false, score: 0, domainScore: 0 };
-  }
-
-  const html = pageResult.content;
-  const text = html
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .toLowerCase();
-
-  // 404 検出
-  const notFoundPatterns = ['404', 'ページが見つかり', 'not found', 'お探しのページ'];
-  if (notFoundPatterns.some(p => text.includes(p))) {
-    console.warn(`[VALIDATE] ❌ 404 またはエラーページ検出`);
-    return { valid: false, score: 0, domainScore: 0 };
-  }
-
-  // ドメインスコア取得（Wikipedia優遇フラグ付き）
-  const domainScore = scoreUrlByDomain(url, facilityName, address, boostWikipedia);
-
-  // 【v5.2 新ルール1】縄文キーワード検知（自治体.lg.jp・文化庁 は免除）
-  const urlObj = new URL(url);
-  const domain = urlObj.hostname.toLowerCase();
-  const isLgJp = domain.includes('.lg.jp');
-  const isKunishitei = domain.includes('kunishitei.bunka.go.jp');
-
-  // グローバルスコープで初期化（try-catch外でも参照可能にする）
-  let hasJomonKeyword = false;
-  let hasJomonText = false;
-
-  // 【縄文キーワード判定（try-catch で安全化）】
-  try {
-    if (!isLgJp && !isKunishitei) {
-      // 自治体・文化庁以外はキーワードチェック必須
-      hasJomonKeyword = ALL_JOMON_KEYWORDS.some(kw => text.includes(kw.toLowerCase()));
-
-      if (!hasJomonKeyword) {
-        console.warn(`[VALIDATE] ❌ 縄文関連キーワード未検出（${domain}） → 破棄`);
-        return { valid: false, score: 0, domainScore };
-      }
-      console.log(`[VALIDATE] ✅ 縄文キーワード確認`);
-    } else if (isLgJp) {
-      // 自治体公式サイト（.lg.jp）はキーワードチェック免除
-      console.log(`[VALIDATE] ✅ 自治体公式サイト（.lg.jp）→ キーワード検判定免除`);
-    } else {
-      // 文化庁DB（kunishitei）はキーワードチェック免除
-      console.log(`[VALIDATE] ✅ 文化庁DB（kunishitei）→ キーワード検判定免除`);
-    }
-
-    // 【v5.0 新ルール2】NGキーワードによる即時除外
-    // NGワード: 弥生時代, 古墳時代, 戦国, 江戸, お城
-    // 縄文の文字がない場合のみ除外
-    hasJomonText = JOMON_KEYWORDS.some(kw => text.includes(kw.toLowerCase()));
-
-    if (!hasJomonText) {
-      // 縄文の文字がない場合、NGキーワードをチェック
-      const hasNgKeyword = NG_KEYWORDS.some(kw => text.includes(kw.toLowerCase()));
-      if (hasNgKeyword) {
-        console.warn(`[VALIDATE] ❌ NGキーワード検出（縄文なし） → 破棄`);
-        return { valid: false, score: 0, domainScore };
-      }
-    } else {
-      // 縄文の文字がある場合はOK（「縄文から古墳まで」のような表記も許可）
-      console.log(`[VALIDATE] ✅ 縄文が主体 → NGキーワードチェック不要`);
-    }
-  } catch (err) {
-    console.error(`[VALIDATE] ⚠️ キーワード判定エラー（スキップ）: ${err.message}`);
-    // エラーが起きても処理継続（フォールバック）
-    hasJomonKeyword = false;
-    hasJomonText = false;
-  }
-
-  // 【v5.3】画像数をカウント
-  const imageCount = countImages(html);
-  console.log(`[VALIDATE] 画像数: ${imageCount}枚`);
-
-  // 【v5.3】文字数と画像の判定：テキスト200文字以下で画像0枚は「ゴミ」
-  if (text.length <= 200 && imageCount === 0) {
-    console.warn(`[VALIDATE] ❌ コンテンツが貧弱（テキスト${text.length}文字、画像0枚） → 破棄`);
-    return { valid: false, score: 0, domainScore };
-  }
-
-  // テキスト長チェック（通常：300文字以上）
-  if (text.length < 300) {
-    console.warn(`[VALIDATE] ⚠️ コンテンツが短い（${text.length}文字、画像${imageCount}枚）`);
-    // 画像が2枚以上あれば許容
-    if (imageCount < 2) {
-      console.warn(`[VALIDATE] ❌ テキスト短 + 画像不足 → 破棄`);
-      return { valid: false, score: 0, domainScore };
-    }
-  }
-
-  // 【v5.3 修正】文化庁DB（kunishitei）の判定緩和
-  // 注: isKunishitei は既に上で定義済み（キーワードチェック免除処理）
-  if (isKunishitei) {
-    // 文化庁DB は以前より厳格だったが、テキスト主体のページが多いため緩和
-    // タイトルにキーワード組み合わせが含まれていれば採用OK
-    const kunPageTitle = extractPageTitle(html);
-    const kunKeywords = extractKeywords(facilityName);
-    const kunTitleMatchesKeywords = kunKeywords.length > 0 && kunKeywords.some(kw => kunPageTitle.includes(kw));
-
-    if (!kunTitleMatchesKeywords) {
-      console.warn(`[VALIDATE] ❌ 文化庁DB: タイトルに施設キーワード「${kunKeywords.join('・')}」が含まれていない → 採用禁止`);
-      return { valid: false, score: 0, domainScore };
-    }
-    console.log(`[VALIDATE] ✅ 文化庁DB: タイトルにキーワード確認 ✓ → 許可（画像要件は不要）`);
-  }
-
-  // 【v5.0 新ルール3】施設名の厳格マッチング（title/h1-h2検査）
-  const pageTitle = extractPageTitle(html);
-  const headings = extractHeadings(html);
-  const facilityNameLower = facilityName.toLowerCase();
-
-  // スコアリング：施設名の完全一致 + キーワード組み合わせ一致（ゆらぎ検索）
-  let nameMatchScore = 0;
-  let nameMatchLocation = '';
-
-  // キーワード抽出（例：「国指定史跡 鷲ノ木遺跡」→ ['鷲ノ木', '遺跡']）
-  const keywords = extractKeywords(facilityName);
-  const keywordMatchesInText = keywords.length > 0 && keywords.every(kw => text.includes(kw));
-
-  // 【100点】title に完全一致
-  if (pageTitle.includes(facilityNameLower)) {
-    nameMatchScore = 100;
-    nameMatchLocation = 'title（完全一致）';
-  }
-  // 【60点】title にキーワード組み合わせ一致
-  else if (keywords.length > 0 && keywords.some(kw => pageTitle.includes(kw))) {
-    const matchedKeywords = keywords.filter(kw => pageTitle.includes(kw));
-    nameMatchScore = 60;
-    nameMatchLocation = `title（キーワード: ${matchedKeywords.join('・')}）`;
-  }
-  // 【80点】h1/h2 に完全一致
-  else if (headings.some(h => h.includes(facilityNameLower))) {
-    nameMatchScore = 80;
-    nameMatchLocation = 'h1/h2（完全一致）';
-  }
-  // 【50点】h1/h2 にキーワード組み合わせ一致
-  else if (keywords.length > 0 && headings.some(h => keywords.some(kw => h.includes(kw)))) {
-    nameMatchScore = 50;
-    nameMatchLocation = 'h1/h2（キーワード一致）';
-  }
-  // 【50点】本文に完全一致
-  else if (text.includes(facilityNameLower)) {
-    nameMatchScore = 50;
-    nameMatchLocation = '本文（完全一致）';
-  }
-  // 【30点】本文にキーワード組み合わせ一致
-  else if (keywordMatchesInText) {
-    nameMatchScore = 30;
-    nameMatchLocation = '本文（キーワード組み合わせ）';
-  }
-  // 破棄：キーワードが本文に1つも含まれない
-  else {
-    console.warn(`[VALIDATE] ❌ 施設名のキーワード「${keywords.join('・')}」が本文に含まれていない → 破棄`);
-    return { valid: false, score: 0, domainScore };
-  }
-
-  console.log(`[VALIDATE] ✅ 施設名マッチング: ${nameMatchLocation} (スコア: ${nameMatchScore})`);
-
-  // 低信頼ドメイン（30点以下）で施設名スコアが50点未満の場合は厳格化
-  if (domainScore <= 30 && nameMatchScore < 50) {
-    console.warn(`[VALIDATE] ⚠️ ドメインスコア≤30点で施設名スコア<50点 → 破棄`);
-    return { valid: false, score: 0, domainScore };
-  }
-
-  // スコア計算（コンテンツスコア）
-  let contentScore = (hasJomonKeyword ? 10 : 0) + (text.length / 100) + nameMatchScore;
-
-  // 総合スコア = ドメイン重視 + コンテンツスコア
-  let totalScore = domainScore * 2 + contentScore;
-
-  console.log(`[VALIDATE] ✅ 検証成功 (ドメイン: ${domainScore}, コンテンツ: ${Math.floor(contentScore)}, 名前マッチ: ${nameMatchScore}, 合計: ${Math.floor(totalScore)})`);
-  return { valid: true, score: totalScore, domainScore, contentScore, nameMatchScore };
-}
-
-// ========== Gemini 再試行（404 回避） v5.1 ==========
-async function retryGeminiForUrls(failedUrls, facilityName, retryCount = 0) {
-  const maxRetries = failedUrls.length >= 5 ? 3 : 2;
-
-  if (retryCount >= maxRetries) {
-    console.warn(`[RETRY_GEMINI] ℹ️ リトライ上限（${maxRetries}回）に達しました`);
-    return [];
-  }
-
-  console.log(`\n[RETRY_GEMINI] ========== Gemini 再試行（第${retryCount + 1}回）==========`);
-  console.log(`[RETRY_GEMINI] 失敗した候補: ${failedUrls.join(', ')}`);
-
-  // 5つ全滅時の特別なメッセージ
-  const isFullFailure = failedUrls.length >= 5 && retryCount === 0;
-
-  const retryPrompt = isFullFailure
-    ? `
-施設「${facilityName}」について、さっきのURL候補がすべてアクセスできませんでした。
-
-もう一度だけ、『縄文』や『貝塚』という言葉が**確実に含まれている**公式サイトをあと3つ探してください。
-
-【特に以下のパターンを優先推測】
-- https://www.pref.{都道府県}.lg.jp/{施設名ローマ字}
-- https://city.{市名}.lg.jp/{施設名ローマ字}
-- https://www.pref.{都道府県}.lg.jp/{愛称ローマ字}
-
-優先順位：
-1. 自治体公式サイト（.lg.jp）下の施設名/愛称パターン
-2. 文化庁データベース（kunishitei.bunka.go.jp）
-3. 観光協会・Wikipedia など
-
-**JSON配列のみを返してください（説明不要）：**
-["url1", "url2", "url3"]
-`
-    : `
-施設「${facilityName}」について、以下のURLはすべてアクセスできませんでした：
-${failedUrls.map((u, i) => `${i + 1}. ${u}`).join('\n')}
-
-別の公開情報源から、この施設に関する信頼度の高いURLを3つ提案してください。
-
-【自治体.lg.jp パターン優先】
-特に以下のパターンを試してください：
-- https://www.pref.{都道府県}.lg.jp/{施設名ローマ字}
-- https://city.{市名}.lg.jp/{施設名ローマ字}
-
-優先順位：
-1. 公開サイト（.lg.jp、.go.jp、.or.jp など）
-2. 学術機関（大学、博物館公式サイト）
-3. Wikipedia
-
-**JSON配列のみを返してください（説明不要）：**
-["url1", "url2", "url3"]
-`;
-
-  try {
-    const response = await callGeminiAPI(retryPrompt);
-    const urls = await parseJsonWithFallback(response, facilityName, true, 0);
-
-    if (!urls || !Array.isArray(urls)) {
-      console.warn(`[RETRY_GEMINI] JSON パース失敗`);
-      return [];
-    }
-
-    console.log(`[RETRY_GEMINI] ✅ ${urls.length}個の新候補を取得: ${urls.join(', ')}`);
-    return urls || [];
-  } catch (error) {
-    console.warn(`[RETRY_GEMINI] エラー: ${error.message}`);
-    return [];
-  }
-}
-
-// ========== kunishitei フォールバック（最終手段） ==========
-async function findUrlViaKunishitei(facilityName, address) {
-  console.log(`\n[FALLBACK] ========== kunishitei.bunka.go.jp 最終検索 ==========`);
-  console.log(`[FALLBACK] Gemini の候補がすべて失敗。最後の手段として kunishitei を検索`);
-
-  const fallbackPrompt = `
-あなたは国指定史跡データベース（kunishitei.bunka.go.jp）の専門家です。
-施設「${facilityName}」に関するページのURLを kunishitei.bunka.go.jp 内で探してください。
-
-JSONオブジェクトのみを返してください（説明不要）：
-見つかった場合: {"found": true, "url": "https://kunishitei.bunka.go.jp/..."}
-見つからない場合: {"found": false}
-`;
-
-  try {
-    const fallbackResponse = await callGeminiAPI(fallbackPrompt);
-    const result = await parseJsonWithFallback(fallbackResponse, facilityName, false, 0);
-
-    if (!result) {
-      console.warn(`[FALLBACK] JSON パース失敗`);
-      return { valid: false, url: '' };
-    }
-
-    if (result.found && result.url) {
-      console.log(`[FALLBACK] kunishitei URL 候補: ${result.url}`);
-      const validation = await validateUrlWithContent(result.url, facilityName, address, false);
-      if (validation.valid) {
-        console.log(`[FALLBACK] ✅ kunishitei から採用: ${result.url}`);
-        return { valid: true, url: result.url };
-      }
-    }
-
-    console.warn(`[FALLBACK] kunishitei に該当ページが見つかりません`);
-    return { valid: false, url: '' };
-
-  } catch (error) {
-    console.warn(`[FALLBACK] エラー: ${error.message}`);
-    return { valid: false, url: '' };
-  }
-}
-
-// ========== URL 検証フロー（Wikipedia直行 → リトライ → kunishitei） v5.2 ==========
-async function validateCandidateUrls(facility, existingData) {
-  const { name: facilityName, address, prefecture, url: geminiUrl } = facility;
-  console.log(`\n[VALIDATE_FLOW] ========== URL 検証開始 ==========`);
-  console.log(`[VALIDATE_FLOW] 全ての候補を検証し、最高スコアを採用します`);
-
-  // 【v5.3】愛称を最優先で抽出
-  const nickname = extractNickname(facilityName);
-  console.log(`[VALIDATE_FLOW] 施設名: ${facilityName}`);
-  if (nickname) {
-    console.log(`[VALIDATE_FLOW] 愛称を検出: ${nickname}`);
-  }
-
-  // URL候補をコード側で構築（Gemini の candidates は使わない）
-  let allUrls = [];
-
-  // 【Step 1】Wikipedia URL を最優先で追加（404にならない安全な候補）
-  const wikiUrl = buildWikipediaUrl(facilityName);
-  allUrls.push(wikiUrl);
-  console.log(`[VALIDATE_FLOW] ✅ Wikipedia URL を先頭に追加: ${wikiUrl}`);
-
-  // 【Step 2】facility.url（Gemini が提示した自治体URL推測）を追加
-  if (facility && facility.url && facility.url.startsWith('http')) {
-    allUrls.push(facility.url);
-    console.log(`[VALIDATE_FLOW] Gemini 提示 URL を追加: ${facility.url}`);
-  }
-
-  // 【v5.3】愛称を含むURLを優先候補に追加
-  if (nickname) {
-    const nicknameUrls = [
-      `https://${nickname.toLowerCase()}.jp/`,
-      `https://www.${nickname.toLowerCase()}.jp/`,
-      `https://${nickname.toLowerCase()}.com/`,
-      `https://www.${nickname.toLowerCase()}.com/`
-    ];
-    console.log(`[VALIDATE_FLOW] 愛称関連URL候補を追加: ${nicknameUrls.length}個`);
-    allUrls = [...allUrls, ...nicknameUrls];
-  }
-
-  // Google Custom Search API が有効なら結果を追加（エラーの場合は無視して続行）
-  if (useGoogleSearch) {
-    try {
-      const googleUrls = await searchWithGoogleAPI(facilityName, address);
-      if (googleUrls.length > 0) {
-        console.log(`[VALIDATE_FLOW] ✅ Google 検索結果を追加: ${googleUrls.length}個`);
-        allUrls = [...allUrls, ...googleUrls];
-      } else {
-        console.log(`[VALIDATE_FLOW] ⚠️ Google 検索結果なし（Gemini候補のみで継続）`);
-      }
-    } catch (err) {
-      console.warn(`[VALIDATE_FLOW] ⚠️ Google Search API エラー（${err.message}） → スキップして続行`);
-      // エラーが起きても処理継続（リトライフェーズへ移行）
-    }
-  }
-
-  const scoredUrls = allUrls
-    .filter(url => url && url.trim() !== '')
-    .map(url => ({
-      url: url.trim(),
-      domainScore: scoreUrlByDomain(url, facilityName, address, false)
-    }))
-    .sort((a, b) => b.domainScore - a.domainScore);
-
-  // 重複排除
-  const uniqueUrls = [];
-  const seen = new Set();
-  for (const item of scoredUrls) {
-    if (!seen.has(item.url.toLowerCase())) {
-      seen.add(item.url.toLowerCase());
-      uniqueUrls.push(item);
-    }
-  }
-
-  console.log(`[VALIDATE_FLOW] ドメインスコア順にソート（重複排除後: ${uniqueUrls.length}個）:`);
-  uniqueUrls.slice(0, 5).forEach(item => {
-    console.log(`  - ${item.url} (${item.domainScore}点)`);
-  });
-
-  // フェーズ1: Gemini 初期候補を全て検証（404チェック + コンテンツ検証 + スコアリング）
-  console.log(`[VALIDATE_FLOW] フェーズ1: ${scoredUrls.length} 個の候補を全検証`);
-
-  const validResults = [];
-  const failedUrls = [];
-
-  for (let index = 0; index < uniqueUrls.length; index++) {
-    const item = uniqueUrls[index];
-    const url = item.url;
-
-    console.log(`\n[VALIDATE_FLOW] [${index + 1}/${uniqueUrls.length}] ${url} (推定スコア: ${item.domainScore}点)`);
-
-    try {
-      // ページ取得 + 404チェック
-      const pageResult = await fetchPageContent(url);
-
-      if (!pageResult.success || pageResult.statusCode === 404) {
-        console.warn(`[VALIDATE_FLOW] ❌ 404 またはアクセス不可`);
-        failedUrls.push(url);
-        continue;
-      }
-
-      // コンテンツ検証（スコア付き）- 最初のフェーズではWikipedia優遇なし
-      const result = await validateUrlWithContent(url, facilityName, address, false);
-      if (result.valid) {
-        console.log(`[VALIDATE_FLOW] ✅ 有効 (スコア: ${Math.floor(result.score)})`);
-        validResults.push({ url, score: result.score, domainScore: result.domainScore, contentScore: result.contentScore });
-      } else {
-        console.warn(`[VALIDATE_FLOW] ❌ コンテンツ検証失敗`);
-        failedUrls.push(url);
-      }
-    } catch (err) {
-      console.warn(`[VALIDATE_FLOW] ⚠️ エラー（${err.message}） → スキップして次の候補へ`);
-      failedUrls.push(url);
-    }
-  }
-
-  // 有効な候補があればベストを返す
-  if (validResults.length > 0) {
-    const best = validResults.reduce((a, b) => a.score > b.score ? a : b);
-    console.log(`\n[VALIDATE_FLOW] 🏆 最高スコア採用: ${best.url}`);
-    console.log(`[VALIDATE_FLOW] スコア内訳：ドメイン=${best.domainScore}, コンテンツ=${Math.floor(best.contentScore)}, 合計=${Math.floor(best.score)}`);
-    return { valid: true, url: best.url, source: 'Gemini候補', score: best.score, domainScore: best.domainScore };
-  }
-
-  console.warn(`[VALIDATE_FLOW] ⚠️ 有効な候補がありません。Gemini リトライに進みます`);
-
-  // 自治体サイト（.lg.jp）が全滅したかチェック
-  const hasLgJpUrl = failedUrls.some(url => url.includes('.lg.jp'));
-  const noLgJpValid = !validResults.some(r => r.domainScore >= 100);
-  const allLgJpFailed = hasLgJpUrl && noLgJpValid;
-
-  if (allLgJpFailed) {
-    console.warn(`[VALIDATE_FLOW] ⚠️ 自治体サイト（.lg.jp）が全滅。Wikipedia優遇モードに切り替え`);
-  }
-
-  // フェーズ2: Gemini 再試行（最大2回、ただし5候補全滅時のみ追加リトライ）
-  let retryUrls = [];
-  let maxRetryAttempts = failedUrls.length >= 5 ? 3 : 2;
-
-  for (let retryAttempt = 0; retryAttempt < maxRetryAttempts; retryAttempt++) {
-    console.log(`[VALIDATE_FLOW] フェーズ2-${retryAttempt + 1}: Gemini 再試行（${maxRetryAttempts}回まで）`);
-
-    const newUrls = await retryGeminiForUrls(failedUrls.slice(0, 5), facilityName, retryAttempt);
-    if (newUrls.length === 0) {
-      console.warn(`[VALIDATE_FLOW] 再試行でも新候補を取得できません`);
-      continue;
-    }
-
-    // 再試行候補もドメインスコア順にソート（自治体全滅時はWikipedia優遇）
-    const sortedRetryUrls = newUrls
-      .filter(url => url && url.trim() !== '')
-      .map(url => ({
-        url: url.trim(),
-        domainScore: scoreUrlByDomain(url, facilityName, address, allLgJpFailed)
-      }))
-      .sort((a, b) => b.domainScore - a.domainScore);
-
-    retryUrls = sortedRetryUrls.map(item => item.url);
-    const retryResults = [];
-
-    // 再試行候補を検証
-    for (let index = 0; index < sortedRetryUrls.length; index++) {
-      const item = sortedRetryUrls[index];
-      const url = item.url;
-
-      console.log(`\n[VALIDATE_FLOW] [リトライ ${retryAttempt + 1}回目-${index + 1}/${sortedRetryUrls.length}] ${url} (推定スコア: ${item.domainScore}点)`);
-
-      const pageResult = await fetchPageContent(url);
-      if (!pageResult.success || pageResult.statusCode === 404) {
-        console.warn(`[VALIDATE_FLOW] ❌ 404 またはアクセス不可`);
-        continue;
-      }
-
-      const result = await validateUrlWithContent(url, facilityName, address, allLgJpFailed);
-      if (result.valid) {
-        console.log(`[VALIDATE_FLOW] ✅ 有効 (スコア: ${Math.floor(result.score)})`);
-        retryResults.push({ url, score: result.score, domainScore: result.domainScore, contentScore: result.contentScore });
-      }
-    }
-
-    // 再試行で有効候補が見つかれば採用
-    if (retryResults.length > 0) {
-      const best = retryResults.reduce((a, b) => a.score > b.score ? a : b);
-      console.log(`\n[VALIDATE_FLOW] 🏆 再試行から採用: ${best.url}`);
-      console.log(`[VALIDATE_FLOW] スコア内訳：ドメイン=${best.domainScore}, コンテンツ=${Math.floor(best.contentScore)}, 合計=${Math.floor(best.score)}`);
-      return { valid: true, url: best.url, source: 'Gemini再試行', score: best.score, domainScore: best.domainScore };
-    }
-  }
-
-  console.warn(`[VALIDATE_FLOW] ⚠️ Gemini リトライも失敗。kunishitei に進みます`);
-
-  // フェーズ3: kunishitei フォールバック（最終手段）
-  console.log(`[VALIDATE_FLOW] フェーズ3: kunishitei.bunka.go.jp 最終検索`);
-  const fallbackResult = await findUrlViaKunishitei(facilityName, address);
-  if (fallbackResult.valid) {
-    console.log(`[VALIDATE_FLOW] kunishitei から採用 (ドメインスコア: 30)`);
-    return { valid: true, url: fallbackResult.url, source: 'kunishitei', score: 50, domainScore: 30 };
-  }
-
-  console.error(`[VALIDATE_FLOW] ❌ 全ての検索方法で有効な URL が見つかりません`);
-  return { valid: false, url: '' };
-}
-
-// ========== 画像生成（Pollinations AI 固定・認証不要） ==========
-async function generateFacilityImage(facilityId, facilityName, description) {
-  // Pollinations AI は認証不要・完全無料のため、OpenAI依存を断ち POLLINATIONS_AI のみ使用
-
-  const imagesDir = path.join(__dirname, '../public/images/facilities');
-
-  if (!fs.existsSync(imagesDir)) {
-    fs.mkdirSync(imagesDir, { recursive: true });
-  }
-
-  const outputPath = path.join(imagesDir, `${facilityId}_ai.png`);
-
-  // プロンプト生成（エラーハンドリング強化）
-  let prompt = '';
-  try {
-    prompt = await generatePrompt(facilityName, description);
-  } catch (promptError) {
-    console.warn(`[IMAGE] ⚠️ プロンプト生成失敗: ${promptError.message}`);
-    // フォールバック：基本的なプロンプトを使用
-    prompt = `Jomon period archaeological site: ${facilityName}. Ancient pottery, shell middens, stone circles.`;
-  }
-
-  if (!prompt) {
-    console.warn(`[IMAGE] ⚠️ プロンプトが空です。スキップします`);
-    return '';
-  }
-
-  // リトライ最大5回（成功率重視）
-  const MAX_RETRIES = 5;
-  const getWaitTime = (attempt) => {
-    // 試行ごとの待機時間：15秒、30秒、30秒、30秒、30秒
-    const waitTimes = [15000, 30000, 30000, 30000, 30000];
-    return waitTimes[attempt - 1] || 30000;
-  };
-
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      console.log(`[IMAGE] [${facilityId}] Pollinations AI にリクエスト中... (試行 ${attempt}/${MAX_RETRIES})`);
-
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1792&height=1024&nologo=true`;
-
-      const response = await fetch(imageUrl, { timeout: 60000 });
-
-      if (response.ok) {
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        fs.writeFileSync(outputPath, buffer);
-
-        console.log(`[IMAGE] ✅ [${facilityId}] 生成・保存成功 (${buffer.length} bytes)`);
-        return `/images/facilities/${facilityId}_ai.png`;
-      }
-
-      // 502, 429 などの一時エラーの場合はリトライ
-      if ((response.status === 502 || response.status === 429) && attempt < MAX_RETRIES) {
-        const waitTime = getWaitTime(attempt);
-        console.warn(`[IMAGE] ⚠️ [${facilityId}] HTTP ${response.status}. ${waitTime}ms 待機後にリトライします... (${attempt + 1}/${MAX_RETRIES}へ)`);
-        await new Promise(r => setTimeout(r, waitTime));
-        continue;
-      }
-
-      throw new Error(`HTTP ${response.status}`);
-    } catch (error) {
-      if (attempt === MAX_RETRIES) {
-        console.warn(`[IMAGE] ❌ [${facilityId}] ${MAX_RETRIES}回失敗: ${error.message}`);
-        return '';
-      }
-      const waitTime = getWaitTime(attempt);
-      console.warn(`[IMAGE] ⚠️ [${facilityId}] 試行${attempt}失敗: ${error.message}. ${waitTime}ms 待機後にリトライ...`);
-      await new Promise(r => setTimeout(r, waitTime));
-    }
-  }
-
-  return '';
-}
-
-// ========== 一括画像再生成（指定IDの画像を再生成） ==========
-async function regenerateImages(facilityData, startId = 52, endId = 67) {
-  console.log(`\n[REGENERATE] ========== 画像一括再生成開始 (ID ${startId}-${endId}) ==========`);
-
-  let updatedCount = 0;
-
-  for (const facility of facilityData) {
-    const facilityId = parseInt(facility.id);
-
-    if (facilityId < startId || facilityId > endId) {
-      continue;
-    }
-
-    console.log(`\n[REGENERATE] [${facilityId}/${endId}] ${facility.name}`);
-
-    try {
-      const imageUrl = await generateFacilityImage(
-        facility.id,
-        facility.name,
-        facility.description
-      );
-
-      if (imageUrl) {
-        facility.thumbnail = imageUrl;
-        updatedCount++;
-        console.log(`[REGENERATE] ✅ 更新: ${facility.name}`);
-
-        // API制限回避のため待機
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-    } catch (error) {
-      console.warn(`[REGENERATE] ⚠️ ${facility.name}: ${error.message}`);
-    }
-  }
-
-  console.log(`\n[REGENERATE] ✅ 完了: ${updatedCount}件の画像を再生成`);
-  return updatedCount;
+if (!API_KEY) {
+  console.error("[FATAL] GEMINI_API_KEY が設定されていません");
+  process.exit(1);
 }
 
 // ========== メイン処理 ==========
 async function main() {
-  const filePath = path.join(__dirname, '../app/data/facilities.json');
+  try {
+    console.log(`[CRAWLER] ========== クローラー開始 ==========`);
 
-  console.log('\n[CRAWLER] ========== クローラー開始 ==========');
-  console.log(`[CRAWLER] データファイル: ${filePath}`);
-
-  // 既存データ読み込み
-  let existingData = [];
-  if (fs.existsSync(filePath)) {
-    const raw = fs.readFileSync(filePath, 'utf-8');
-    existingData = JSON.parse(raw);
+    // 既存データ読み込み
+    const existingData = JSON.parse(fs.readFileSync(FACILITIES_PATH, "utf-8"));
     console.log(`[CRAWLER] 既存データ: ${existingData.length} 件`);
-  }
 
-  const existingNames = existingData.map(f => `- ${f.name}`).join('\n');
-  const regions = ['北海道', '東北', '関東', '中部', '近畿', '中国', '四国', '九州'];
-  const randomRegion = regions[Math.floor(Math.random() * regions.length)];
+    // 既存施設名リスト
+    const existingNames = existingData
+      .map((f) => f.name.replace(/【.*?】/g, "").trim())
+      .join("\n");
 
-  const prompt = `
+    // ランダムに地域選択
+    const randomRegion = regions[Math.floor(Math.random() * regions.length)];
+    console.log(`[CRAWLER] ターゲット地域: ${randomRegion}`);
+
+    // Gemini API呼び出し
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+
+    const prompt = `
 日本の縄文時代における遺跡・博物館の専門家になってください。
-「すでに登録済みの施設リスト」に含まれていない、日本国内の重要な縄文時代の遺跡・博物館・考古館を3件ピックアップしてください。
+「すでに登録済みの施設リスト」に含まれていない、${randomRegion}地方の重要な縄文時代の遺跡・博物館・考古館を最大3件ピックアップしてください。
 
-【既存リスト（これらは除外）】
+【既存リスト（除外）】
 ${existingNames}
 
-【条件】
-- ターゲット地方: ${randomRegion}地方
+【必須】
 - 縄文時代のみ
-- 公立博物館または国指定史跡
+- 実在する施設
+- 日本語で記述
 
-【出力】
+【JSON形式（配列）】
+[{
+  "id": "001-999の数字",
+  "name": "施設名",
+  "prefecture": "都道府県",
+  "address": "住所",
+  "description": "説明（100字以内）",
+  "region": "${randomRegion}",
+  "url": "公式URL またはWikipedia",
+  "tags": ["tag1", "tag2"],
+  "lat": 緯度,
+  "lng": 経度,
+  "access": {
+    "train": "電車アクセス",
+    "bus": "バスアクセス",
+    "car": "車アクセス",
+    "rank": "ランク（S/A/B）"
+  },
+  "copy": "キャッチコピー"
+}]
 
-JSON配列のみを返してください。改行や説明は一切不要です。
+JSON配列のみ出力。説明や注釈は不要。`;
 
-各施設は以下のフォーマットで記載：
-- id: 英数字ハイフン
-- name: 施設の正式名称
-- prefecture: 都道府県名
-- address: 住所
-- description: 100文字以内（改行禁止）
-- region: Hokkaido / Tohoku / Kanto / Chubu / Kinki / Chugoku / Shikoku / Kyushu
-- url: 可能なら施設公式の自治体URL（例: https://www.pref.aomori.jp/rekishi/...）。不明なら空文字""でよい
-- tags: 最大2個。【許可タグのみ使用】世界遺産、博物館、国宝、土偶、貝塚、土器、環状列石。他のタグは絶対に使わないこと。
-- lat: 緯度
-- lng: 経度
-- access: train, bus, car, rank
-- copy: 14文字以内
-- その他: name_en, description_en など
+    console.log(`[CRAWLER] Gemini API にリクエスト...`);
 
-【重要】
-- JSON配列だけを出力
-- 説明は絶対に含めない
-- descriptonは1行（改行なし）
-- *** などの特殊文字は使わない
-- URL候補には https:// で始まる完全なURLのみ
-- 【最優先】候補URLは404ページではなく、確実に生きているページのみ。公式ウェブサイトのトップページ、Wikipedia の関連記事、自治体の博物館紹介ページなど信頼できるソースを選べ。
-- 施設名が日本語の場合、Wikipedia の日本語記事も候補に含めよ（日本語版 Wikipedia は最も信頼度が高い）。
-`;
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 1,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 8192,
+      },
+      tools: [], // グラウンディング無効
+    });
 
+    const responseText = result.response.text();
+    console.log(`[CRAWLER] API レスポンス受信（${responseText.length}文字）`);
 
-  try {
-    console.log(`[CRAWLER] Gemini API にリクエスト (地方: ${randomRegion})...`);
-
-    const responseText = await callGeminiAPI(prompt);
-    console.log(`[CRAWLER] API レスポンス受信（長さ: ${responseText.length}文字）`);
-
-    // JSON 抽出・パース（クリーニング + 自動修復 + リトライ対応）
-    console.log(`[CRAWLER] API レスポンス長: ${responseText.length}文字`);
-
-    const candidates = await parseJsonWithFallback(responseText, '新規施設', true, 0);
-
-    if (!candidates || !Array.isArray(candidates) || candidates.length === 0) {
-      console.log('[CRAWLER] ❌ 有効な候補がありません');
+    // JSON抽出
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) {
+      console.log("[CRAWLER] ❌ JSON配列が見つかりません");
       console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
       return;
     }
 
-    console.log(`[CRAWLER] ✅ AI が ${candidates.length} 件の候補を返却`);
+    let candidates;
+    try {
+      candidates = JSON.parse(jsonMatch[0]);
+    } catch (parseErr) {
+      console.log(`[CRAWLER] ❌ JSON パース失敗: ${parseErr.message}`);
+      console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
+      return;
+    }
 
-    // 1 件制限で追加
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+      console.log("[CRAWLER] ❌ 有効な候補がありません");
+      console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
+      return;
+    }
+
+    console.log(`[CRAWLER] ✅ ${candidates.length}件の候補を取得`);
+
+    // 既存データに追加
     let addedCount = 0;
     for (const candidate of candidates) {
-      if (addedCount >= 1) break;
+      if (addedCount >= 3) break; // 最大3件まで
 
-      // 厳密な重複チェック：完全一致のみ（部分マッチは許容）
-      const isDuplicate = existingData.some(f => {
-        // 元の名前（前後スペース除去）で完全一致チェック
-        const existingName = f.name.replace(/【.*?】/g, '').trim();
-        const candidateName = candidate.name.trim();
-        return existingName === candidateName;
+      // 重複チェック
+      const isDuplicate = existingData.some((f) => {
+        const existingName = f.name.replace(/【.*?】/g, "").trim();
+        return existingName === candidate.name.trim();
       });
 
       if (isDuplicate) {
-        console.log(`[DUPLICATE] 完全一致で既存データにあるためスキップ: ${candidate.name}`);
-        continue;
-      }
-      console.log(`[DUPLICATE_CHECK] ✅ 重複なし: ${candidate.name} は新規追加対象`);
-
-      console.log(`\n[PROCESS] ${candidate.name} - URL 検証開始`);
-
-      // candidate オブジェクト全体を渡す（Wikipedia + facility.url で候補を構築）
-      const urlValidation = await validateCandidateUrls(candidate, existingData);
-
-      if (!urlValidation.valid) {
-        console.warn(`[PROCESS] ❌ ${candidate.name} - URL 検証失敗（全候補が不適切）`);
+        console.log(`[SKIP] 重複: ${candidate.name}`);
         continue;
       }
 
-      candidate.url = urlValidation.url;
-      delete candidate.candidates;
-
-      console.log(`[URL_CONFIRMED] ✅ ${candidate.name} → ${candidate.url}`);
-
-      // 【v4.0 新機能】【要確認】ラベルの自動付与（ドメインスコア < 100点）
-      // ただし、ユーザーが管理画面で承認した場合は付与しない
-      const domainScore = urlValidation.domainScore || 0;
-      const isUserApproved = candidate.userApproved === true;  // 管理画面で削除済みフラグ
-
-      if (domainScore < 100 && !isUserApproved) {
-        // 【要確認】を付与
-        candidate.name = `【要確認】${candidate.name}`;
-        candidate.needsCheck = true;
-        candidate.userApproved = false;  // ユーザー未承認フラグ
-        console.warn(`[NEEDS_CHECK] ⚠️ ドメインスコア ${domainScore}点 < 100点 → 【要確認】ラベル付与`);
-      } else if (domainScore < 100 && isUserApproved) {
-        // ユーザーが既に承認済み（【要確認】を削除済み）
-        candidate.needsCheck = false;
-        console.log(`[NEEDS_CHECK] ✅ ドメインスコア ${domainScore}点 < 100点ですが、ユーザー承認済みのため【要確認】ラベルなし`);
-      } else {
-        candidate.needsCheck = false;
-        candidate.userApproved = true;  // 100点以上なら自動承認扱い
-      }
-
-      // アクセス情報の補完（不完全でも追加を続行）
-      if (!candidate.access) {
-        candidate.access = { train: 'なし', bus: 'なし', car: 'なし', rank: 'C' };
-        console.warn(`[ACCESS_INCOMPLETE] ⚠️ ${candidate.name} - アクセス情報を補完して追加`);
-      } else {
-        if (!candidate.access.train) candidate.access.train = 'なし';
-        if (!candidate.access.bus) candidate.access.bus = 'なし';
-        if (!candidate.access.car) candidate.access.car = 'なし';
-        if (!candidate.access.rank) candidate.access.rank = 'C';
-      }
-
-      // タグの処理（65施設目以降は description から自動抽出）
-      if (existingData.length >= 64) {
-        // 新規施設（ID 065以降）: description から自動抽出
-        candidate.tags = extractTagsFromDescription(candidate.description, candidate.name);
-        console.log(`[TAG_AUTO_EXTRACT] ✅ タグを description から自動抽出: [${candidate.tags.join(', ') || 'なし'}]`);
-      } else {
-        // 既存施設対応時向け（実際には起きない）
-        candidate.tags = filterAndValidateTags(candidate.tags);
-        console.log(`[TAG_FILTER] ✅ タグを許可リストでフィルタリング: [${candidate.tags.join(', ') || 'なし'}]`);
-      }
-
-      // ID生成
-      const nextId = String(existingData.length + 1).padStart(3, '0');
+      // 次のID計算
+      const nextId = String(Math.max(...existingData.map((f) => parseInt(f.id) || 0)) + 1).padStart(3, "0");
       candidate.id = nextId;
-      console.log(`[ID_ASSIGNED] ID割り当て: ${nextId}`);
 
-      // 画像生成
-      const imageUrl = await generateFacilityImage(nextId, candidate.name, candidate.description);
-      candidate.thumbnail = imageUrl || '';
-      console.log(`[IMAGE_COMPLETE] 画像生成完了: ${imageUrl || '（スキップ）'}`);
+      // デフォルト値補完
+      if (!candidate.access) candidate.access = { train: "なし", bus: "なし", car: "なし", rank: "C" };
+      if (!candidate.lat) candidate.lat = 0;
+      if (!candidate.lng) candidate.lng = 0;
+      if (!candidate.tags) candidate.tags = [];
 
-      // メモリに追加
-      console.log(`[PUSH_DATA] existingData に追加前のサイズ: ${existingData.length} 件`);
       existingData.push(candidate);
-      console.log(`[PUSH_DATA] ✅ existingData に追加完了。新サイズ: ${existingData.length} 件`);
-
       addedCount++;
-      console.log(`[ADDED] ✅ [${nextId}] ${candidate.name} を追加キューに登録（ループ内での追加完了）`);
+      console.log(`[ADD] ✅ ${candidate.name} (ID: ${candidate.id})`);
     }
 
-    // ファイル保存（エラーハンドリング強化 + 物理的確認）
-    try {
-      const jsonData = JSON.stringify(existingData, null, 2);
-      console.log(`\n[FILE_SAVE] ファイル保存開始: ${filePath}`);
-      console.log(`[FILE_SAVE] 対象データ: ${existingData.length} 件、JSON サイズ: ${jsonData.length} bytes`);
-
-      fs.writeFileSync(filePath, jsonData, 'utf-8');
-
-      // 物理的に保存されたかを確認
-      if (fs.existsSync(filePath)) {
-        const stats = fs.statSync(filePath);
-        console.log(`[FILE_SAVE] ✅ ファイル保存成功: ${filePath}`);
-        console.log(`[FILE_SAVE] ✅ ファイルサイズ: ${stats.size} bytes（確認済み）`);
-        console.log(`\n[RESULT] ✅ ${addedCount} 件追加、合計 ${existingData.length} 件を facilities.json に書き込み完了`);
-      } else {
-        throw new Error('ファイルが存在しません（保存確認失敗）');
-      }
-    } catch (saveError) {
-      console.error(`[SAVE_ERROR] ⚠️ facilities.json の保存に失敗: ${saveError.message}`);
-      console.error(`[SAVE_ERROR] ⚠️ メモリ上のデータ: ${existingData.length} 件（物理保存未確認）`);
-      console.log(`[RESULT] データベース保存失敗 (メモリ上: ${existingData.length} 件)`);
-      // エラーが起きても処理を継続（process.exit しない）
+    if (addedCount > 0) {
+      fs.writeFileSync(FACILITIES_PATH, JSON.stringify(existingData, null, 2), "utf-8");
+      console.log(`[RESULT] ${addedCount}件を追加しました。合計: ${existingData.length}件`);
+    } else {
+      console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
     }
-
   } catch (error) {
-    console.error(`[FATAL] クローラーエラー: ${error.message}`);
-    console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
-    process.exit(0);
+    console.error("[FATAL] エラー:", error.message);
+    process.exit(1);
   }
 }
 
-// ========== 実行 ==========
-
-// 環境変数で実行モードを指定
-const REGENERATE_MODE = process.env.REGENERATE_IMAGES === 'true';
-const REGENERATE_START = parseInt(process.env.REGENERATE_START || '52');
-const REGENERATE_END = parseInt(process.env.REGENERATE_END || '67');
-
-if (REGENERATE_MODE) {
-  // 画像再生成モード
-  (async () => {
-    const filePath = path.join(__dirname, '../app/data/facilities.json');
-
-    try {
-      console.log(`\n[REGENERATE_MODE] 画像一括再生成モード起動`);
-
-      let facilityData = [];
-      if (fs.existsSync(filePath)) {
-        const raw = fs.readFileSync(filePath, 'utf-8');
-        facilityData = JSON.parse(raw);
-        console.log(`[REGENERATE_MODE] 既存データ読み込み: ${facilityData.length} 件`);
-      }
-
-      const updatedCount = await regenerateImages(facilityData, REGENERATE_START, REGENERATE_END);
-
-      // JSON保存（エラーハンドリング強化）
-      try {
-        fs.writeFileSync(filePath, JSON.stringify(facilityData, null, 2), 'utf-8');
-        console.log(`\n[REGENERATE_MODE] ✅ JSON更新完了: ${updatedCount}件の画像を再生成・保存`);
-        process.exit(0);
-      } catch (saveError) {
-        console.error(`[REGENERATE_MODE] ⚠️ JSON保存失敗: ${saveError.message}`);
-        console.log(`[REGENERATE_MODE] ⚠️ ${updatedCount}件の画像生成は成功しましたが、ファイル保存に失敗しました`);
-        process.exit(0);  // 部分的成功として exit(0)
-      }
-    } catch (error) {
-      console.error(`[REGENERATE_MODE] ❌ エラー: ${error.message}`);
-      process.exit(1);
-    }
-  })();
-} else {
-  // 通常モード
-  main().catch(error => {
-    console.error(`[ERROR] クローラーメイン処理エラー: ${error.message}`);
-    console.error(`[ERROR] スタックトレース: ${error.stack}`);
-    console.log(`[RESULT] エラーが発生しましたが、既存データを維持します`);
-    // 部分的成功として exit(0) で終了
-    process.exit(0);
-  });
-}
+main();
