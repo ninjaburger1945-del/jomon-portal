@@ -2415,7 +2415,7 @@
     "address": "愛媛県松山市南斎院町乙456",
     "description": "松山市内の遺跡から出土した膨大な資料を収蔵・展示する施設です。縄文時代の最大の見どころは、重要文化財である「四国のヴィーナス」と呼ばれる土偶（南町遺跡出土）です。写実的で端正な顔立ちを持つこの土偶は、当時の精神文化の高さを今に伝えています。館内では瀬戸内海沿岸特有の押型文土器や石器なども豊富に展示されており、四国地方における縄文人の生活様式や文化の広がりを体系的に学べる重要な拠点です。",
     "region": "四国",
-    "url": "https://www.cul-spo.or.jp/m-kouko/",
+    "url": "https://www.city.matsuyama.ehime.jp/shisetsu/bunka/maibun_koukokan.html",
     "tags": [
       "四国のヴィーナス",
       "土偶",
@@ -2430,6 +2430,9 @@
       "rank": "A"
     },
     "copy": "「四国のヴィーナス」が微笑む、瀬戸内縄文文化の発信拠点。",
-    "thumbnail": "/images/facilities/078_ai.png"
+    "thumbnail": "/images/facilities/078_ai.png",
+    "access_public": "JR予讃線「松山駅」からタクシーで約10分。伊予鉄バス（空港線ほか）「考古館前」停留所下車すぐ",
+    "access_car": "松山自動車道「松山IC」から約20分（無料駐車場あり）",
+    "userApproved": true
   }
 ]
