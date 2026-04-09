@@ -366,12 +366,9 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
       }
 
       if (attempt < maxRetries) {
-        // 503 の場合は非常に長く待機（API過負荷対策）
-        const is503 = error.message.includes('503');
-        const jitter = Math.random() * 10000;  // 0-10秒のランダムジッタ
-        const delayMs = is503
-          ? (60000 * attempt) + jitter  // 503: 60秒 * 試行回数 + ジッタ
-          : 5000 * Math.pow(2, attempt - 1) + jitter;  // 他エラー: 指数バックオフ
+        // 短めの待機で十分（指数バックオフ）
+        const jitter = Math.random() * 2000;  // 0-2秒のランダムジッタ
+        const delayMs = (3000 * Math.pow(2, attempt - 1)) + jitter;  // 3s, 6s, 12s, 24s...
         console.log(`[RETRY] ${Math.floor(delayMs)}ms 待機後にリトライ (試行 ${attempt}/${maxRetries})...`);
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
