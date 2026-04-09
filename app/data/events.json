@@ -327,5 +327,20 @@
     "url": "https://www.hyogo-koukohaku.jp/",
     "category": "企画展",
     "description": "縄文時代の人々が何を食べていたのかを学ぶ体験教室です。"
+  },
+  {
+    "id": "evt-049-1775747137019-0",
+    "title": "「国宝 縄文の女神」（レプリカ）常設展示",
+    "date_start": "2026-04-17",
+    "date_end": "2026-11-15",
+    "time": "10:00-16:00",
+    "location": "舟形町歴史民俗資料館",
+    "location_id": "049",
+    "facility_name": "舟形町歴史民俗資料館",
+    "prefecture": "山形県",
+    "region": "Tohoku",
+    "url": "https://www.town.funagata.yamagata.jp/s029/map/map02/010/020/20210907150405.html",
+    "category": "企画展",
+    "description": "西ノ前遺跡より発掘された、日本最大（高さ45センチ）の八頭身美人土偶「縄文の女神」のレプリカを常設展示しています。"
   }
 ]
