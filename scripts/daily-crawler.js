@@ -1218,7 +1218,7 @@ async function main() {
   const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
   // ⭐ 1件集中モード：最も確実な1件だけを完璧に返す
-  const prompt = `Most important Jomon site in ${randomRegion} region. JSON array with: id, name, prefecture, address, description (50 chars), region, url, tags, lat, lng, access (train, bus, car, rank), copy. Return ONLY the JSON array.`;
+  const prompt = `Return JSON for best Jomon site in ${randomRegion}. EXAMPLE: [{"id":"001","name":"Name","prefecture":"Pref","address":"Addr","description":"Desc","region":"${randomRegion}","url":"http","tags":["tag"],"lat":0,"lng":0,"access":{"train":"T","bus":"B","car":"C","rank":"R"},"copy":"Copy"}]. Output ONLY JSON, nothing else.`;
 
 
 
