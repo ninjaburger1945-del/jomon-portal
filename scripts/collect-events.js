@@ -128,7 +128,14 @@ ${textContent}`;
 
         let extractedData = '[]';
         try {
-          const result = await model.generateContent(geminiPrompt);
+          const result = await model.generateContent({
+            contents: [{ role: 'user', parts: [{ text: geminiPrompt }] }],
+            tools: [],
+            generationConfig: {
+              temperature: 0.1,
+              maxOutputTokens: 2048
+            }
+          });
           const responseText = result.response.text().trim();
 
           // JSON 抽出（マークダウンブロック対応）

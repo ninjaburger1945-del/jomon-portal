@@ -71,7 +71,14 @@ ${scrapeContext}
     let retries = 3;
     while (retries > 0) {
         try {
-            const result = await model.generateContent(prompt);
+            const result = await model.generateContent({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              tools: [],
+              generationConfig: {
+                temperature: 0.1,
+                maxOutputTokens: 2048
+              }
+            });
             let text = result.response.text().trim();
             if (text.startsWith('```json')) text = text.substring(7);
             if (text.startsWith('```')) text = text.substring(3);

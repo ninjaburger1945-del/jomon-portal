@@ -391,7 +391,7 @@ async function callGeminiAPI(prompt, isRetry = false) {
 - NO line breaks or extra text outside the JSON
 - JSON must be valid and parseable immediately`;
 
-  // ⭐ 最小構成のリクエスト - 不要なオプション一切なし
+  // ⭐ 最小構成のリクエスト - グラウンディング明示的無効化
   const requestBody = {
     systemInstruction: {
       parts: [{
@@ -405,8 +405,9 @@ async function callGeminiAPI(prompt, isRetry = false) {
     }],
     generationConfig: {
       temperature: 0.1,  // より決定的な出力のため低い温度
-      maxOutputTokens: isRetry ? 500 : 1000  // ⭐ 大幅増加：途中で切れ込み防止
-    }
+      maxOutputTokens: 2048  // ⭐ 出力制限解除：JSON完全出力を確実に
+    },
+    tools: []  // ⭐ CRITICAL: グラウンディング・検索レトリーバルを完全無効化
   };
 
   // ⭐ デバッグログ：実際に叩く URL とリクエストを出力

@@ -56,7 +56,14 @@ ${facility.access.advice}
             let attempts = 0;
             while (!success && attempts < 3) {
                 try {
-                    const result = await model.generateContent(prompt);
+                    const result = await model.generateContent({
+                      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                      tools: [],
+                      generationConfig: {
+                        temperature: 0.1,
+                        maxOutputTokens: 2048
+                      }
+                    });
                     let respText = result.response.text();
                     respText = respText.replace(/```json/g, '').replace(/```/g, '').trim();
                     const parsed = JSON.parse(respText);

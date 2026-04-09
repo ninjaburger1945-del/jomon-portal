@@ -143,10 +143,16 @@ Analyze the site structure from available materials (text and visual context) to
       const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
       });
-      result = await callGeminiWithRetry(model, [
-        { text: systemPrompt },
-        { text: userContent },
-      ]);
+      result = await callGeminiWithRetry(model, {
+        contents: [
+          { role: 'user', parts: [{ text: systemPrompt }, { text: userContent }] },
+        ],
+        tools: [],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 2048
+        }
+      });
     } catch (modelErr: any) {
       // Check for 429 Quota Exceeded
       if (modelErr?.status === 429 || modelErr?.message?.includes('Quota')) {
@@ -162,10 +168,16 @@ Analyze the site structure from available materials (text and visual context) to
       if (modelErr?.message?.includes('not found') || modelErr?.status === 404) {
         try {
           const fallbackModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
-          result = await callGeminiWithRetry(fallbackModel, [
-            { text: systemPrompt },
-            { text: userContent },
-          ]);
+          result = await callGeminiWithRetry(fallbackModel, {
+            contents: [
+              { role: 'user', parts: [{ text: systemPrompt }, { text: userContent }] },
+            ],
+            tools: [],
+            generationConfig: {
+              temperature: 0.1,
+              maxOutputTokens: 2048
+            }
+          });
         } catch (fallbackErr: any) {
           if (fallbackErr?.status === 429 || fallbackErr?.message?.includes('Quota')) {
             return NextResponse.json(

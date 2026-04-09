@@ -98,7 +98,11 @@
       "Bash(curl -s http://localhost:3000/api/stats)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:developers.google.com)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(pkill -f \"npm run dev\")",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"node\")",
+      "Bash(rm:*)"
     ]
   }
 }

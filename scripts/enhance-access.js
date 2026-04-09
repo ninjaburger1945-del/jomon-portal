@@ -47,7 +47,14 @@ ${JSON.stringify(batch.map(f => ({ id: f.id, name: f.name, address: f.address })
 `;
 
         try {
-            const result = await model.generateContent(prompt);
+            const result = await model.generateContent({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              tools: [],
+              generationConfig: {
+                temperature: 0.1,
+                maxOutputTokens: 2048
+              }
+            });
             let responseText = result.response.text().trim();
             if (responseText.startsWith('```json')) responseText = responseText.substring(7);
             if (responseText.startsWith('```')) responseText = responseText.substring(3);

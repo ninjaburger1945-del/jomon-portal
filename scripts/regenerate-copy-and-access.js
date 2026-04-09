@@ -45,7 +45,14 @@ async function generateForFacility(facility) {
 {"copy":"縄文最大集落の記憶","access":{"train":"JR奥羽本線青森駅からバスで約35分","bus":"縄文時遊館前バス停から徒歩約2分","car":"東北道青森ICから国道7号経由で約15分","rank":"B"}}
 `.trim();
 
-  const result = await model.generateContent(prompt);
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    tools: [],
+    generationConfig: {
+      temperature: 0.1,
+      maxOutputTokens: 2048
+    }
+  });
   const text = result.response.text().trim();
 
   // JSONブロックを除去して parse
