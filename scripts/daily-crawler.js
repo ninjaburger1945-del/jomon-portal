@@ -82,16 +82,35 @@ JSON配列のみ出力。説明や注釈は不要。`;
 
     console.log(`[CRAWLER] Gemini API にリクエスト...`);
 
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 1,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 8192,
-      },
-      tools: [], // グラウンディング無効
-    });
+    // リトライロジック（503対策）
+    let result;
+    let lastError;
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      try {
+        result = await model.generateContent({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 1,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 8192,
+          },
+          tools: [], // グラウンディング無効
+        });
+        break; // 成功したらループ抜ける
+      } catch (err) {
+        lastError = err;
+        if (err.message.includes("503") && attempt < 5) {
+          const waitTime = 3000 * attempt; // 3s, 6s, 9s, 12s, 15s
+          console.log(`[RETRY] 503エラー。${waitTime}ms 待機後にリトライ... (${attempt}/5)`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    if (!result) throw lastError;
 
     const responseText = result.response.text();
     console.log(`[CRAWLER] API レスポンス受信（${responseText.length}文字）`);
