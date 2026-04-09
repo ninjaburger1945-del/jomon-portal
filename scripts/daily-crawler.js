@@ -368,7 +368,7 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
 // ========== Gemini API 呼び出し（厳格なシステムプロンプト付き） ==========
 async function callGeminiAPI(prompt, isRetry = false) {
   // ⭐ 厳格なシステムプロンプト - 挨拶や説明は絶対禁止
-  const systemPrompt = `Output JSON array ONLY. Start with [. End with ]. NO explanations, NO confirmation messages, NO other text.`;
+  const systemPrompt = `JSON配列のみ出力。[で始まり]で終わる。説明不要。マークダウン禁止。`;
 
   // ⭐ 最小構成のリクエスト - グラウンディング明示的無効化
   const requestBody = {
@@ -383,8 +383,8 @@ async function callGeminiAPI(prompt, isRetry = false) {
       }]
     }],
     generationConfig: {
-      temperature: 0.05,
-      maxOutputTokens: 800  // ⭐ JSON確実に完成させる
+      temperature: 0.1,
+      maxOutputTokens: 300  // サーバー負荷軽減：300文字で十分
     },
     tools: []  // ⭐ CRITICAL: グラウンディング・検索レトリーバルを完全無効化
   };
@@ -1218,7 +1218,7 @@ async function main() {
   const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
   // ⭐ 1件集中モード：最も確実な1件だけを完璧に返す
-  const prompt = `Jomon site in ${randomRegion}. JSON: [{"id":"001-099","name":"Site Name","prefecture":"Prefecture","address":"Address","description":"Brief","region":"${randomRegion}","url":"URL","tags":["tag"],"lat":0,"lng":0,"access":{"train":"Train info","bus":"Bus info","car":"Car info","rank":"Rank"},"copy":"Catchphrase"}]`;
+  const prompt = `縄文遺跡専門家として、${randomRegion}地方の最も重要な遺跡1件を選び、JSON配列で返せ。[{id,name,prefecture,address,description,region,url,tags,lat,lng,access:{train,bus,car,rank},copy}]形式。JSONだけ出力。`;
 
 
 
