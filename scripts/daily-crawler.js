@@ -179,11 +179,18 @@ JSON配列のみ出力。説明や注釈は不要。`;
       console.log(`\n[IMAGE] ========== イラスト生成開始 ==========`);
       for (const facility of candidates.slice(0, addedCount)) {
         try {
-          await generateFacilityImage(facility.id, facility.name, facility.description);
+          const imageUrl = await generateFacilityImage(facility.id, facility.name, facility.description);
+          // existingData 内の該当施設に thumbnail を設定
+          const facilityInData = existingData.find(f => f.id === facility.id);
+          if (facilityInData && imageUrl) {
+            facilityInData.thumbnail = imageUrl;
+          }
         } catch (err) {
           console.warn(`[IMAGE] ⚠️ ${facility.name} のイラスト生成失敗: ${err.message}`);
         }
       }
+      // 更新を保存
+      fs.writeFileSync(FACILITIES_PATH, JSON.stringify(existingData, null, 2), "utf-8");
     } else {
       console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
     }
@@ -207,24 +214,38 @@ async function generateFacilityImage(facilityId, facilityName, description) {
 
   console.log(`[IMAGE] [${facilityId}] ${facilityName} のイラスト生成中...`);
 
-  try {
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1792&height=1024&nologo=true`;
-    const response = await fetch(imageUrl, { timeout: 60000 });
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1792&height=1024&nologo=true`;
+      console.log(`[IMAGE] [${facilityId}] URL: ${imageUrl.slice(0, 80)}...`);
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      const response = await fetch(imageUrl, { timeout: 60000 });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      if (buffer.length === 0) {
+        throw new Error('Empty response');
+      }
+
+      fs.writeFileSync(outputPath, buffer);
+
+      console.log(`[IMAGE] ✅ [${facilityId}] 生成完了 (${buffer.length} bytes)`);
+      return `/images/facilities/${facilityId}_ai.png`;
+    } catch (error) {
+      if (attempt < 3) {
+        console.warn(`[IMAGE] ⚠️ [${facilityId}] 試行${attempt}失敗: ${error.message}. リトライします...`);
+        await new Promise(r => setTimeout(r, 5000 * attempt));
+      } else {
+        console.warn(`[IMAGE] ❌ [${facilityId}] イラスト生成失敗 (${attempt}回試行): ${error.message}`);
+      }
     }
-
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    fs.writeFileSync(outputPath, buffer);
-
-    console.log(`[IMAGE] ✅ [${facilityId}] 生成完了`);
-    return `/images/facilities/${facilityId}_ai.png`;
-  } catch (error) {
-    console.warn(`[IMAGE] ⚠️ [${facilityId}] イラスト生成失敗: ${error.message}`);
-    return '';
   }
+  return '';
 }
 
 main();
