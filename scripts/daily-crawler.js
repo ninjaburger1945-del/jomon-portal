@@ -384,12 +384,7 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
 // ========== Gemini API 呼び出し（厳格なシステムプロンプト付き） ==========
 async function callGeminiAPI(prompt, isRetry = false) {
   // ⭐ 厳格なシステムプロンプト - 挨拶や説明は絶対禁止
-  const systemPrompt = `You are a JSON extraction expert. IMPORTANT RULES:
-- Output ONLY a JSON array starting with [ and ending with ]
-- NO greetings, explanations, or commentary whatsoever
-- NO markdown backticks (never use \`\`\`json\`\`\`)
-- NO line breaks or extra text outside the JSON
-- JSON must be valid and parseable immediately`;
+  const systemPrompt = `JSON配列のみ出力。[で始まり]で終わる。説明不要。マークダウン禁止。`;
 
   // ⭐ 最小構成のリクエスト - グラウンディング明示的無効化
   const requestBody = {
@@ -404,8 +399,8 @@ async function callGeminiAPI(prompt, isRetry = false) {
       }]
     }],
     generationConfig: {
-      temperature: 0.1,  // より決定的な出力のため低い温度
-      maxOutputTokens: 2048  // ⭐ 出力制限解除：JSON完全出力を確実に
+      temperature: 0.1,
+      maxOutputTokens: 300  // ⭐ サーバー負荷軽減：300文字で十分
     },
     tools: []  // ⭐ CRITICAL: グラウンディング・検索レトリーバルを完全無効化
   };
@@ -1239,22 +1234,7 @@ async function main() {
   const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
   // ⭐ 1件集中モード：最も確実な1件だけを完璧に返す
-  const prompt = `You are a Jomon archaeology expert. Find THE MOST IMPORTANT AND CERTAIN Jomon archaeological site in ${randomRegion} region that you can provide complete, verified information about. Return ONLY 1 site (not 3) as a JSON array with exactly this structure:
-[{
-  "id": "unique-id-number",
-  "name": "exact official name",
-  "prefecture": "prefecture name",
-  "address": "full address",
-  "description": "100 char max description of the site",
-  "region": "region name",
-  "url": "official website URL or Wikipedia",
-  "tags": ["tag1", "tag2"],
-  "lat": latitude_number,
-  "lng": longitude_number,
-  "access": {"train": "info", "bus": "info", "car": "info", "rank": "rank"},
-  "copy": "short catchphrase"
-}]
-CRITICAL: Output ONLY valid JSON. NO explanations. NO greetings. NO markdown. Complete all fields.`;
+  const prompt = `縄文遺跡専門家として、${randomRegion}地方の最も重要な遺跡1件を選び、JSON配列で返せ。[{id,name,prefecture,address,description,region,url,tags,lat,lng,access:{train,bus,car,rank},copy}]形式。JSONだけ出力。`;
 
 
 
