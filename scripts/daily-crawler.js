@@ -47,7 +47,7 @@ async function main() {
 
     const prompt = `
 日本の縄文時代における遺跡・博物館の専門家になってください。
-「すでに登録済みの施設リスト」に含まれていない、${randomRegion}地方の重要な縄文時代の遺跡・博物館・考古館を最大3件ピックアップしてください。
+「すでに登録済みの施設リスト」に含まれていない、${randomRegion}地方の重要な縄文時代の遺跡・博物館・考古館を1件のみピックアップしてください。
 
 【既存リスト（除外）】
 ${existingNames}
@@ -143,7 +143,7 @@ JSON配列のみ出力。説明や注釈は不要。`;
     // 既存データに追加
     let addedCount = 0;
     for (const candidate of candidates) {
-      if (addedCount >= 3) break; // 最大3件まで
+      if (addedCount >= 1) break; // 1件のみ追加
 
       // 重複チェック
       const isDuplicate = existingData.some((f) => {
