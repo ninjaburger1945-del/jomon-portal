@@ -6,7 +6,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // ========== 設定 ==========
 const API_KEY = process.env.GEMINI_API_KEY20261336;
-const MODEL_NAME = "gemini-1.5-flash";  // gemini-2.5-flash が高負荷のため変更
+const MODEL_NAME = "gemini-2.0-flash-lite";  // 推奨モデル＆軽量版
 const FACILITIES_PATH = path.join(__dirname, "../app/data/facilities.json");
 
 // ========== 地域リスト ==========

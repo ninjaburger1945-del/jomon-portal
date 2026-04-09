@@ -141,7 +141,7 @@ Analyze the site structure from available materials (text and visual context) to
     let result;
     try {
       const model = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',  // gemini-2.5-flash が高負荷のため変更
+        model: 'gemini-2.0-flash-lite',  // 推奨モデル＆軽量版
       });
       result = await callGeminiWithRetry(model, {
         contents: [
@@ -167,7 +167,7 @@ Analyze the site structure from available materials (text and visual context) to
       // Fallback to gemini-2.5-flash-lite on model not found
       if (modelErr?.message?.includes('not found') || modelErr?.status === 404) {
         try {
-          const fallbackModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+          const fallbackModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
           result = await callGeminiWithRetry(fallbackModel, {
             contents: [
               { role: 'user', parts: [{ text: systemPrompt }, { text: userContent }] },
