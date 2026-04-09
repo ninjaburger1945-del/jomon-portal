@@ -18,10 +18,9 @@ const { generatePrompt } = require('./lib/image-prompt');
  * - GOOGLE_SEARCH_ENGINE_ID: Google Custom Search Engine ID（オプション）
  */
 
-// Gemini API（gemini-2.5-flash - 最新・軽量・高精度）
-const MODEL_NAME = "gemini-2.5-flash";  // ✅ 最新モデル（JSON抽出最適化）
-const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent`;
-const API_KEY = process.env.GEMINI_API_KEY20261336 || process.env.GEMINI_API_KEY;
+// Gemini API
+const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
+const API_KEY = process.env.GEMINI_API_KEY20261336;
 
 // Pollinations AI（認証不要、無料）
 
@@ -45,15 +44,8 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-// ⭐ エンドポイント確認（モデル名の形式を確認）
-console.log(`[INIT] モデル名: ${MODEL_NAME}`);
-console.log(`[INIT] API エンドポイント: ${API_ENDPOINT}`);
-console.log(`[INIT] API キー（先頭8文字）: ${API_KEY.substring(0, 8)}...`);
-
-// Grounding は完全に無効化（gemini-1.5-flash + 軽量化）
 const useGoogleSearch = GOOGLE_SEARCH_API_KEY && GOOGLE_SEARCH_ENGINE_ID;
 console.log(`[INIT] Google Custom Search API: ${useGoogleSearch ? '✅ 有効' : '⚠️ 無効'}`);
-console.log(`[INIT] Grounding with Google: ❌ 無効（軽量化・503対策）`);
 console.log(`[INIT] 画像生成: ✅ Pollinations AI (無料、認証不要)`);
 console.log(`[INIT] ✅ 初期化完了\n`);
 
@@ -166,35 +158,29 @@ function cleanAndExtractJson(responseText, isArray = true) {
   // Step 1-B: 引用番号 [1], [2][3], [1, 2] 等を除去（Grounding 付きレスポンスに混入する）
   cleaned = cleaned.replace(/\s*\[\d+(?:[,\s]+\d+)*\]/g, '');
 
-  // ⭐ 強力な正規表現抽出: [ ... ] または { ... } を強引に抽出
-  // この処理により「はい、中国地方の……」のような日本語ノイズを除去
+  // Step 2: [ または { まで前の部分を削除
   if (isArray) {
-    const arrayMatch = cleaned.match(/\[\s*(?:\{[^}]*\}[,\s]*)*\s*\]/s);
-    if (arrayMatch) {
-      cleaned = arrayMatch[0];
-      console.log(`[JSON_CLEAN] ⭐ 正規表現で JSON 配列を強引に抽出`);
-    } else {
-      // フォールバック: 最初の [ から最後の ] までを抽出
-      const startIdx = cleaned.indexOf('[');
-      const endIdx = cleaned.lastIndexOf(']');
-      if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
-        cleaned = cleaned.substring(startIdx, endIdx + 1);
-        console.log(`[JSON_CLEAN] フォールバック: [ から ] までを抽出`);
-      }
+    const startIdx = cleaned.indexOf('[');
+    if (startIdx !== -1) {
+      cleaned = cleaned.substring(startIdx);
     }
   } else {
-    const objectMatch = cleaned.match(/\{[^{}]*(?:\{[^}]*\}[^{}]*)*\}/s);
-    if (objectMatch) {
-      cleaned = objectMatch[0];
-      console.log(`[JSON_CLEAN] ⭐ 正規表現で JSON オブジェクトを強引に抽出`);
-    } else {
-      // フォールバック: 最初の { から最後の } までを抽出
-      const startIdx = cleaned.indexOf('{');
-      const endIdx = cleaned.lastIndexOf('}');
-      if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
-        cleaned = cleaned.substring(startIdx, endIdx + 1);
-        console.log(`[JSON_CLEAN] フォールバック: { から } までを抽出`);
-      }
+    const startIdx = cleaned.indexOf('{');
+    if (startIdx !== -1) {
+      cleaned = cleaned.substring(startIdx);
+    }
+  }
+
+  // Step 3: 末尾から逆向きに ] または } を探す
+  if (isArray) {
+    const endIdx = cleaned.lastIndexOf(']');
+    if (endIdx !== -1) {
+      cleaned = cleaned.substring(0, endIdx + 1);
+    }
+  } else {
+    const endIdx = cleaned.lastIndexOf('}');
+    if (endIdx !== -1) {
+      cleaned = cleaned.substring(0, endIdx + 1);
     }
   }
 
@@ -298,14 +284,39 @@ async function parseJsonWithFallback(responseText, facilityName = '', isArray = 
       }
     }
 
-    // Step 4: 修復に失敗したら諦める（次回のクローラー実行待機）
-    console.log(`[JSON_PARSE] ⚠️ パース失敗。この実行はスキップします。`);
+    // Step 4: Gemini 再送（修復に失敗した場合のみ）
+    if (retryCount === 0 && facilityName) {
+      console.log(`[JSON_PARSE] ⚠️ 修復失敗。Gemini に正しい形式での再送を要求（${retryCount + 1}回目）...`);
+
+      const retryPrompt = `
+前のレスポンスが無効な形式でした。以下を厳密に守ってください：
+
+${isArray ?
+`1. JSON配列のみを返す（説明や前置きは一切不要）
+2. 各オブジェクトの "description" フィールドは最大100文字で、改行（\\n）を含めない
+3. 以下の形式で返す：
+[{"key": "value"}, ...]` :
+`1. JSON オブジェクトのみを返す（説明や前置きは一切不要）
+2. "description" フィールドは最大100文字で、改行（\\n）を含めない
+3. 以下の形式で返す：
+{...}`}
+`;
+
+      try {
+        const retryResponse = await callGeminiAPI(retryPrompt);
+        return await parseJsonWithFallback(retryResponse, facilityName, isArray, retryCount + 1);
+      } catch (retryError) {
+        console.error(`[JSON_PARSE] Gemini 再送失敗: ${retryError.message}`);
+        return null;
+      }
+    }
+
     return null;
   }
 }
 
 // ========== リトライ機能付き fetch v2 ==========
-async function fetchWithRetry(url, options, maxRetries = 5) {
+async function fetchWithRetry(url, options, maxRetries = 3) {
   let lastError;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -315,14 +326,6 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`[HTTP_ERROR] ステータス: ${response.status}`);
-
-        // ⭐ 404エラー時に詳細情報を出力
-        if (response.status === 404) {
-          console.error(`[HTTP_ERROR] 404 Not Found`);
-          console.error(`[HTTP_ERROR] リクエスト URL: ${url}`);
-          console.error(`[HTTP_ERROR] エラーレスポンス: ${errorText.substring(0, 200)}`);
-          console.error(`[HTTP_ERROR] → モデル名またはエンドポイント形式が間違っている可能性があります`);
-        }
 
         if ([400, 401, 403, 404].includes(response.status)) {
           throw new Error(`[PERMANENT] HTTP ${response.status}`);
@@ -353,10 +356,10 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
       }
 
       if (attempt < maxRetries) {
-        // 短めの待機で十分（指数バックオフ）
-        const jitter = Math.random() * 2000;  // 0-2秒のランダムジッタ
-        const delayMs = (3000 * Math.pow(2, attempt - 1)) + jitter;  // 3s, 6s, 12s, 24s...
-        console.log(`[RETRY] ${Math.floor(delayMs)}ms 待機後にリトライ (試行 ${attempt}/${maxRetries})...`);
+        // 503 の場合は長めに待機（30秒 * attempt）
+        const is503 = error.message.includes('503');
+        const delayMs = is503 ? 30000 * attempt : 2000 * Math.pow(2, attempt - 1);
+        console.log(`[RETRY] ${delayMs}ms 待機後にリトライ...`);
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
     }
@@ -365,46 +368,41 @@ async function fetchWithRetry(url, options, maxRetries = 5) {
   throw lastError;
 }
 
-// ========== Gemini API 呼び出し（厳格なシステムプロンプト付き） ==========
-async function callGeminiAPI(prompt, isRetry = false) {
-  // ⭐ 厳格なシステムプロンプト - 挨拶や説明は絶対禁止
-  const systemPrompt = `JSON配列のみ出力。[で始まり]で終わる。説明不要。マークダウン禁止。`;
-
-  // ⭐ 最小構成のリクエスト - グラウンディング明示的無効化
+// ========== Gemini API 呼び出し（Grounding with Google Search 有効） ==========
+async function callGeminiAPI(prompt) {
   const requestBody = {
     systemInstruction: {
       parts: [{
-        text: systemPrompt
+        text: `あなたは日本の縄文遺跡・博物館の専門調査員です。
+回答前に必ず Google 検索を実行し、404にならない現行の公式サイトURLを特定してください。
+URLは検索結果で実際に確認できた現行の URL のみを使用し、推測によるURLは絶対に含めないでください。
+最新のリアルタイム情報をベースに回答してください。`
       }]
     },
     contents: [{
-      parts: [{
-        text: prompt
-      }]
+      parts: [{ text: prompt }]
+    }],
+    tools: [{
+      googleSearch: {}  // Grounding with Google Search（gemini-2.5-pro 対応）
     }],
     generationConfig: {
-      temperature: 0.1,
-      maxOutputTokens: 2048  // ⭐ 出力制限解除：JSON完全出力を確実に
-    },
-    tools: []  // ⭐ CRITICAL: グラウンディング・検索レトリーバルを完全無効化
+      temperature: 1,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 8192
+    }
   };
-
-  // ⭐ デバッグログ：実際に叩く URL とリクエストを出力
-  const requestUrl = `${API_ENDPOINT}?key=${API_KEY.substring(0, 8)}...`;
-  console.log(`[API_CALL] URL: ${requestUrl}`);
-  console.log(`[API_CALL] Method: POST`);
-  console.log(`[API_CALL] Body size: ${JSON.stringify(requestBody).length} bytes`);
-  console.log(`[API_CALL] Model: ${MODEL_NAME}`);
 
   const response = await fetchWithRetry(
     `${API_ENDPOINT}?key=${API_KEY}`,
     {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; JomonPortal/1.0)'
       },
       body: JSON.stringify(requestBody),
-      timeout: 30000
+      timeout: 60000
     }
   );
 
@@ -416,6 +414,24 @@ async function callGeminiAPI(prompt, isRetry = false) {
   const content = candidate.content;
   if (!content || !content.parts || content.parts.length === 0) {
     throw new Error('No text content in API response');
+  }
+
+  // ✅ Grounding エビデンス（本物の検索結果 vs 記憶の区別）
+  try {
+    const groundingMeta = candidate.groundingMetadata;
+    if (groundingMeta && (groundingMeta.groundingChunks?.length > 0 || groundingMeta.webSearchQueries?.length > 0)) {
+      const queries = groundingMeta.webSearchQueries || [];
+      const chunks = groundingMeta.groundingChunks || [];
+      console.log(`[GROUNDING] ✅ 本物の Google 検索結果を使用`);
+      if (queries.length > 0) {
+        console.log(`[GROUNDING]   検索クエリ: ${queries.join(', ')}`);
+      }
+      console.log(`[GROUNDING]   検索ヒット数: ${chunks.length}件`);
+    } else {
+      console.warn(`[GROUNDING] ⚠️ 検索結果なし → Gemini の記憶のみ使用（URL信頼度低）`);
+    }
+  } catch (err) {
+    console.warn(`[GROUNDING] ⚠️ メタデータ確認エラー: ${err.message}`);
   }
 
   return content.parts[0].text;
@@ -827,11 +843,50 @@ async function retryGeminiForUrls(failedUrls, facilityName, retryCount = 0) {
   console.log(`\n[RETRY_GEMINI] ========== Gemini 再試行（第${retryCount + 1}回）==========`);
   console.log(`[RETRY_GEMINI] 失敗した候補: ${failedUrls.join(', ')}`);
 
-  // 厳格なリトライプロンプト
-  const retryPrompt = `Find 3 official URLs for facility "${facilityName}" (prefer .lg.jp/.go.jp). Output ONLY JSON array: ["url1", "url2", "url3"]. NO explanations.`;
+  // 5つ全滅時の特別なメッセージ
+  const isFullFailure = failedUrls.length >= 5 && retryCount === 0;
+
+  const retryPrompt = isFullFailure
+    ? `
+施設「${facilityName}」について、さっきのURL候補がすべてアクセスできませんでした。
+
+もう一度だけ、『縄文』や『貝塚』という言葉が**確実に含まれている**公式サイトをあと3つ探してください。
+
+【特に以下のパターンを優先推測】
+- https://www.pref.{都道府県}.lg.jp/{施設名ローマ字}
+- https://city.{市名}.lg.jp/{施設名ローマ字}
+- https://www.pref.{都道府県}.lg.jp/{愛称ローマ字}
+
+優先順位：
+1. 自治体公式サイト（.lg.jp）下の施設名/愛称パターン
+2. 文化庁データベース（kunishitei.bunka.go.jp）
+3. 観光協会・Wikipedia など
+
+**JSON配列のみを返してください（説明不要）：**
+["url1", "url2", "url3"]
+`
+    : `
+施設「${facilityName}」について、以下のURLはすべてアクセスできませんでした：
+${failedUrls.map((u, i) => `${i + 1}. ${u}`).join('\n')}
+
+別の公開情報源から、この施設に関する信頼度の高いURLを3つ提案してください。
+
+【自治体.lg.jp パターン優先】
+特に以下のパターンを試してください：
+- https://www.pref.{都道府県}.lg.jp/{施設名ローマ字}
+- https://city.{市名}.lg.jp/{施設名ローマ字}
+
+優先順位：
+1. 公開サイト（.lg.jp、.go.jp、.or.jp など）
+2. 学術機関（大学、博物館公式サイト）
+3. Wikipedia
+
+**JSON配列のみを返してください（説明不要）：**
+["url1", "url2", "url3"]
+`;
 
   try {
-    const response = await callGeminiAPI(retryPrompt, true);
+    const response = await callGeminiAPI(retryPrompt);
     const urls = await parseJsonWithFallback(response, facilityName, true, 0);
 
     if (!urls || !Array.isArray(urls)) {
@@ -852,10 +907,17 @@ async function findUrlViaKunishitei(facilityName, address) {
   console.log(`\n[FALLBACK] ========== kunishitei.bunka.go.jp 最終検索 ==========`);
   console.log(`[FALLBACK] Gemini の候補がすべて失敗。最後の手段として kunishitei を検索`);
 
-  const fallbackPrompt = `Find kunishitei.bunka.go.jp URL for facility "${facilityName}". Output ONLY JSON: {"found": true, "url": "..."} or {"found": false}. NO explanations.`;
+  const fallbackPrompt = `
+あなたは国指定史跡データベース（kunishitei.bunka.go.jp）の専門家です。
+施設「${facilityName}」に関するページのURLを kunishitei.bunka.go.jp 内で探してください。
+
+JSONオブジェクトのみを返してください（説明不要）：
+見つかった場合: {"found": true, "url": "https://kunishitei.bunka.go.jp/..."}
+見つからない場合: {"found": false}
+`;
 
   try {
-    const fallbackResponse = await callGeminiAPI(fallbackPrompt, true);
+    const fallbackResponse = await callGeminiAPI(fallbackPrompt);
     const result = await parseJsonWithFallback(fallbackResponse, facilityName, false, 0);
 
     if (!result) {
@@ -1212,14 +1274,50 @@ async function main() {
     console.log(`[CRAWLER] 既存データ: ${existingData.length} 件`);
   }
 
-  // 既存データの最後の5件のみ（最小限に削減）
-  const lastNames = existingData.slice(-5).map(f => f.name);
+  const existingNames = existingData.map(f => `- ${f.name}`).join('\n');
   const regions = ['北海道', '東北', '関東', '中部', '近畿', '中国', '四国', '九州'];
   const randomRegion = regions[Math.floor(Math.random() * regions.length)];
 
-  // ⭐ 1件集中モード：最も確実な1件だけを完璧に返す
-  const prompt = `縄文遺跡専門家として、${randomRegion}地方の最も重要な遺跡1件を選び、JSON配列で返せ。[{id,name,prefecture,address,description,region,url,tags,lat,lng,access:{train,bus,car,rank},copy}]形式。JSONだけ出力。`;
+  const prompt = `
+日本の縄文時代における遺跡・博物館の専門家になってください。
+「すでに登録済みの施設リスト」に含まれていない、日本国内の重要な縄文時代の遺跡・博物館・考古館を3件ピックアップしてください。
 
+【既存リスト（これらは除外）】
+${existingNames}
+
+【条件】
+- ターゲット地方: ${randomRegion}地方
+- 縄文時代のみ
+- 公立博物館または国指定史跡
+
+【出力】
+
+JSON配列のみを返してください。改行や説明は一切不要です。
+
+各施設は以下のフォーマットで記載：
+- id: 英数字ハイフン
+- name: 施設の正式名称
+- prefecture: 都道府県名
+- address: 住所
+- description: 100文字以内（改行禁止）
+- region: Hokkaido / Tohoku / Kanto / Chubu / Kinki / Chugoku / Shikoku / Kyushu
+- url: 可能なら施設公式の自治体URL（例: https://www.pref.aomori.jp/rekishi/...）。不明なら空文字""でよい
+- tags: 最大2個。【許可タグのみ使用】世界遺産、博物館、国宝、土偶、貝塚、土器、環状列石。他のタグは絶対に使わないこと。
+- lat: 緯度
+- lng: 経度
+- access: train, bus, car, rank
+- copy: 14文字以内
+- その他: name_en, description_en など
+
+【重要】
+- JSON配列だけを出力
+- 説明は絶対に含めない
+- descriptonは1行（改行なし）
+- *** などの特殊文字は使わない
+- URL候補には https:// で始まる完全なURLのみ
+- 【最優先】候補URLは404ページではなく、確実に生きているページのみ。公式ウェブサイトのトップページ、Wikipedia の関連記事、自治体の博物館紹介ページなど信頼できるソースを選べ。
+- 施設名が日本語の場合、Wikipedia の日本語記事も候補に含めよ（日本語版 Wikipedia は最も信頼度が高い）。
+`;
 
 
   try {
