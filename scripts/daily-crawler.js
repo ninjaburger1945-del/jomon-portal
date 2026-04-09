@@ -384,7 +384,7 @@ async function callGeminiAPI(prompt, isRetry = false) {
     }],
     generationConfig: {
       temperature: 0.1,
-      maxOutputTokens: 300  // サーバー負荷軽減：300文字で十分
+      maxOutputTokens: 2048  // ⭐ 出力制限解除：JSON完全出力を確実に
     },
     tools: []  // ⭐ CRITICAL: グラウンディング・検索レトリーバルを完全無効化
   };
