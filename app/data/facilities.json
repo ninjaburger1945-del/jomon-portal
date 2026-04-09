@@ -2358,7 +2358,7 @@
     "address": "北海道伊達市南稀府町138番地11",
     "description": "噴火湾沿岸の縄文文化を中心に調査研究・展示。世界遺産北黄金貝塚に関する情報も提供しています。",
     "region": "北海道",
-    "url": "https://www.city.date.hokkaido.jp/hotnews/detail/00000216.html",
+    "url": "https://www.city.date.hokkaido.jp/funkawan/",
     "tags": [
       "研究施設",
       "博物館",
@@ -2374,6 +2374,8 @@
       "rank": "A"
     },
     "copy": "噴火湾の恵みと共生した、縄文人の営みを紐解く。",
+    "access_public": "JR稀府駅から徒歩約10分。なし",
+    "access_car": "道央自動車道伊達ICから約15分",
     "userApproved": true
   }
 ]
