@@ -2349,6 +2349,7 @@
     "copy": "キウス周堤墓群を育んだ、千歳の縄文文化に触れる。",
     "access_public": "JR千歳駅から車で約10分。千歳市コミュニティバス「千歳市埋蔵文化財センター」下車",
     "access_car": "道央自動車道千歳ICから約10分",
+    "thumbnail": "/images/facilities/taishakukyo-isekigun_ai.png",
     "userApproved": true
   },
   {
@@ -2376,6 +2377,7 @@
     "copy": "噴火湾の恵みと共生した、縄文人の営みを紐解く。",
     "access_public": "JR稀府駅から徒歩約10分。なし",
     "access_car": "道央自動車道伊達ICから約15分",
+    "thumbnail": "/images/facilities/soyata_ai.png",
     "userApproved": true
   }
 ]
