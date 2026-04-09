@@ -102,7 +102,8 @@
       "Bash(pkill -f \"npm run dev\")",
       "Bash(pkill -f \"next dev\")",
       "Bash(pkill -f \"node\")",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(curl -s https://raw.githubusercontent.com/ninjaburger1945-del/jomon-portal/main/scripts/daily-crawler.js)"
     ]
   }
 }
