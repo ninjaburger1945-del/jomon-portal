@@ -28,7 +28,10 @@ export default function Footer() {
           </a>
         </nav>
         <p className={styles.copyright}>
-          &copy; 2026 JOMON PORTAL &nbsp;·&nbsp; jomon-portal.jp
+          &copy; 2026 JOMON PORTAL &nbsp;·&nbsp;{" "}
+          <Link href="/" className={styles.linkBtn}>
+            jomon-portal.jp
+          </Link>
         </p>
       </div>
     </footer>
