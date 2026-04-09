@@ -63,7 +63,7 @@ ${existingNames}
   "name": "施設名",
   "prefecture": "都道府県",
   "address": "住所",
-  "description": "説明（100字以内）",
+  "description": "説明（200字程度、詳しく記述）",
   "region": "${randomRegion}",
   "url": "公式URL またはWikipedia",
   "tags": ["tag1", "tag2"],
@@ -174,12 +174,56 @@ JSON配列のみ出力。説明や注釈は不要。`;
     if (addedCount > 0) {
       fs.writeFileSync(FACILITIES_PATH, JSON.stringify(existingData, null, 2), "utf-8");
       console.log(`[RESULT] ${addedCount}件を追加しました。合計: ${existingData.length}件`);
+
+      // イラスト生成
+      console.log(`\n[IMAGE] ========== イラスト生成開始 ==========`);
+      for (const facility of candidates.slice(0, addedCount)) {
+        try {
+          await generateFacilityImage(facility.id, facility.name, facility.description);
+        } catch (err) {
+          console.warn(`[IMAGE] ⚠️ ${facility.name} のイラスト生成失敗: ${err.message}`);
+        }
+      }
     } else {
       console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
     }
   } catch (error) {
     console.error("[FATAL] エラー:", error.message);
     process.exit(1);
+  }
+}
+
+// ========== イラスト生成（Pollinations AI） ==========
+async function generateFacilityImage(facilityId, facilityName, description) {
+  const imagesDir = path.join(__dirname, '../public/images/facilities');
+  if (!fs.existsSync(imagesDir)) {
+    fs.mkdirSync(imagesDir, { recursive: true });
+  }
+
+  const outputPath = path.join(imagesDir, `${facilityId}_ai.png`);
+
+  // プロンプト生成
+  const prompt = `Archaeological site: ${facilityName}. Jomon period Japan. ${description.slice(0, 100)}. Professional photograph, documentary style, historical accuracy.`;
+
+  console.log(`[IMAGE] [${facilityId}] ${facilityName} のイラスト生成中...`);
+
+  try {
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1792&height=1024&nologo=true`;
+    const response = await fetch(imageUrl, { timeout: 60000 });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    fs.writeFileSync(outputPath, buffer);
+
+    console.log(`[IMAGE] ✅ [${facilityId}] 生成完了`);
+    return `/images/facilities/${facilityId}_ai.png`;
+  } catch (error) {
+    console.warn(`[IMAGE] ⚠️ [${facilityId}] イラスト生成失敗: ${error.message}`);
+    return '';
   }
 }
 
