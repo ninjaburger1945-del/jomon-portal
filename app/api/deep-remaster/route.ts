@@ -150,7 +150,7 @@ Analyze the site structure from available materials (text and visual context) to
         tools: [],
         generationConfig: {
           temperature: 0.1,
-          maxOutputTokens: 2048
+          maxOutputTokens: 4096  // 3 concepts × 150 words を確実に出力
         }
       });
     } catch (modelErr: any) {
@@ -175,7 +175,7 @@ Analyze the site structure from available materials (text and visual context) to
             tools: [],
             generationConfig: {
               temperature: 0.1,
-              maxOutputTokens: 2048
+              maxOutputTokens: 4096  // 3 concepts × 150 words を確実に出力
             }
           });
         } catch (fallbackErr: any) {
@@ -198,7 +198,12 @@ Analyze the site structure from available materials (text and visual context) to
     const responseText = result.response.text().trim();
 
     // Extract JSON from markdown code blocks
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    let jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      // マークダウンブロック内にある場合を試す
+      const mdMatch = responseText.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+      jsonMatch = mdMatch ? [mdMatch[1]] : null;
+    }
     if (!jsonMatch) {
       return NextResponse.json(
         { error: 'Gemini returned invalid format', raw: responseText.slice(0, 500) },
