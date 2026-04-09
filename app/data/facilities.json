@@ -2295,30 +2295,5 @@
     "thumbnail": "/images/facilities/073_remaster_b.png",
     "access_public": "京阪石山坂本線「粟津駅」下車、東へ徒歩約10分。なし",
     "access_car": "名神高速道路「瀬田西IC」から約10分"
-  },
-  {
-    "id": "074",
-    "name": "【要確認】轟貝塚",
-    "prefecture": "長崎県",
-    "address": "長崎県諫早市轟町1000番地",
-    "description": "National Historic Site and type site for Early Jomon Todoroki pottery, crucial for understanding Kyushu's Jomon culture.",
-    "region": "九州",
-    "url": "https://ja.wikipedia.org/wiki/%E8%BD%9F%E8%B2%9D%E5%A1%9A",
-    "tags": [
-      "貝塚",
-      "土器"
-    ],
-    "lat": 32.852,
-    "lng": 130.057,
-    "access": {
-      "train": "From Isahaya Station (JR/Shimabara Railway)",
-      "bus": "Take bus from Isahaya Station towards Todoroki-no-taki, alight at Todoroki-no-taki Iriguchi",
-      "car": "Near Todoroki Waterfall, parking available",
-      "rank": "High"
-    },
-    "copy": "Unearthing the origins of Jomon pottery in Kyushu.",
-    "needsCheck": true,
-    "userApproved": false,
-    "thumbnail": "/images/facilities/074_ai.png"
   }
 ]
