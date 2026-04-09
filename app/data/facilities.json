@@ -2331,7 +2331,7 @@
     "address": "北海道千歳市真町176番地",
     "description": "世界遺産キウス周堤墓群のガイダンス機能も持つ施設。縄文時代の遺物展示や体験学習が充実しています。",
     "region": "北海道",
-    "url": "https://www.city.chitose.lg.jp/docs/176-17387-95-53.html",
+    "url": "https://www.city.chitose.lg.jp/c40/1002692/1002693/1002695/index.html",
     "tags": [
       "ガイダンス施設",
       "埋蔵文化財",
@@ -2347,6 +2347,8 @@
       "rank": "A"
     },
     "copy": "キウス周堤墓群を育んだ、千歳の縄文文化に触れる。",
+    "access_public": "JR千歳駅から車で約10分。千歳市コミュニティバス「千歳市埋蔵文化財センター」下車",
+    "access_car": "道央自動車道千歳ICから約10分",
     "userApproved": true
   },
   {
