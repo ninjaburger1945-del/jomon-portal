@@ -298,21 +298,8 @@ async function parseJsonWithFallback(responseText, facilityName = '', isArray = 
       }
     }
 
-    // Step 4: Gemini 再送（修復に失敗した場合のみ）
-    if (retryCount === 0 && facilityName) {
-      console.log(`[JSON_PARSE] ⚠️ 修復失敗。Gemini に正しい形式での再送を要求...`);
-
-      const retryPrompt = `CRITICAL: Output ONLY valid JSON. NO explanations, NO greetings, NO markdown. If array, start with [ and end with ]. NEVER include any text outside JSON.`;
-
-      try {
-        const retryResponse = await callGeminiAPI(retryPrompt, true);
-        return await parseJsonWithFallback(retryResponse, facilityName, isArray, retryCount + 1);
-      } catch (retryError) {
-        console.error(`[JSON_PARSE] Gemini 再送失敗: ${retryError.message}`);
-        return null;
-      }
-    }
-
+    // Step 4: 修復に失敗したら諦める（次回のクローラー実行待機）
+    console.log(`[JSON_PARSE] ⚠️ パース失敗。この実行はスキップします。`);
     return null;
   }
 }
