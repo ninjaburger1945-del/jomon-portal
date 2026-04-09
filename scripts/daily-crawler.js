@@ -382,9 +382,7 @@ URLは検索結果で実際に確認できた現行の URL のみを使用し、
     contents: [{
       parts: [{ text: prompt }]
     }],
-    tools: [{
-      googleSearch: {}  // Grounding with Google Search（gemini-2.5-pro 対応）
-    }],
+    tools: [],  // ⭐ グラウンディング完全無効化（503対策）
     generationConfig: {
       temperature: 1,
       topK: 40,
