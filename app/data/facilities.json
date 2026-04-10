@@ -2442,13 +2442,9 @@
     "address": "北海道恵庭市南島松202-1",
     "description": "国指定史跡「カリンバ遺跡」から出土した、縄文時代晩期の極めて華麗な副葬品を展示する施設です。特に漆塗りの櫛や垂れ飾り、管玉などの精緻な装身具は、当時の高度な工芸技術と精神文化を今に伝えています。これらの出土品は一括して重要文化財に指定されており、縄文の「美」と「祈り」を体感できる国内有数のスポットです。また、遺跡公園として整備されたカリンバ遺跡も近隣に位置し、往時の景観に思いを馳せることができます。",
     "region": "北海道",
-    "url": "https://www.city.eniwa.hokkaido.jp/kurashi/shisetsu/kyodoshiryokan/index.html",
+    "url": "https://www.city.eniwa.hokkaido.jp/kurashi/kosodate_kyoiku/eniwashikyodoshiryokan/kyodoshiryokan/index.html",
     "tags": [
-      "カリンバ遺跡",
-      "重要文化財",
-      "漆器",
-      "装身具",
-      "国指定史跡"
+      "博物館"
     ],
     "lat": 42.910242,
     "lng": 141.594391,
@@ -2459,6 +2455,9 @@
       "rank": "A"
     },
     "copy": "縄文の美が息づく、朱塗りの装身具の宝庫。",
-    "thumbnail": "/images/facilities/079_ai.png"
+    "thumbnail": "/images/facilities/079_ai.png",
+    "access_public": "JR千歳線「島松駅」から徒歩約15分。恵庭市コミュニティバス（ecoバス）「郷土資料館」バス停下車すぐ",
+    "access_car": "道央自動車道「恵庭IC」から約10分",
+    "userApproved": true
   }
 ]
