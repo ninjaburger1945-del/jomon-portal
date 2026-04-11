@@ -9,6 +9,19 @@ const API_KEY = process.env.GEMINI_API_KEY20261336;
 const MODEL_NAME = "gemini-flash-latest";  // 最新版フラッシュモデル
 const FACILITIES_PATH = path.join(__dirname, "../app/data/facilities.json");
 
+// ========== 許可されたタグ（ホワイトリスト） ==========
+const ALLOWED_TAGS = [
+  '世界遺産',
+  '国宝',
+  '環状列石',
+  '貝塚',
+  '土偶',
+  '土器',
+  '遺跡公園',
+  '体験',
+  '博物館'
+];
+
 // ========== 地域リスト ==========
 const regions = ["北海道", "東北", "関東", "中部", "近畿", "中国", "四国", "九州"];
 
@@ -57,6 +70,17 @@ ${existingNames}
 - 実在する施設
 - 日本語で記述
 
+【タグ（必ず以下から選択してください。最大2個）】
+- 世界遺産: 北海道・北東北縄文遺跡群の構成資産
+- 国宝: 国宝指定の遺物を展示する施設
+- 環状列石: 環状列石・配石遺跡
+- 貝塚: 貝塚遺跡・貝塚出土品主軸の施設
+- 土偶: 土偶展示が主要な施設
+- 土器: 特徴的な土器を主軸展示する施設
+- 遺跡公園: 復元集落・野外展示・公園整備施設
+- 体験: 体験学習・ワークショップが主要な施設
+- 博物館: 遺物展示を主目的とする常設展示施設
+
 【JSON形式（配列）】
 [{
   "id": "001-999の数字",
@@ -66,7 +90,7 @@ ${existingNames}
   "description": "説明（200字程度、詳しく記述）",
   "region": "${randomRegion}",
   "url": "公式URL またはWikipedia",
-  "tags": ["tag1", "tag2"],
+  "tags": ["世界遺産", "博物館"],
   "lat": 緯度,
   "lng": 経度,
   "access": {
@@ -154,6 +178,23 @@ JSON配列のみ出力。説明や注釈は不要。`;
       if (isDuplicate) {
         console.log(`[SKIP] 重複: ${candidate.name}`);
         continue;
+      }
+
+      // タグバリデーション（ホワイトリスト確認）
+      if (!Array.isArray(candidate.tags) || candidate.tags.length === 0) {
+        console.log(`[SKIP] タグなし: ${candidate.name}`);
+        continue;
+      }
+
+      const validTags = candidate.tags.filter(tag => ALLOWED_TAGS.includes(tag)).slice(0, 2);
+      if (validTags.length === 0) {
+        console.log(`[SKIP] 無効なタグ: ${candidate.name} (${candidate.tags.join(', ')})`);
+        continue;
+      }
+
+      candidate.tags = validTags;
+      if (validTags.length < candidate.tags.length) {
+        console.log(`[WARN] 無効なタグを削除: ${candidate.name}`);
       }
 
       // 次のID計算
