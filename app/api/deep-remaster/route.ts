@@ -108,16 +108,16 @@ OUTPUT FORMAT:
 
 ---CONCEPT DEFINITIONS (Strict Temporal Separation)---
 
-concept_a - ANCIENT DAILY LIFE (太古の日常):
-Jomon settlement ~10,000 years ago. MUST include people engaged in hunting, gathering, cooking. Multiple pithouses with smoke rising, hearth fires, cord-marked pottery visible, stone tools in use. People and pottery must maintain NATURAL PROPORTIONS—no stretching. Raw, alive with human activity. Dense primitive forest. Dawn or dusk dramatic lighting. Active human presence is MANDATORY. 16:9 composition should fill width with environmental depth and multiple figures, NOT by warping any artifacts.
+concept_a - SYMBOLIC ARTIFACTS (象徴的遺物):
+Museum display: cord-marked pottery vessel or Dogu figurine CENTERED in frame with NATURAL VERTICAL PROPORTIONS—NEVER stretch or warp the artifact. Dramatic spotlighting on clay surface. Macro detail of intricate cord patterns, patina, ancient soil stains. Dogu's mysterious expression. Fill the 16:9 width with museum environment: display base/platform beneath artifact, ambient gallery lighting on sides, dark background gradient. Emphasize spiritual essence of Jomon object. Cinematic museum photography—wide composition achieved through environmental depth, NOT artifact distortion.
 Start with: "${JOMON_OS_SUFFIX_V2_2}"
 
 concept_b - MODERN ARCHAEOLOGICAL SITE (現代の史跡):
 Contemporary view of Jomon heritage park or museum site. NO PEOPLE. Reconstructed pithouses standing silently, centered in the frame. Moss-covered mounds, eroded earth structures, forest backdrop on both sides. Modern signage, preserved earth layers. Static, quiet, contemplative atmosphere. Use surrounding forest, earth textures, and archaeological landscape to fill 16:9 width—NOT by stretching the pithouse structure itself. Archaeological landscape showing passage of time.
 Start with: "${JOMON_OS_SUFFIX_V2_2}"
 
-concept_c - SYMBOLIC ARTIFACTS (象徴的遺物):
-Museum display: cord-marked pottery vessel or Dogu figurine CENTERED in frame with NATURAL VERTICAL PROPORTIONS—NEVER stretch or warp the artifact. Dramatic spotlighting on clay surface. Macro detail of intricate cord patterns, patina, ancient soil stains. Dogu's mysterious expression. Fill the 16:9 width with museum environment: display base/platform beneath artifact, ambient gallery lighting on sides, dark background gradient. Emphasize spiritual essence of Jomon object. Cinematic museum photography—wide composition achieved through environmental depth, NOT artifact distortion.
+concept_c - ANCIENT DAILY LIFE (太古の日常):
+Jomon settlement ~10,000 years ago. MUST include people engaged in hunting, gathering, cooking. Multiple pithouses with smoke rising, hearth fires, cord-marked pottery visible, stone tools in use. People and pottery must maintain NATURAL PROPORTIONS—no stretching. Raw, alive with human activity. Dense primitive forest. Dawn or dusk dramatic lighting. Active human presence is MANDATORY. 16:9 composition should fill width with environmental depth and multiple figures, NOT by warping any artifacts.
 Start with: "${JOMON_OS_SUFFIX_V2_2}"
 
 ---REQUIREMENTS---
@@ -141,7 +141,7 @@ Analyze the site structure from available materials (text and visual context) to
     let result;
     try {
       const model = genAI.getGenerativeModel({
-        model: 'gemini-flash-latest',  // 最新版フラッシュモデル
+        model: 'gemini-2.5-pro',  // 高性能 Pro モデル（長文 JSON 対応）
       });
       result = await callGeminiWithRetry(model, {
         contents: [
@@ -150,7 +150,7 @@ Analyze the site structure from available materials (text and visual context) to
         tools: [],
         generationConfig: {
           temperature: 0.1,
-          maxOutputTokens: 4096  // 3 concepts × 150 words を確実に出力
+          maxOutputTokens: 8192  // ディープリマスター用の長い指示書に対応
         }
       });
     } catch (modelErr: any) {
@@ -167,7 +167,7 @@ Analyze the site structure from available materials (text and visual context) to
       // Fallback to gemini-2.5-flash-lite on model not found
       if (modelErr?.message?.includes('not found') || modelErr?.status === 404) {
         try {
-          const fallbackModel = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
+          const fallbackModel = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
           result = await callGeminiWithRetry(fallbackModel, {
             contents: [
               { role: 'user', parts: [{ text: systemPrompt }, { text: userContent }] },
@@ -175,7 +175,7 @@ Analyze the site structure from available materials (text and visual context) to
             tools: [],
             generationConfig: {
               temperature: 0.1,
-              maxOutputTokens: 4096  // 3 concepts × 150 words を確実に出力
+              maxOutputTokens: 8192  // ディープリマスター用の長い指示書に対応
             }
           });
         } catch (fallbackErr: any) {

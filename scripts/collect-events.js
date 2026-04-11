@@ -48,7 +48,7 @@ async function collectEvents() {
       throw new Error('GEMINI_API_KEY environment variable not set');
     }
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
 
     // 3. 各施設をスクレイピング＋イベント抽出
     const newEvents = [];
@@ -133,7 +133,7 @@ ${textContent}`;
             tools: [],
             generationConfig: {
               temperature: 0.1,
-              maxOutputTokens: 2048
+              maxOutputTokens: 4096  // イベント情報が多い場合に対応
             }
           });
           const responseText = result.response.text().trim();
@@ -217,6 +217,11 @@ ${textContent}`;
       } catch (err) {
         console.warn(`[collect-events] Failed to process ${facility.name}:`, err.message);
       }
+
+      // API への負荷軽減：5-10秒待機（503エラー防止）
+      const waitTime = 5000 + Math.random() * 5000; // 5-10秒
+      console.log(`[collect-events] [待機中] ${Math.floor(waitTime)}ms 後に次のリクエストを送信...`);
+      await new Promise(r => setTimeout(r, waitTime));
     }
 
     // 4. 期限切れイベントを削除
