@@ -41,8 +41,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(requestBody),
-      timeout: 120000
+      body: JSON.stringify(requestBody)
     });
 
     const responseText = await response.text();
