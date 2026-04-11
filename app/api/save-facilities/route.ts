@@ -27,7 +27,16 @@ async function saveWithRetry(
     const fileData = await getRes.json();
 
     // 2. PUT updated content
-    const newContent = JSON.stringify(facilities, null, 2);
+    let newContent: string;
+    try {
+      newContent = JSON.stringify(facilities, null, 2);
+      // Validate JSON by parsing it back
+      JSON.parse(newContent);
+    } catch (err) {
+      console.error('[API] JSON stringify/parse error:', err);
+      throw new Error(`Invalid facilities data: ${err instanceof Error ? err.message : 'unknown error'}`);
+    }
+
     const encodedContent = Buffer.from(newContent).toString('base64');
 
     const putRes = await fetch(
@@ -70,6 +79,19 @@ export async function POST(request: NextRequest) {
 
     console.log('[API] === SAVE-FACILITIES API CALLED ===');
     console.log('[API] Received facilities count:', facilities.length);
+
+    // Validate each facility can be JSON stringified
+    console.log('[API] Validating facilities data...');
+    for (let i = 0; i < facilities.length; i++) {
+      const facility = facilities[i];
+      try {
+        JSON.stringify(facility);
+      } catch (err) {
+        console.error(`[API] Facility ${i} (ID: ${facility?.id}) has non-serializable data:`, err);
+        throw new Error(`Facility ${facility?.id || i} contains non-serializable data: ${err instanceof Error ? err.message : 'unknown error'}`);
+      }
+    }
+
     const f078 = facilities.find((f: any) => f.id === '078');
     const f067 = facilities.find((f: any) => f.id === '067');
     console.log('[API] Facility 078 thumbnail:', f078?.thumbnail);
