@@ -68,6 +68,14 @@ export async function POST(request: NextRequest) {
   try {
     const { facilities } = await request.json();
 
+    console.log('[API] === SAVE-FACILITIES API CALLED ===');
+    console.log('[API] Received facilities count:', facilities.length);
+    const f078 = facilities.find((f: any) => f.id === '078');
+    const f067 = facilities.find((f: any) => f.id === '067');
+    console.log('[API] Facility 078 thumbnail:', f078?.thumbnail);
+    console.log('[API] Facility 067 thumbnail:', f067?.thumbnail);
+    console.log('[API] Facility 078 tags:', f078?.tags);
+
     // 【要確認】ラベルが削除された施設に userApproved フラグを設定
     // これにより、クローラーが再実行時に【要確認】を復活させない
     const facilitiesWithApprovalFlags = facilities.map((facility: any) => {
@@ -78,12 +86,14 @@ export async function POST(request: NextRequest) {
       return facility;
     });
 
+    console.log('[API] After approval flags - Facility 078 tags:', facilitiesWithApprovalFlags.find((f: any) => f.id === '078')?.tags);
     console.log('[API] Approval flags set for facilities without 【要確認】');
 
     const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
     const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
 
     if (!token || !repo) {
+      console.error('[API] Missing GitHub credentials - token:', !!token, 'repo:', !!repo);
       return NextResponse.json(
         { error: 'GitHub credentials not configured' },
         { status: 400 }
@@ -93,7 +103,8 @@ export async function POST(request: NextRequest) {
     console.log('[API] Saving facilities to GitHub:', repo);
     console.log('[API] Token configured:', !!token);
 
-    await saveWithRetry(token, repo, facilitiesWithApprovalFlags);
+    const saveResult = await saveWithRetry(token, repo, facilitiesWithApprovalFlags);
+    console.log('[API] Save result:', saveResult);
 
     console.log('[API] Successfully saved to GitHub!');
 
