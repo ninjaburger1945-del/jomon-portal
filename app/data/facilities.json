@@ -2349,7 +2349,7 @@
     "copy": "キウス周堤墓群を育んだ、千歳の縄文文化に触れる。",
     "access_public": "JR千歳駅から車で約10分。千歳市コミュニティバス「千歳市埋蔵文化財センター」下車",
     "access_car": "道央自動車道千歳ICから約10分",
-    "thumbnail": "/images/facilities/taishakukyo-isekigun_ai.png",
+    "thumbnail": "/images/facilities/075_remaster_b.png",
     "userApproved": true
   },
   {
@@ -2433,6 +2433,58 @@
     "thumbnail": "/images/facilities/078_remaster_c.png",
     "access_public": "JR予讃線「松山駅」からタクシーで約10分。伊予鉄バス（空港線ほか）「考古館前」停留所下車すぐ",
     "access_car": "松山自動車道「松山IC」から約20分（無料駐車場あり）",
+    "userApproved": true
+  },
+  {
+    "id": "079",
+    "name": "恵庭市郷土資料館（カリンバ遺跡）",
+    "prefecture": "北海道",
+    "address": "北海道恵庭市南島松202-1",
+    "description": "国指定史跡「カリンバ遺跡」から出土した、縄文時代晩期の極めて華麗な副葬品を展示する施設です。特に漆塗りの櫛や垂れ飾り、管玉などの精緻な装身具は、当時の高度な工芸技術と精神文化を今に伝えています。これらの出土品は一括して重要文化財に指定されており、縄文の「美」と「祈り」を体感できる国内有数のスポットです。また、遺跡公園として整備されたカリンバ遺跡も近隣に位置し、往時の景観に思いを馳せることができます。",
+    "region": "北海道",
+    "url": "https://www.city.eniwa.hokkaido.jp/kurashi/kosodate_kyoiku/eniwashikyodoshiryokan/kyodoshiryokan/index.html",
+    "tags": [
+      "博物館"
+    ],
+    "lat": 42.910242,
+    "lng": 141.594391,
+    "access": {
+      "train": "JR千歳線「島松駅」から徒歩約15分",
+      "bus": "恵庭市コミュニティバス（ecoバス）「郷土資料館」バス停下車すぐ",
+      "car": "道央自動車道「恵庭IC」から約10分",
+      "rank": "A"
+    },
+    "copy": "縄文の美が息づく、朱塗りの装身具の宝庫。",
+    "thumbnail": "/images/facilities/079_remaster_a.png",
+    "access_public": "JR千歳線「島松駅」から徒歩約15分。恵庭市コミュニティバス（ecoバス）「郷土資料館」バス停下車すぐ",
+    "access_car": "道央自動車道「恵庭IC」から約10分",
+    "userApproved": true
+  },
+  {
+    "id": "080",
+    "name": "高知県立埋蔵文化財センター",
+    "prefecture": "高知県",
+    "address": "高知県南国市篠原143-1",
+    "description": "四国を代表する縄文時代前期の標式土器である「轟式土器」が出土した轟遺跡の資料を中心に、県内の縄文遺跡から発掘された重要文化財を多数展示しています。早期から晩期に及ぶ土器の変遷や、黒潮が育んだ独特の縄文文化、当時の人々の暮らしを精緻な出土品を通して詳しく紹介しています。南国市の丘陵地に位置し、県内の発掘調査・研究の中核を担う施設であり、体験学習を通じて当時の技術を学ぶことも可能です。",
+    "region": "四国",
+    "url": "https://kochi-maibun.jp/",
+    "tags": [
+      "轟式土器",
+      "重要文化財",
+      "体験学習"
+    ],
+    "lat": 33.5658,
+    "lng": 133.6339,
+    "access": {
+      "train": "JR土讃線「後免駅」からタクシーで約10分",
+      "bus": "とさでん交通バス「高知医療センター」経由便で「埋蔵文化財センター前」下車すぐ",
+      "car": "高知自動車道「南国IC」から約15分",
+      "rank": "A"
+    },
+    "copy": "黒潮が運んだ縄文の記憶、轟式土器の美に触れる。",
+    "thumbnail": "/images/facilities/080_ai.png",
+    "access_public": "JR土讃線「後免駅」からタクシーで約10分。とさでん交通バス「高知医療センター」経由便で「埋蔵文化財センター前」下車すぐ",
+    "access_car": "高知自動車道「南国IC」から約15分",
     "userApproved": true
   }
 ]
