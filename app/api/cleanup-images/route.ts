@@ -67,10 +67,23 @@ export async function POST(request: NextRequest) {
 
     console.log('[cleanup-images] Starting cleanup...');
 
-    // Get all used thumbnails from facilities.json
-    const filePath = path.join(process.cwd(), 'app/data/facilities.json');
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const facilities = JSON.parse(fileContent);
+    // Get facilities.json from GitHub (latest version)
+    console.log('[cleanup-images] Fetching latest facilities.json from GitHub...');
+    const facilitiesUrl = `https://api.github.com/repos/${repo}/contents/app/data/facilities.json`;
+    const facilitiesRes = await fetch(facilitiesUrl, {
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+      },
+    });
+
+    if (!facilitiesRes.ok) {
+      throw new Error(`Failed to fetch facilities.json: ${facilitiesRes.status}`);
+    }
+
+    const facilitiesData = await facilitiesRes.json();
+    const facilitiesContent = Buffer.from(facilitiesData.content, 'base64').toString('utf-8');
+    const facilities = JSON.parse(facilitiesContent);
 
     const usedImages = new Set(
       facilities
