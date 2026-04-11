@@ -253,12 +253,28 @@ export default function AdminPage() {
     const maxRetries = 3;
     try {
       console.log("Calling save-facilities API...");
+      console.log(`[saveFacilitiesToGithub] Facilities count: ${updatedFacilities.length}`);
+
+      // Validate each facility can be stringified before sending
+      for (let i = 0; i < updatedFacilities.length; i++) {
+        const f = updatedFacilities[i];
+        try {
+          JSON.stringify(f);
+        } catch (err) {
+          console.error(`[saveFacilitiesToGithub] Facility ${i} (ID: ${f?.id}) is not JSON serializable:`, err);
+          throw new Error(`Facility ${f?.id || i} contains non-serializable data. Check browser console for details.`);
+        }
+      }
+
+      const requestBody = JSON.stringify({ facilities: updatedFacilities });
+      console.log(`[saveFacilitiesToGithub] Request body size: ${requestBody.length} bytes`);
+
       const response = await fetch("/api/save-facilities", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ facilities: updatedFacilities }),
+        body: requestBody,
       });
 
       if (!response.ok) {
