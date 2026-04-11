@@ -73,4 +73,4 @@ export default function RootLayout({
   );
 }
 
-export const revalidate = 60;
+export const revalidate = 1; // ISR: Revalidate every 1 second to ensure latest facility data
