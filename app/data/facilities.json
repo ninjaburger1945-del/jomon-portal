@@ -73,8 +73,8 @@
     "url": "https://www.city.chiba.jp/kasori/",
     "thumbnail": "/images/facilities/kasori_ai.png",
     "tags": [
-      "博物館",
-      "貝塚"
+      "貝塚",
+      "博物館"
     ],
     "lat": 35.6264,
     "lng": 140.1656,
@@ -105,8 +105,8 @@
     "url": "https://visithachinohe.com/spot/korekawa_jomonkan/",
     "thumbnail": "/images/facilities/korekawa_ai.png",
     "tags": [
-      "国宝",
-      "土偶"
+      "博物館",
+      "国宝"
     ],
     "lat": 40.4851,
     "lng": 141.4886,
@@ -233,7 +233,6 @@
     "url": "https://www.jomon-no-mori.jp/",
     "thumbnail": "/images/facilities/uenohara_ai.png",
     "tags": [
-      "遺跡公園",
       "博物館"
     ],
     "lat": 31.7345,
@@ -328,8 +327,8 @@
     "url": "https://jomon-japan.jp/learn/jomon-sites/oyu",
     "thumbnail": "/images/facilities/oyu_ai.png",
     "tags": [
-      "世界遺産",
-      "環状列石"
+      "環状列石",
+      "世界遺産"
     ],
     "lat": 40.2741,
     "lng": 140.7936,
@@ -360,8 +359,8 @@
     "url": "https://www.city.kitaakita.akita.jp/isedotai/",
     "thumbnail": "/images/facilities/isedotai_ai.png",
     "tags": [
-      "世界遺産",
-      "環状列石"
+      "環状列石",
+      "世界遺産"
     ],
     "lat": 40.1836,
     "lng": 140.3444,
@@ -392,8 +391,8 @@
     "url": "https://komakinosite.jp/",
     "thumbnail": "/images/facilities/komakino_ai.png",
     "tags": [
-      "世界遺産",
-      "環状列石"
+      "環状列石",
+      "世界遺産"
     ],
     "lat": 40.7511,
     "lng": 140.7186,
@@ -551,8 +550,7 @@
     "url": "https://jomon-japan.jp/learn/jomon-sites/goshono",
     "thumbnail": "/images/facilities/goshono_ai.png",
     "tags": [
-      "世界遺産",
-      "遺跡公園"
+      "世界遺産"
     ],
     "lat": 40.2019,
     "lng": 141.3063,
@@ -893,8 +891,8 @@
     "url": "https://www.pref.chiba.lg.jp/kyouiku/bunkazai/bunkazai/n411-029.html",
     "thumbnail": "/images/facilities/soyata_ai.png",
     "tags": [
-      "土器",
-      "貝塚"
+      "貝塚",
+      "土器"
     ],
     "lat": 35.7497,
     "lng": 139.9327,
@@ -956,8 +954,8 @@
     "url": "http://www.hjcc.jp/",
     "thumbnail": "/images/facilities/jomon-culture-center_ai.png",
     "tags": [
-      "国宝",
-      "土偶"
+      "博物館",
+      "国宝"
     ],
     "lat": 41.9279,
     "lng": 140.9447,
@@ -988,7 +986,6 @@
     "url": "http://www.f-shinkoukousha.or.jp/jyomopia/index.html",
     "thumbnail": "/images/facilities/jomopia-miyahata_ai.png",
     "tags": [
-      "遺跡公園",
       "博物館"
     ],
     "lat": 37.7925,
@@ -1051,8 +1048,8 @@
     "url": "https://www.city.funabashi.lg.jp/shisetsu/bunka/0001/0006/0001/p036786.html",
     "thumbnail": "/images/facilities/tobinodai-museum_ai.png",
     "tags": [
-      "貝塚",
-      "遺跡公園"
+      "博物館",
+      "貝塚"
     ],
     "lat": 35.7107,
     "lng": 139.9748,
@@ -1083,8 +1080,7 @@
     "url": "https://www.city.fujimi.saitama.jp/madoguchi_shisetsu/02shisetsu/shiryoukan/mizukokaiduka/index.html",
     "thumbnail": "/images/facilities/mizuko-kaizuka_ai.png",
     "tags": [
-      "貝塚",
-      "博物館"
+      "貝塚"
     ],
     "lat": 35.8457,
     "lng": 139.5622,
@@ -1115,8 +1111,7 @@
     "url": "https://www.city.sagamihara.kanagawa.jp/kurashi/shisetsu/kouen_kankou/kouen_ryokuchi/1003090.html",
     "thumbnail": "/images/facilities/katsusaka-iseki_ai.png",
     "tags": [
-      "土器",
-      "遺跡公園"
+      "土器"
     ],
     "lat": 35.5098,
     "lng": 139.3875,
@@ -1210,8 +1205,8 @@
     "url": "https://www.city.ichikawa.lg.jp/edu14/1111000001.html",
     "thumbnail": "/images/facilities/kasori_ai.png",
     "tags": [
-      "博物館",
-      "貝塚"
+      "貝塚",
+      "博物館"
     ],
     "lat": 35.759333,
     "lng": 139.910528,
@@ -1242,8 +1237,7 @@
     "url": "https://www.vill.miho.lg.jp/kankou-event/minohobunkazai/mihomurabunkazaicenter/page003523.html",
     "thumbnail": "/images/facilities/ubayama_ai.png",
     "tags": [
-      "貝塚",
-      "博物館"
+      "貝塚"
     ],
     "lat": 36.017111,
     "lng": 140.347944,
@@ -1368,8 +1362,8 @@
     "url": "https://www.city.hasuda.saitama.jp/kyoiku/bunkazai/bunkazai/kurohamakaizuka/index.html",
     "thumbnail": "/images/facilities/kurohama-kaizuka_ai.png",
     "tags": [
-      "土器",
-      "貝塚"
+      "貝塚",
+      "土器"
     ],
     "lat": 35.98013,
     "lng": 139.66444,
@@ -1500,8 +1494,8 @@
     "url": "https://kunishitei.bunka.go.jp/heritage/detail/401/3022",
     "thumbnail": "/images/facilities/ogido-kaizuka_ai.png",
     "tags": [
-      "土器",
-      "貝塚"
+      "貝塚",
+      "土器"
     ],
     "lat": 26.292889,
     "lng": 127.798694,
@@ -1532,8 +1526,8 @@
     "url": "https://www.town.funagata.yamagata.jp/s029/map/map02/010/020/20210907150405.html",
     "thumbnail": "/images/facilities/funagata-rekimin_ai.png",
     "tags": [
-      "国宝",
-      "土偶"
+      "博物館",
+      "国宝"
     ],
     "lat": 38.679361,
     "lng": 140.329858,
@@ -1567,7 +1561,7 @@
     "thumbnail": "/images/facilities/ogushi-kaizuka-fureai-koen_ai.png",
     "tags": [
       "貝塚",
-      "遺跡公園"
+      "博物館"
     ],
     "lat": 36.33383877,
     "lng": 140.54586563,
@@ -1693,8 +1687,8 @@
     "url": "https://www.city.sukumo.kochi.jp/docs-26/p0108041001.html",
     "thumbnail": "/images/facilities/054_ai.png",
     "tags": [
-      "博物館",
-      "貝塚"
+      "貝塚",
+      "博物館"
     ],
     "lat": 32.93671,
     "lng": 132.72315,
@@ -1725,8 +1719,8 @@
     "url": "https://www.city.oyabe.toyama.jp/bunkasports/1003003/1003016/index.html",
     "thumbnail": "/images/facilities/055_ai.png",
     "tags": [
-      "土器",
-      "遺跡公園"
+      "博物館",
+      "土器"
     ],
     "lat": 36.67151,
     "lng": 136.87783,
@@ -1757,8 +1751,8 @@
     "url": "https://aomori-tourism.com/spot/detail_8655.html",
     "thumbnail": "/images/facilities/056_ai.png",
     "tags": [
-      "国宝",
-      "貝塚"
+      "博物館",
+      "国宝"
     ],
     "lat": 40.713915,
     "lng": 141.139423,
@@ -1822,7 +1816,7 @@
     "thumbnail": "/images/facilities/058_ai.png",
     "tags": [
       "貝塚",
-      "土偶"
+      "土器"
     ],
     "lat": 36.075833,
     "lng": 140.177222,
@@ -1948,7 +1942,7 @@
     "url": "http://www.tokushima-kouko.jp/",
     "thumbnail": "/images/facilities/062_ai.png",
     "tags": [
-      "土偶",
+      "博物館",
       "土器"
     ],
     "lat": 34.0729,
@@ -1980,7 +1974,6 @@
     "url": "https://www.city.kitami.lg.jp/detail.php?content=8321",
     "thumbnail": "/images/facilities/063_ai.png",
     "tags": [
-      "遺跡公園",
       "博物館"
     ],
     "lat": 44.11025,
@@ -2012,7 +2005,6 @@
     "url": "https://www.city.tsugaru.aomori.jp/soshiki/kyoiku/bunkazai/sihakukan/6521.html",
     "thumbnail": "/images/facilities/064_ai.png",
     "tags": [
-      "土偶",
       "博物館"
     ],
     "lat": 40.941328,
@@ -2140,8 +2132,8 @@
     "url": "https://www.najomon.com/page_top/index.php",
     "thumbnail": "/images/facilities/068_ai.png",
     "tags": [
-      "土器",
-      "遺跡公園"
+      "博物館",
+      "土器"
     ],
     "lat": 37.0163,
     "lng": 138.6475,
@@ -2313,7 +2305,10 @@
     "region": "北海道",
     "url": "https://www.domaibun.or.jp/",
     "tags": [
-      "博物館"
+      "埋蔵文化財",
+      "博物館",
+      "研究機関",
+      "常設展示"
     ],
     "lat": 43.059277,
     "lng": 141.332306,
@@ -2338,8 +2333,10 @@
     "region": "北海道",
     "url": "https://www.city.chitose.lg.jp/c40/1002692/1002693/1002695/index.html",
     "tags": [
-      "世界遺産",
-      "体験"
+      "ガイダンス施設",
+      "埋蔵文化財",
+      "世界遺産関連",
+      "体験学習"
     ],
     "lat": 42.827722,
     "lng": 141.650806,
@@ -2364,8 +2361,10 @@
     "region": "北海道",
     "url": "https://www.city.date.hokkaido.jp/funkawan/",
     "tags": [
-      "世界遺産",
-      "博物館"
+      "研究施設",
+      "博物館",
+      "地域文化",
+      "世界遺産関連"
     ],
     "lat": 42.476444,
     "lng": 140.949778,
@@ -2390,8 +2389,10 @@
     "region": "中国",
     "url": "https://www.city.setouchi.lg.jp/soshiki/23/3862.html",
     "tags": [
+      "国指定史跡",
       "貝塚",
-      "遺跡公園"
+      "門田式土器",
+      "縄文後期"
     ],
     "lat": 34.654395,
     "lng": 133.945037,
@@ -2416,8 +2417,7 @@
     "region": "四国",
     "url": "https://www.city.matsuyama.ehime.jp/shisetsu/bunka/maibun_koukokan.html",
     "tags": [
-      "土偶",
-      "博物館"
+      "土偶"
     ],
     "lat": 33.8329,
     "lng": 132.7231,
@@ -2442,7 +2442,6 @@
     "region": "北海道",
     "url": "https://www.city.eniwa.hokkaido.jp/kurashi/kosodate_kyoiku/eniwashikyodoshiryokan/kyodoshiryokan/index.html",
     "tags": [
-      "遺跡公園",
       "博物館"
     ],
     "lat": 42.910242,
@@ -2468,8 +2467,7 @@
     "region": "四国",
     "url": "https://kochi-maibun.jp/",
     "tags": [
-      "土器",
-      "博物館"
+      "土器"
     ],
     "lat": 33.5658,
     "lng": 133.6339,
