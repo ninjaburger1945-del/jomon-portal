@@ -2389,10 +2389,8 @@
     "region": "中国",
     "url": "https://www.city.setouchi.lg.jp/soshiki/23/3862.html",
     "tags": [
-      "国指定史跡",
       "貝塚",
-      "門田式土器",
-      "縄文後期"
+      "遺跡公園"
     ],
     "lat": 34.654395,
     "lng": 133.945037,
@@ -2417,7 +2415,8 @@
     "region": "四国",
     "url": "https://www.city.matsuyama.ehime.jp/shisetsu/bunka/maibun_koukokan.html",
     "tags": [
-      "土偶"
+      "土偶",
+      "博物館"
     ],
     "lat": 33.8329,
     "lng": 132.7231,
