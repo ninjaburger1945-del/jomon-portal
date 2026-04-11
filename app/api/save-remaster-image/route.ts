@@ -30,20 +30,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch image from Pollinations
-    const imgRes = await fetch(pollinationsUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; JomonPortalBot/1.0)' },
-    });
+    // Extract Base64 from data URL or fetch from URL
+    let base64Content: string;
 
-    if (!imgRes.ok) {
-      return NextResponse.json(
-        { error: `Failed to fetch image from Pollinations: ${imgRes.status}` },
-        { status: 502 }
-      );
+    if (pollinationsUrl.startsWith('data:image')) {
+      // Data URL format: data:image/png;base64,<base64>
+      const match = pollinationsUrl.match(/base64,(.+)$/);
+      if (!match) {
+        return NextResponse.json(
+          { error: 'Invalid data URL format' },
+          { status: 400 }
+        );
+      }
+      base64Content = match[1];
+    } else {
+      // Fetch image from URL (Pollinations or other)
+      const imgRes = await fetch(pollinationsUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; JomonPortalBot/1.0)' },
+      });
+
+      if (!imgRes.ok) {
+        return NextResponse.json(
+          { error: `Failed to fetch image: ${imgRes.status}` },
+          { status: 502 }
+        );
+      }
+
+      const imageBuffer = await imgRes.arrayBuffer();
+      base64Content = Buffer.from(imageBuffer).toString('base64');
     }
-
-    const imageBuffer = await imgRes.arrayBuffer();
-    const base64Content = Buffer.from(imageBuffer).toString('base64');
 
     // GitHub API path
     const githubPath = `public/images/facilities/${facilityId}_remaster_${conceptLabel}.png`;

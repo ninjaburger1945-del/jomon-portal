@@ -353,21 +353,34 @@ export default function AdminPage() {
     for (let i = 0; i < keys.length; i++) {
       setGeneratingIndex(i);
       const prompt = prompts[keys[i]];
-      const seed = Math.floor(Math.random() * 1000000);
-      const timestamp = Date.now();
-      const encodedPrompt = encodeURIComponent(prompt);
-      const pollinationsUrl =
-        `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&nologo=true&model=flux-pro&seed=${seed}&t=${timestamp}`;
 
       let loadSuccess = false;
       const maxRetries = 2;
 
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
-          await preloadImage(pollinationsUrl, 120000);
-          newImages[i] = pollinationsUrl;
-          loadSuccess = true;
-          break;
+          console.log(`[generateImages] Imagen 4.0 生成中 concept_${String.fromCharCode(97 + i)} (${attempt + 1}/${maxRetries})`);
+
+          const response = await fetch('/api/generate-image-imagen', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+          }
+
+          const result = await response.json();
+
+          if (result.success && result.dataUrl) {
+            newImages[i] = result.dataUrl;
+            loadSuccess = true;
+            console.log(`[generateImages] concept_${String.fromCharCode(97 + i)} 生成成功`);
+            break;
+          } else {
+            throw new Error(result.error || 'Unknown error');
+          }
         } catch (err) {
           console.warn(
             `[generateImages] concept_${String.fromCharCode(97 + i)} attempt ${attempt + 1}/${maxRetries} failed:`,
@@ -380,9 +393,8 @@ export default function AdminPage() {
       }
 
       if (!loadSuccess) {
-        newImages[i] = pollinationsUrl;
         console.warn(
-          `[generateImages] concept_${String.fromCharCode(97 + i)} will show URL but failed to preload. User can retry.`
+          `[generateImages] concept_${String.fromCharCode(97 + i)} 生成失敗`
         );
       }
 
