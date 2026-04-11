@@ -494,6 +494,19 @@ export default function AdminPage() {
 
       await saveFacilitiesToGithub(updatedFacilities);
 
+      // Cleanup unused images after successful save
+      console.log("[handleConfirmRemaster] Cleaning up unused images...");
+      try {
+        const cleanupRes = await fetch("/api/cleanup-images", {
+          method: "POST",
+        });
+        const cleanupData = await cleanupRes.json();
+        console.log("[handleConfirmRemaster] Cleanup result:", cleanupData);
+      } catch (cleanupErr) {
+        console.warn("[handleConfirmRemaster] Cleanup failed (non-blocking):", cleanupErr);
+        // Don't throw - cleanup failure should not block the entire operation
+      }
+
       setFacilities(updatedFacilities);
       setShowRemasterModal(false);
       setDeepRemasterFacility(null);
