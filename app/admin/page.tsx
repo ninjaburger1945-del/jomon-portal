@@ -1251,9 +1251,9 @@ export default function AdminPage() {
                 }}>
                   {(['a', 'b', 'c'] as const).map((label, i) => {
                     const conceptLabels = [
-                      { icon: '🏛️', text: 'コンセプトA：再現' },
+                      { icon: '🏺', text: 'コンセプトA：象徴的遺物' },
                       { icon: '🌿', text: 'コンセプトB：遺構/環境' },
-                      { icon: '🏺', text: 'コンセプトC：象徴的遺物' },
+                      { icon: '🏛️', text: 'コンセプトC：再現' },
                     ];
                     const isSelected = selectedImageIndex === i;
                     const isGenerating = generatingIndex === i;
