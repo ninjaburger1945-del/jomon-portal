@@ -1233,7 +1233,7 @@
     "region": "Kanto",
     "prefecture": "茨城県",
     "address": "茨城県稲敷郡美浦村土浦2359",
-    "description": "『日本考古学の原点』とも言われる国指定史跡・陸平貝塚に隣接する施設です。 霞ヶ浦を望む高台にあり、縄文時代早期から後期という長期間にわたる集落の跡が見つかっています。 センターでは貝塚から発掘された貴重な土器や石器などが展示されており、縄文人の生活を身近に感じることができます。 復元された竪穴住居もあり、豊かな自然の中で古代の暮らしに思いを馳せることができる場所です。陸平貝塚は霞ヶ浦周辺の縄文文化を理解する上で最も重要な遺跡であり、複数の貝塚時期の層序が明確に保存されています。",
+    "description": "「日本考古学の原点」とされる国指定史跡。明治時代、日本人自らの手で初めて学術的発掘が行われた記念碑的な遺跡です。霞ヶ浦を望む丘陵に広がる国内屈指の規模を誇る貝塚で、センターではその歴史的背景と、長期にわたる定住の変遷を詳しく紹介しています。",
     "url": "https://www.vill.miho.lg.jp/kankou-event/minohobunkazai/mihomurabunkazaicenter/page003523.html",
     "thumbnail": "/images/facilities/ubayama_ai.png",
     "tags": [
@@ -1252,7 +1252,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR常磐線土浦駅からJRバス関東で約40分",
+    "access_public": "JR常磐線土浦駅からJRバス関東で約40分。陸平貝塚バス停から徒歩約1分",
     "access_public_en": "",
     "access_car": "圏央道稲敷ICから県道5号線経由で約20分",
     "access_car_en": "",
