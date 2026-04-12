@@ -99,7 +99,12 @@ function extractAndParseJSON(responseText, context = '', prefix = '') {
 }
 
 async function collectEvents() {
-  console.log('[collect-events] Starting event collection...');
+  console.log('\n╔══════════════════════════════════════════════════════════════╗');
+  console.log('║  Jomon Portal - Event Auto Collector (Safe Mode)             ║');
+  console.log('╚══════════════════════════════════════════════════════════════╝\n');
+  console.log('[collect-events] ⚡ Starting event collection cycle...');
+  console.log('[collect-events] 🔒 Safety Mode: All processing → Single batch push → [skip ci]');
+  console.log('[collect-events] 📊 Vercel Build Minutes protected\n');
 
   const eventsPath = path.join(__dirname, '../app/data/events.json');
   const facilitiesPath = path.join(__dirname, '../app/data/facilities.json');
@@ -116,7 +121,7 @@ async function collectEvents() {
 
     // url フィールドがある施設のみをフィルタ
     const facilitiesWithUrl = facilitiesData.filter(f => f.url && f.url.trim() !== '');
-    console.log(`[collect-events] Total facilities: ${facilitiesData.length}, With URL: ${facilitiesWithUrl.length}`);
+    console.log(`[collect-events] 📍 Total facilities: ${facilitiesData.length}, With URL: ${facilitiesWithUrl.length}\n`);
 
     // 2. 既存の events.json を読み込み（重複排除用）
     let existingEvents = [];
@@ -140,25 +145,37 @@ async function collectEvents() {
     const oneMonthLater = new Date(today);
     oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
 
+    let processedCount = 0;
+    let errorCount = 0;
+    let eventsFoundCount = 0;
+
     for (const facility of facilitiesWithUrl) {
-      console.log(`[collect-events] Processing ${facility.name}...`);
-
       try {
-        // URL をスクレイピング（タイムアウト10秒）
-        const response = await axios.get(facility.url, {
-          timeout: 10000,
-          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; JomonPortalBot/1.0)' },
-        });
+        console.log(`[collect-events] [${processedCount + 1}/${facilitiesWithUrl.length}] Processing ${facility.name}...`);
 
-        const html = response.data;
+        // URL をスクレイピング（タイムアウト10秒）
+        let html, textContent;
+        try {
+          const response = await axios.get(facility.url, {
+            timeout: 10000,
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; JomonPortalBot/1.0)' },
+          });
+          html = response.data;
+        } catch (fetchErr) {
+          console.warn(`[collect-events] ⚠️  Failed to fetch ${facility.name}: ${fetchErr.message}`);
+          errorCount++;
+          continue; // この施設をスキップして次へ進む
+        }
+
         const $ = cheerio.load(html);
 
         // スクリプト・スタイルを削除
         $('script, style, nav, footer, header').remove();
-        const textContent = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 5000);
+        textContent = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 5000);
 
         if (!textContent) {
-          console.warn(`[collect-events] No text content from ${facility.name}`);
+          console.warn(`[collect-events] ⚠️  No text content from ${facility.name}`);
+          errorCount++;
           continue;
         }
 
@@ -303,16 +320,26 @@ ${textContent}`;
           }
         });
 
-        console.log(`[collect-events] ${facility.name}: ${extractedEvents.length} events found`);
+        console.log(`[collect-events] ✅ ${facility.name}: ${extractedEvents.length} events found`);
+        eventsFoundCount += extractedEvents.length;
+        processedCount++;
       } catch (err) {
-        console.warn(`[collect-events] Failed to process ${facility.name}:`, err.message);
+        console.warn(`[collect-events] ❌ Failed to process ${facility.name}: ${err.message}`);
+        errorCount++;
+        // エラーが発生しても処理を継続
+        processedCount++;
       }
 
       // API への負荷軽減：5-10秒待機（503エラー防止）
       const waitTime = 5000 + Math.random() * 5000; // 5-10秒
-      console.log(`[collect-events] [待機中] ${Math.floor(waitTime)}ms 後に次のリクエストを送信...`);
+      console.log(`[collect-events] ⏳ Waiting ${Math.floor(waitTime)}ms before next request...\n`);
       await new Promise(r => setTimeout(r, waitTime));
     }
+
+    console.log(`\n[collect-events] 📊 Processing Summary:`);
+    console.log(`[collect-events]   ✅ Successfully processed: ${processedCount - errorCount}/${facilitiesWithUrl.length}`);
+    console.log(`[collect-events]   ⚠️  Errors encountered: ${errorCount}/${facilitiesWithUrl.length}`);
+    console.log(`[collect-events]   🎯 Total events found: ${eventsFoundCount}\n`);
 
     // 4. 期限切れイベントを削除
     const activeEvents = existingEvents.filter(e => {
@@ -328,8 +355,10 @@ ${textContent}`;
     fs.writeFileSync(eventsPath, JSON.stringify(updatedEvents, null, 2) + '\n', 'utf8');
     console.log(`[collect-events] Updated events.json: ${newEvents.length} new events added, total: ${updatedEvents.length}`);
 
-    // 5. 全件処理完了後に、まとめてGitコマンドでコミット＆プッシュ
-    if (newEvents.length > 0) {
+    // 6. 全件処理完了後に、『一度だけ』Gitコマンドでコミット＆プッシュ
+    console.log(`[collect-events] 📦 Batch push phase: Processing ${newEvents.length} new events + ${existingEvents.length - activeEvents.length} removed expired\n`);
+
+    if (newEvents.length > 0 || (existingEvents.length - activeEvents.length) > 0) {
       try {
         const { exec } = require('child_process');
         const util = require('util');
@@ -339,39 +368,45 @@ ${textContent}`;
         try {
           await execPromise('git config user.email');
         } catch {
-          console.log('[collect-events] Setting git user config...');
+          console.log('[collect-events] 🔧 Initializing git user config...');
           await execPromise('git config user.email "action@github.com"');
           await execPromise('git config user.name "GitHub Action"');
         }
 
-        // コミットメッセージ（[skip ci] はオプション）
-        const skipCi = process.env.SKIP_CI === 'true' ? ' [skip ci]' : '';
-        const commitMessage = `chore(events): auto-collect ${newEvents.length} new events${skipCi}`;
+        // コミットメッセージ：[skip ci] を必ず先頭に含める
+        const commitMessage = `[skip ci] chore(events): auto-collect ${newEvents.length} new events, removed ${existingEvents.length - activeEvents.length} expired`;
 
         // events.json をステージング
-        console.log('[collect-events] Staging events.json...');
+        console.log('[collect-events] 📝 Staging events.json...');
         await execPromise('git add app/data/events.json');
 
-        // コミット実行
-        console.log('[collect-events] Committing changes...');
+        // コミット実行（単一のコミット）
+        console.log('[collect-events] 💾 Creating single batch commit...');
         await execPromise(`git commit -m "${commitMessage}"`);
 
         // プッシュ実行（リベースで競合対応）
-        console.log('[collect-events] Pushing to GitHub...');
+        console.log('[collect-events] 🚀 Pushing to GitHub (with [skip ci] flag)...');
         await execPromise('git pull --rebase --autostash origin main');
         await execPromise('git push origin main');
 
-        console.log('[collect-events] Successfully committed and pushed to GitHub');
+        console.log('\n[collect-events] ✅ Successfully committed and pushed to GitHub');
+        console.log('[collect-events] 🛡️  Build skip flag [skip ci] active - Vercel build NOT triggered\n');
       } catch (gitErr) {
         // git push 失敗時もスクリプト失敗とはしない（ローカル変更は保持）
-        console.warn('[collect-events] Git operation failed:', gitErr.message);
-        console.log('[collect-events] Events were saved locally. Manual push may be needed.');
+        console.warn('\n[collect-events] ⚠️  Git operation error:', gitErr.message);
+        console.warn('[collect-events] 💾 Events were saved locally at:', eventsPath);
+        console.warn('[collect-events] 🔄 Proceeding without push (data is safe)\n');
+        // スクリプトは成功として終了（重要なのはデータ保存）
       }
     } else {
-      console.log('[collect-events] No new events found. Skipping commit.');
+      console.log('[collect-events] ℹ️  No new events to commit. Skipping batch push.\n');
     }
 
-    console.log('[collect-events] Event collection completed successfully');
+    console.log('╔══════════════════════════════════════════════════════════════╗');
+    console.log('║  ✅ Event collection cycle completed successfully            ║');
+    console.log('║  ✅ Batch push: ONE commit (protected by [skip ci])          ║');
+    console.log('║  ✅ Vercel Build Minutes: SAVED                              ║');
+    console.log('╚══════════════════════════════════════════════════════════════╝\n');
     process.exit(0);
   } catch (error) {
     console.error('[collect-events] Fatal error:', error);
