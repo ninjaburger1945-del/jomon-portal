@@ -373,4 +373,4 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
     );
 }
 
-export const revalidate = 1; // ISR: Revalidate every 1 second to pick up facility updates
+export const revalidate = 3600; // ISR: Revalidate every 1 hour. Deployment triggers full rebuild for fresh data.

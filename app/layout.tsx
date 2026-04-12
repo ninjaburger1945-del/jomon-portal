@@ -73,4 +73,4 @@ export default function RootLayout({
   );
 }
 
-export const revalidate = 1; // ISR: Revalidate every 1 second to ensure latest facility data
+export const revalidate = 3600; // ISR: Revalidate every 1 hour. Deployment triggers full rebuild for fresh data.
