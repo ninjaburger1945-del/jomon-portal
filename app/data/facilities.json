@@ -2428,7 +2428,7 @@
     "id": "079",
     "name": "恵庭市郷土資料館（カリンバ遺跡）",
     "prefecture": "北海道",
-    "address": "北海道恵庭市南島松202-1",
+    "address": "北海道恵庭市黄金中央5丁目216-7",
     "description": "国指定史跡・カリンバ遺跡の出土品を展示。縄文晩期の合葬墓から見つかった、鮮やかな赤漆塗りの櫛や垂れ飾り、管玉などの膨大な装身具（重要文化財）は圧巻です。縄文人の「美」へのこだわりと、精緻な工芸技術、そして厚い弔いの儀礼を鮮明に伝えています。",
     "region": "Hokkaido",
     "url": "https://www.city.eniwa.hokkaido.jp/kurashi/kosodate_kyoiku/eniwashikyodoshiryokan/kyodoshiryokan/index.html",
@@ -2436,7 +2436,7 @@
       "博物館"
     ],
     "lat": 42.910242,
-    "lng": 141.594391,
+    "lng": 141.594091,
     "access": {
       "train": "JR千歳線「島松駅」から徒歩約15分",
       "bus": "恵庭市コミュニティバス（ecoバス）「郷土資料館」バス停下車すぐ",
