@@ -608,7 +608,7 @@
     "region": "Kanto",
     "prefecture": "東京都",
     "address": "東京都品川区大井6-21-6",
-    "description": "エドワード・モースによって科学的に発見された『日本考古学発祥の地』。出土した土器から『縄文（Cord Marked）』という時代名が生まれました。東京都品川区の貝塚は、日本の考古学の歴史における象徴的で極めて重要な遺跡です。幕末から明治初期にかけてのこの発見は、日本の学問に新しい学問分野をもたらしました。幕末から明治初期の学制改革と同時期に考古学が導入されたことで、日本の学問体系に新しい分野が加わりました。",
+    "description": "日本考古学発祥の地。エドワード・モースが汽車の窓から発見したことで有名。現在は大森貝塚遺跡庭園として整備されており、当時の発掘資料や耳飾りなどの出土品の多くは、近隣の品川区立品川歴史館に保管・展示されています。",
     "url": "https://shinagawa-kanko.or.jp/spot/oomorikaiduka/",
     "thumbnail": "/images/facilities/oomori_ai.png",
     "tags": [
@@ -627,7 +627,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "京浜急行本線大森海岸駅から徒歩約5分",
+    "access_public": "京浜急行本線大森海岸駅から徒歩約5分。大井警察署前バス停から徒歩約1分",
     "access_public_en": "",
     "access_car": "首都高速1号羽田線平和島ICから約10分",
     "access_car_en": "",
