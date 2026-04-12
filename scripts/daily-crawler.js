@@ -387,7 +387,7 @@ JSON配列のみ出力。説明や注釈は不要。`;
     }
 
     if (addedCount > 0) {
-      const facilitiesJson = JSON.stringify(existingData, null, 2);
+      let facilitiesJson = JSON.stringify(existingData, null, 2);
       fs.writeFileSync(FACILITIES_PATH, facilitiesJson, "utf-8");
       fs.writeFileSync(PUBLIC_FACILITIES_PATH, facilitiesJson, "utf-8");
       console.log(`[RESULT] ${addedCount}件を追加しました。合計: ${existingData.length}件`);
