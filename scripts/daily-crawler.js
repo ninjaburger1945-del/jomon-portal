@@ -407,7 +407,7 @@ JSON配列のみ出力。説明や注釈は不要。`;
         }
       }
       // 更新を保存（イラスト生成完了後の最終保存）
-      const facilitiesJson = JSON.stringify(existingData, null, 2);
+      facilitiesJson = JSON.stringify(existingData, null, 2);
       fs.writeFileSync(FACILITIES_PATH, facilitiesJson, "utf-8");
       fs.writeFileSync(PUBLIC_FACILITIES_PATH, facilitiesJson, "utf-8");
 
