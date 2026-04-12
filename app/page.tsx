@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useMemo, useEffect, useRef } from "react";
 import styles from "./page.module.css";
-import facilitiesData from "./data/facilities.json";
+import facilitiesDataFallback from "./data/facilities.json";
 
 interface JomonEvent {
   id: string;
@@ -69,6 +69,7 @@ const isLgJpUrl = (url: string) =>
   !!url && /\.(lg|go)\.jp/i.test(url);
 
 export default function Home() {
+  const [facilitiesData, setFacilitiesData] = useState(facilitiesDataFallback);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
@@ -97,10 +98,22 @@ export default function Home() {
     if (pref) setSelectedPrefecture(pref);
   }, []);
 
-  // イベント情報を取得し、直近イベントをカルーセルに反映
+  // 施設データとイベント情報を取得
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchData = async () => {
       try {
+        // facilities.json を動的に取得
+        const facilitiesRes = await fetch('/facilities.json', { cache: 'no-store' });
+        if (facilitiesRes.ok) {
+          const facilities = await facilitiesRes.json();
+          setFacilitiesData(facilities);
+        }
+      } catch (error) {
+        console.error('[fetch facilities]', error);
+      }
+
+      try {
+        // イベント情報を取得
         const res = await fetch('/api/events', { cache: 'no-store' });
         const events: JomonEvent[] = await res.json();
         const today = new Date();
@@ -135,7 +148,7 @@ export default function Home() {
         console.error('[fetch events]', error);
       }
     };
-    fetchEvents();
+    fetchData();
   }, []);
 
   const newestFacilityId = facilitiesData[facilitiesData.length - 1]?.id;
