@@ -86,6 +86,7 @@ function extractAndParseJSON(responseText, context = '', prefix = '[CRAWLER]') {
 const API_KEY = process.env.GEMINI_API_KEY20261336;
 const MODEL_NAME = "gemini-flash-latest";  // 最新版フラッシュモデル
 const FACILITIES_PATH = path.join(__dirname, "../app/data/facilities.json");
+const PUBLIC_FACILITIES_PATH = path.join(__dirname, "../public/facilities.json");
 
 // ========== 許可されたタグ（ホワイトリスト） ==========
 const ALLOWED_TAGS = [
@@ -386,7 +387,9 @@ JSON配列のみ出力。説明や注釈は不要。`;
     }
 
     if (addedCount > 0) {
-      fs.writeFileSync(FACILITIES_PATH, JSON.stringify(existingData, null, 2), "utf-8");
+      const facilitiesJson = JSON.stringify(existingData, null, 2);
+      fs.writeFileSync(FACILITIES_PATH, facilitiesJson, "utf-8");
+      fs.writeFileSync(PUBLIC_FACILITIES_PATH, facilitiesJson, "utf-8");
       console.log(`[RESULT] ${addedCount}件を追加しました。合計: ${existingData.length}件`);
 
       // イラスト生成
@@ -404,7 +407,9 @@ JSON配列のみ出力。説明や注釈は不要。`;
         }
       }
       // 更新を保存（イラスト生成完了後の最終保存）
-      fs.writeFileSync(FACILITIES_PATH, JSON.stringify(existingData, null, 2), "utf-8");
+      const facilitiesJson = JSON.stringify(existingData, null, 2);
+      fs.writeFileSync(FACILITIES_PATH, facilitiesJson, "utf-8");
+      fs.writeFileSync(PUBLIC_FACILITIES_PATH, facilitiesJson, "utf-8");
 
       // イラスト生成完了後、まとめてGitコマンドでコミット＆プッシュ
       console.log(`\n[GIT] ========== Git操作開始 ==========`);
