@@ -1358,7 +1358,7 @@
     "region": "Kanto",
     "prefecture": "埼玉県",
     "address": "埼玉県蓮田市大字黒浜2799-1",
-    "description": "約6,000年前の縄文時代前期を代表する貝塚で、国の史跡に指定されています。ここから出土した『黒浜式土器』は、関東地方の同時代の土器の基準となる標式土器として学術的に非常に重要です。 調査により、中央に広場を持つ集落の跡が確認され、当時の人々の生活様式や、縄文海進により海が近かった環境を知る上で貴重な遺跡となっています。 隣接する蓮田市文化財展示館では出土品を見ることができます。黒浜式土器の製作技法は関東地方全体に広がり、当時の文化圏を示す重要な指標として広く用いられています。",
+    "description": "縄文前期を代表する「黒浜式土器」の標式遺跡です。中央に広場を持つ集落（環状集落）の構造が確認されており、関東地方の縄文社会形成期を知る上で欠かせません。隣接する蓮田市文化財展示館では、本遺跡の代表的な土器群や当時の生活資料が公開されています。",
     "url": "https://www.city.hasuda.saitama.jp/kyoiku/bunkazai/bunkazai/kurohamakaizuka/index.html",
     "thumbnail": "/images/facilities/kurohama-kaizuka_ai.png",
     "tags": [
@@ -1379,7 +1379,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR宇都宮線蓮田駅からバスで約10分",
+    "access_public": "JR宇都宮線蓮田駅からバスで約10分。黒浜中央バス停から徒歩約5分",
     "access_public_en": "",
     "access_car": "東北道岩槻ICから県道87号経由で約15分",
     "access_car_en": "",
