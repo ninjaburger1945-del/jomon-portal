@@ -23,7 +23,18 @@ const ALLOWED_TAGS = [
 ];
 
 // ========== 地域リスト ==========
-const regions = ["北海道", "東北", "関東", "中部", "近畿", "中国", "四国", "九州"];
+const regions = ["北海道", "東北", "関東", "中部", "近畿", "中国・四国", "九州・沖縄"];
+
+// 地域マッピング（日本語 → 英語キー）
+const regionMapping = {
+  "北海道": "Hokkaido",
+  "東北": "Tohoku",
+  "関東": "Kanto",
+  "中部": "Chubu",
+  "近畿": "Kinki",
+  "中国・四国": "ChugokuShikoku",
+  "九州・沖縄": "KyushuOkinawa"
+};
 
 // ========== 初期化 ==========
 console.log(`\n[INIT] ========== Jomon Portal Crawler v6.0 (シンプル版) ==========`);
@@ -52,7 +63,8 @@ async function main() {
 
     // ランダムに地域選択
     const randomRegion = regions[Math.floor(Math.random() * regions.length)];
-    console.log(`[CRAWLER] ターゲット地域: ${randomRegion}`);
+    const englishRegion = regionMapping[randomRegion];
+    console.log(`[CRAWLER] ターゲット地域: ${randomRegion} (${englishRegion})`);
 
     // Gemini API呼び出し
     const genAI = new GoogleGenerativeAI(API_KEY);
@@ -88,7 +100,7 @@ ${existingNames}
   "prefecture": "都道府県",
   "address": "住所",
   "description": "説明（200字程度、詳しく記述）",
-  "region": "${randomRegion}",
+  "region": "${englishRegion}",
   "url": "公式URL またはWikipedia",
   "tags": ["世界遺産", "博物館"],
   "lat": 緯度,
@@ -160,6 +172,20 @@ JSON配列のみ出力。説明や注釈は不要。`;
       console.log("[CRAWLER] ❌ 有効な候補がありません");
       console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
       return;
+    }
+
+    // region を英語に統一
+    for (const candidate of candidates) {
+      if (candidate.region && regionMapping[candidate.region]) {
+        candidate.region = regionMapping[candidate.region];
+      } else if (!candidate.region) {
+        // region がない場合は、現在選択されている地域を使用
+        candidate.region = englishRegion;
+      }
+      // copy が14文字を超える場合はトリム
+      if (candidate.copy && candidate.copy.length > 14) {
+        candidate.copy = candidate.copy.substring(0, 14);
+      }
     }
 
     console.log(`[CRAWLER] ✅ ${candidates.length}件の候補を取得`);
