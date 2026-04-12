@@ -292,7 +292,7 @@
     "region": "Hokkaido",
     "prefecture": "北海道",
     "address": "北海道函館市大船町575-1",
-    "description": "世界遺産。万座・野中堂の2つの大規模な配石遺構からなる配石遺跡です。日時計状の組石が確認されており、精神文化を示す重要拠点です。出土品や遺跡の詳細は、隣接する大湯ストーンサークル館で学ぶことができます",
+    "description": "世界遺産。最大で深さ2メートルを超える巨大な竪穴建物跡が特徴で、長期にわたる安定した居住と祭祀の痕跡が保存されています。この深い住居構造は、地中熱を利用して厳冬期の熱損失を抑えるという、北の大地ならではの高度な熱力学的合理性に基づいています。厳しい自然への創意工夫に満ちた適応と、複雑な社会組織化を物語る貴重な遺跡です。",
     "url": "https://jomon-japan.jp/learn/jomon-sites/ofune",
     "thumbnail": "/images/facilities/ofune_ai.png",
     "tags": [
@@ -645,8 +645,8 @@
     "tags": [
       "土器"
     ],
-    "lat": 36.1263,
-    "lng": 138.1066,
+    "lat": 36.1275,
+    "lng": 138.143694,
     "access": {
       "train": "JR中央本線下諏訪駅からタクシーで約40分",
       "bus": "下諏訪町循環バス高木バス停から徒歩約3時間30分",
@@ -732,14 +732,14 @@
     "region": "ChugokuShikoku",
     "prefecture": "岡山県",
     "address": "岡山県笠岡市西大島",
-    "description": "国指定史跡。170体以上の人骨が出土し、縄文時代の「抜歯」風習を学術的に証明した重要な遺跡です。瀬戸内海の豊かな恵みを受けた生活様式を伝えています。出土品や人骨資料の多くは、近隣の笠岡市立郷土館に保管・展示されており、当時の葬送儀礼を学べます。",
+    "description": "国指定史跡。170体以上の人骨が出土し、縄文時代の「抜歯」風習を学術的に証明した極めて重要な遺跡です。通常、酸性土壌の日本では骨は分解されますが、ここでは貝殻の炭酸カルシウムが土壌を中和する「保存カプセル」の役割を果たしたため、奇跡的に良好な状態で残されました。当時の葬送儀礼や身体的特徴を解明する上で不可欠な証拠を提供しています。",
     "url": "https://www.city.kasaoka.okayama.jp/soshiki/39/2424.html",
     "thumbnail": "/images/facilities/tsugumo_ai.png",
     "tags": [
       "貝塚"
     ],
-    "lat": 34.4847,
-    "lng": 133.528,
+    "lat": 34.48452,
+    "lng": 133.533294,
     "access": {
       "train": "JR山陽本線笠岡駅からバスで約20分",
       "bus": "大島西バス停から徒歩約20分",
@@ -1522,7 +1522,7 @@
     "region": "Tohoku",
     "prefecture": "山形県",
     "address": "山形県最上郡舟形町舟形2679-22",
-    "description": "西ノ前遺跡から出土した国宝「縄文の女神」（日本最大の高さ45cmの土偶）の関連施設。均整の取れた八頭身の造形美は縄文芸術の傑作として世界的に評価されています。資料館では本物の迫力を伝える精密レプリカや、最上川流域の歴史資料を展示しています。",
+    "description": "西ノ前遺跡から出土した国宝「縄文の女神」（日本最大の高さ45cmの土偶）の関連施設。均整の取れた八頭身の造形美は縄文芸術の傑作として世界的に評価されています。資料館では本物の迫力を伝える精密レプリカや、最上川流域の歴史資料を展示しています。\n入館料は大人110円。冬季は休館となるため、訪問前に開館状況の確認が必要です。",
     "url": "https://www.town.funagata.yamagata.jp/s029/map/map02/010/020/20210907150405.html",
     "thumbnail": "/images/facilities/funagata-rekimin_ai.png",
     "tags": [
@@ -2084,9 +2084,9 @@
     "description_en": "This museum is adjacent to the Hashimuregawa Ruins, a nationally designated historic site. The site is extremely important in Japanese archaeological history as the location where the first Jomon period pit-dwelling remains were discovered in 1924. The museum displays a wealth of materials, including dioramas recreating an Early Jomon period settlement and numerous artifacts such as pottery, stone tools, and ornaments excavated from the site. As a complex ruin with layers of human activity from the Jomon to medieval periods, it offers a unique opportunity to learn about the transitions in life and culture over time.",
     "location_en": "Kagoshima",
     "address_en": "2290 Junicho, Ibusuki, Kagoshima",
-    "access_public": "JR指宿枕崎線「指宿駅」から徒歩約15分。「考古博物館前」バス停下車すぐ",
+    "access_public": "JR指宿駅から徒歩約10分。",
     "access_public_en": "Approx. 15-minute walk from JR Ibusuki Station (Ibusuki Makurazaki Line).",
-    "access_car": "指宿スカイライン「谷山IC」から約50分",
+    "access_car": "指宿スカイライン「谷山IC」から約50分。無料駐車場完備（普通車50台、大型4台）。",
     "access_car_en": "Approx. 50 minutes from the Taniyama IC on the Ibusuki Skyline.",
     "userApproved": true
   },
@@ -2377,16 +2377,16 @@
     "id": "077",
     "name": "国指定史跡 門田貝塚",
     "prefecture": "岡山県",
-    "address": "岡山県岡山市中区門田本町2丁目9",
-    "description": "岡山県を代表する縄文後期〜晩期の貝塚遺跡。瀬戸内地域の基準となる「門田（かどた）式土器」の標式遺跡です。現在は史跡公園として保存されており、旭川を望む台地で豊かな狩猟採集生活を送った人々の姿を、地形や環境とともに想像できる静かな歴史のスポットです。",
+    "address": "岡山県瀬戸内市邑久町尾張",
+    "description": "岡山県瀬戸内市に位置する国指定史跡。弥生時代の巨大な貝塚や住居跡が確認されており、中世に至るまで約2000年以上もの間、人々の生活が途切れることなく継続した稀有な遺跡です。瀬戸内海の水上交通の要衝という地形的優位性が、時代を問わず居住地として選ばれ続けた理由であり、西日本の先史・歴史時代を繋ぐ極めて重要な拠点です。",
     "region": "ChugokuShikoku",
     "url": "https://www.city.setouchi.lg.jp/soshiki/23/3862.html",
     "tags": [
       "貝塚",
       "遺跡公園"
     ],
-    "lat": 34.654395,
-    "lng": 133.945037,
+    "lat": 34.6663,
+    "lng": 134.0945,
     "access": {
       "train": "JR岡山駅から路面電車東山線「門田屋敷」電停下車、徒歩約20分",
       "bus": "JR岡山駅から岡電バス「新山」行き乗車、「新山」バス停下車、徒歩約5分",
@@ -2428,7 +2428,7 @@
     "id": "079",
     "name": "恵庭市郷土資料館（カリンバ遺跡）",
     "prefecture": "北海道",
-    "address": "北海道恵庭市南島松202-1",
+    "address": "北海道恵庭市黄金中央5丁目216-7",
     "description": "国指定史跡・カリンバ遺跡の出土品を展示。縄文晩期の合葬墓から見つかった、鮮やかな赤漆塗りの櫛や垂れ飾り、管玉などの膨大な装身具（重要文化財）は圧巻です。縄文人の「美」へのこだわりと、精緻な工芸技術、そして厚い弔いの儀礼を鮮明に伝えています。",
     "region": "Hokkaido",
     "url": "https://www.city.eniwa.hokkaido.jp/kurashi/kosodate_kyoiku/eniwashikyodoshiryokan/kyodoshiryokan/index.html",
@@ -2436,7 +2436,7 @@
       "博物館"
     ],
     "lat": 42.910242,
-    "lng": 141.594391,
+    "lng": 141.594091,
     "access": {
       "train": "JR千歳線「島松駅」から徒歩約15分",
       "bus": "恵庭市コミュニティバス（ecoバス）「郷土資料館」バス停下車すぐ",
