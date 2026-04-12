@@ -1,0 +1,25 @@
+name = "jomon-portal"
+main = "dist/index.js"
+type = "javascript"
+compatibility_date = "2026-04-01"
+
+# Cloudflare Pages configuration
+env = {
+  production = { routes = [{ pattern = "*", zone_id = "" }] }
+}
+
+# Build configuration
+build = { command = "npm run build" }
+
+# Environment variables (populate these via Cloudflare Pages UI)
+# GEMINI_API_KEY = ""
+# NEXT_PUBLIC_GITHUB_TOKEN = ""
+# NEXT_PUBLIC_GITHUB_REPO = ""
+
+# KV Namespace bindings (optional, for caching)
+# [[kv_namespaces]]
+# binding = "KV"
+# id = ""
+
+# Observability
+observability = { enabled = true }

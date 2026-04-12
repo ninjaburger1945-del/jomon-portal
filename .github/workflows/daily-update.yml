@@ -1,9 +1,10 @@
 name: "Daily Autopilot: Jomon Explorer"
 
 on:
-  schedule:
-    - cron: '37 8 * * *'   # 日本時間 毎日 17:37
-  workflow_dispatch:      # 手動実行ボタンを有効化
+  # ⚠️ DISABLED: Automatic execution suspended during Vercel to Cloudflare Pages migration
+  # schedule:
+  #   - cron: '37 8 * * *'   # 日本時間 毎日 17:37
+  workflow_dispatch:      # 手動実行のみ可能（テスト時用）
 
 jobs:
   explore-and-deploy:

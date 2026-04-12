@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-// v1.0.1 - 42 entries
+// v1.0.1 - Cloudflare Pages optimized
 const nextConfig: NextConfig = {
   trailingSlash: true,
   images: {
@@ -21,12 +21,15 @@ const nextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     unoptimized: true,
   },
+  // Cloudflare Pages compatibility: use Edge Runtime where possible
+  experimental: {
+    serverMinification: true,
+  },
   // CSS プリロード最適化：未使用スタイルシートの事前読み込み警告を削減
   onDemandEntries: {
     maxInactiveAge: 25000,
     pagesBufferLength: 5,
   },
 };
-
 
 export default nextConfig;

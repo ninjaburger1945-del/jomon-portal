@@ -1,9 +1,10 @@
 name: "Weekly URL Health Check"
 
 on:
-  schedule:
-    - cron: '0 1 * * 1'  # 毎週月曜日 日本時間 10:00 (UTC 01:00)
-  workflow_dispatch:      # 手動実行ボタンを有効化
+  # ⚠️ DISABLED: Automatic execution suspended during Vercel to Cloudflare Pages migration
+  # schedule:
+  #   - cron: '0 1 * * 1'  # 毎週月曜日 日本時間 10:00 (UTC 01:00)
+  workflow_dispatch:      # 手動実行のみ可能（テスト時用）
 
 jobs:
   check-urls:
