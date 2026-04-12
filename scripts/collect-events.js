@@ -14,6 +14,90 @@
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * Gemini レスポンスから JSON を抽出・パース
+ * マークダウンフェンス、トランケーション、制御文字に対応
+ */
+function extractAndParseJSON(responseText, context = '', prefix = '') {
+  // マークダウンフェンスを削除（```json ... ``` または ``` ... ```）
+  let cleaned = responseText.replace(/```(?:json)?\s*/g, '').replace(/```\s*$/g, '');
+
+  // 制御文字を削除
+  cleaned = cleaned.replace(/[\x00-\x1F\x7F]/g, ' ');
+
+  // JSON 配列を抽出（トランケーション対応）
+  let jsonMatch = cleaned.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) {
+    console.warn(`${prefix} JSON not found in response (context: ${context})`);
+    return '[]';
+  }
+
+  let jsonText = jsonMatch[0];
+
+  // トランケートされた JSON の修復試行
+  try {
+    // まず素のまま parse を試みる
+    JSON.parse(jsonText);
+    return jsonText;
+  } catch (e) {
+    // parse 失敗時の修復処理
+    console.warn(`${prefix} First JSON parse failed, attempting repair (context: ${context})`);
+
+    // 不正な制御文字を削除
+    jsonText = jsonText.replace(/[\\"]/g, (match) => {
+      // バックスラッシュの連続を修正
+      return match;
+    });
+
+    // 最後が不完全な場合は補完
+    let depth = 0;
+    let inString = false;
+    let escapeNext = false;
+
+    for (let i = 0; i < jsonText.length; i++) {
+      const char = jsonText[i];
+
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
+
+      if (char === '\\') {
+        escapeNext = true;
+        continue;
+      }
+
+      if (char === '"' && !escapeNext) {
+        inString = !inString;
+      }
+
+      if (!inString) {
+        if (char === '[' || char === '{') {
+          depth++;
+        } else if (char === ']' || char === '}') {
+          depth--;
+        }
+      }
+    }
+
+    // 開きブラケットが閉じられていない場合は補完
+    while (depth > 0) {
+      jsonText += depth > 0 ? ']' : '}';
+      depth--;
+    }
+
+    // 修復後の parse を試みる
+    try {
+      JSON.parse(jsonText);
+      console.log(`${prefix} JSON repair successful (context: ${context})`);
+      return jsonText;
+    } catch (repairErr) {
+      console.warn(`${prefix} JSON repair failed: ${repairErr.message} (context: ${context})`);
+      return '[]';
+    }
+  }
+}
+
 async function collectEvents() {
   console.log('[collect-events] Starting event collection...');
 
@@ -133,22 +217,28 @@ ${textContent}`;
             tools: [],
             generationConfig: {
               temperature: 0.1,
-              maxOutputTokens: 4096  // イベント情報が多い場合に対応
+              maxOutputTokens: 8192  // JSONが長い場合に対応
             }
           });
           const responseText = result.response.text().trim();
 
-          // JSON 抽出（マークダウンブロック対応）
-          const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-          if (jsonMatch) {
-            extractedData = jsonMatch[0];
-          }
+          // JSON 抽出（マークダウンブロック・トランケーション対応）
+          extractedData = extractAndParseJSON(responseText, facility.name, '[collect-events]');
         } catch (geminiErr) {
           console.warn(`[collect-events] Gemini error for ${facility.name}:`, geminiErr.message);
           continue;
         }
 
-        const extractedEvents = JSON.parse(extractedData);
+        let extractedEvents = [];
+        try {
+          extractedEvents = JSON.parse(extractedData);
+          if (!Array.isArray(extractedEvents)) {
+            extractedEvents = [];
+          }
+        } catch (parseErr) {
+          console.warn(`[collect-events] JSON parse error for ${facility.name}: ${parseErr.message}`);
+          continue;
+        }
 
         // イベントを events.json 形式に変換（リンク完全性ルール適用）
         extractedEvents.forEach((evt, idx) => {

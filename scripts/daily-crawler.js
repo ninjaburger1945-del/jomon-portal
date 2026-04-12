@@ -4,6 +4,84 @@ const fs = require("fs");
 const path = require("path");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+/**
+ * Gemini レスポンスから JSON を抽出・パース
+ * マークダウンフェンス、トランケーション、制御文字に対応
+ */
+function extractAndParseJSON(responseText, context = '', prefix = '[CRAWLER]') {
+  // マークダウンフェンスを削除（```json ... ``` または ``` ... ```）
+  let cleaned = responseText.replace(/```(?:json)?\s*/g, '').replace(/```\s*$/g, '');
+
+  // 制御文字を削除
+  cleaned = cleaned.replace(/[\x00-\x1F\x7F]/g, ' ');
+
+  // JSON 配列を抽出（トランケーション対応）
+  let jsonMatch = cleaned.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) {
+    console.warn(`${prefix} JSON not found in response (context: ${context})`);
+    return '[]';
+  }
+
+  let jsonText = jsonMatch[0];
+
+  // トランケートされた JSON の修復試行
+  try {
+    // まず素のまま parse を試みる
+    JSON.parse(jsonText);
+    return jsonText;
+  } catch (e) {
+    // parse 失敗時の修復処理
+    console.warn(`${prefix} First JSON parse failed, attempting repair (context: ${context}): ${e.message}`);
+
+    // 最後が不完全な場合は補完
+    let depth = 0;
+    let inString = false;
+    let escapeNext = false;
+
+    for (let i = 0; i < jsonText.length; i++) {
+      const char = jsonText[i];
+
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
+
+      if (char === '\\') {
+        escapeNext = true;
+        continue;
+      }
+
+      if (char === '"' && !escapeNext) {
+        inString = !inString;
+      }
+
+      if (!inString) {
+        if (char === '[' || char === '{') {
+          depth++;
+        } else if (char === ']' || char === '}') {
+          depth--;
+        }
+      }
+    }
+
+    // 開きブラケットが閉じられていない場合は補完
+    while (depth > 0) {
+      jsonText += ']';
+      depth--;
+    }
+
+    // 修復後の parse を試みる
+    try {
+      JSON.parse(jsonText);
+      console.log(`${prefix} JSON repair successful (context: ${context})`);
+      return jsonText;
+    } catch (repairErr) {
+      console.warn(`${prefix} JSON repair failed: ${repairErr.message} (context: ${context})`);
+      return '[]';
+    }
+  }
+}
+
 // ========== 設定 ==========
 const API_KEY = process.env.GEMINI_API_KEY20261336;
 const MODEL_NAME = "gemini-flash-latest";  // 最新版フラッシュモデル
@@ -68,18 +146,33 @@ ${description}`;
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.7,
-        maxOutputTokens: 256,
+        maxOutputTokens: 512,  // copy が長く応答する場合に対応
       },
     });
 
     const responseText = result.response.text();
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
 
-    if (jsonMatch) {
+    // JSON オブジェクトを抽出（{...}形式）
+    let jsonText = responseText.replace(/```(?:json)?\s*/g, '').replace(/```\s*$/g, '');
+    jsonText = jsonText.replace(/[\x00-\x1F\x7F]/g, ' ');
+
+    let jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.warn(`[COPY] JSON object not found in response`);
+      return null;
+    }
+
+    try {
       const parsed = JSON.parse(jsonMatch[0]);
-      const copy = parsed.copy.substring(0, 14); // 念のため14文字でトリム
-      console.log(`[COPY] 生成: "${copy}" (${copy.length}字)`);
-      return copy;
+      if (parsed.copy && typeof parsed.copy === 'string') {
+        const copy = parsed.copy.substring(0, 14); // 念のため14文字でトリム
+        console.log(`[COPY] 生成: "${copy}" (${copy.length}字)`);
+        return copy;
+      } else {
+        console.warn(`[COPY] 'copy' field not found or invalid type`);
+      }
+    } catch (parseErr) {
+      console.warn(`[COPY] JSON parse failed: ${parseErr.message}`);
     }
   } catch (err) {
     console.warn(`[COPY] 生成失敗: ${err.message}`);
@@ -192,17 +285,17 @@ JSON配列のみ出力。説明や注釈は不要。`;
     const responseText = result.response.text();
     console.log(`[CRAWLER] API レスポンス受信（${responseText.length}文字）`);
 
-    // JSON抽出
-    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
-      console.log("[CRAWLER] ❌ JSON配列が見つかりません");
-      console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
-      return;
-    }
+    // JSON抽出・パース（堅牢化版）
+    const jsonText = extractAndParseJSON(responseText, 'facility-data', '[CRAWLER]');
 
     let candidates;
     try {
-      candidates = JSON.parse(jsonMatch[0]);
+      candidates = JSON.parse(jsonText);
+      if (!Array.isArray(candidates)) {
+        console.log("[CRAWLER] ❌ JSON is not an array");
+        console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
+        return;
+      }
     } catch (parseErr) {
       console.log(`[CRAWLER] ❌ JSON パース失敗: ${parseErr.message}`);
       console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
