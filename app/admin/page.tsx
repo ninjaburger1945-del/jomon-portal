@@ -1073,10 +1073,8 @@ export default function AdminPage() {
                   <option value="Kanto">関東</option>
                   <option value="Chubu">中部</option>
                   <option value="Kinki">近畿</option>
-                  <option value="Chugoku">中国</option>
-                  <option value="Shikoku">四国</option>
-                  <option value="Kyushu">九州</option>
-                  <option value="Okinawa">沖縄</option>
+                  <option value="ChugokuShikoku">中国・四国</option>
+                  <option value="KyushuOkinawa">九州・沖縄</option>
                 </select>
               </label>
             </div>
