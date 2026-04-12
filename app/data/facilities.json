@@ -2160,7 +2160,7 @@
     "region": "Kyushu",
     "prefecture": "長崎県",
     "address": "長崎県佐世保市吉井町立石473",
-    "description": "縄文時代草創期の標識遺跡である国指定史跡「福井洞窟」のガイダンス施設です。福井洞窟は、日本で初めて旧石器時代の石器と縄文土器（隆起線文土器）が同じ層から発見され、旧石器時代から縄文時代への移行期を解明する上で極めて重要な遺跡とされています。ミュージアムでは、精巧なレプリカや映像資料を用いて、約2万年にわたる人々の暮らしの変遷をわかりやすく解説しています。特に、日本最古級の土器とされる豆粒文土器や隆起線文土器の出土状況が学べる展示は必見です。洞窟実物とあわせて見学することで、日本のあけぼのの時代を体感できます。",
+    "description": "国指定史跡・福井洞窟のガイダンス施設。日本で初めて旧石器時代の石器と縄文土器が同じ地層から発見され、時代の連続性を証明した学術的価値が極めて高い遺跡です。最新の映像技術や、近隣の泉福寺洞窟の出土品を含む展示を通じ、日本人のルーツを辿ることができます。",
     "url": "https://fukuicave.jp/",
     "thumbnail": "/images/facilities/069_remaster_c.png",
     "tags": [
@@ -2180,9 +2180,9 @@
     "description_en": "This is a guidance facility for the Fukui Cave, a nationally designated historic site and a key location for understanding the Incipient Jomon period. The cave is critically important as it was the first place in Japan where Paleolithic stone tools and Jomon pottery (Ryukisenmon pottery) were discovered in the same stratum, shedding light on the transition from the Paleolithic to the Jomon period. The museum uses elaborate replicas and video materials to clearly explain the changes in people's lives over approximately 20,000 years. The exhibition showcasing the discovery of some of Japan's oldest pottery, such as Tsubumon and Ryukisenmon pottery, is a must-see.",
     "location_en": "Sasebo, Nagasaki",
     "address_en": "473 Tateishi, Yoshii-cho, Sasebo-shi, Nagasaki",
-    "access_public": "松浦鉄道「吉井駅」から徒歩約20分。または西肥バス「福祉センター前」バス停から徒歩約3分。",
+    "access_public": "松浦鉄道「吉井駅」から徒歩約20分。西肥バス「福祉センター前」バス停から徒歩約3分",
     "access_public_en": "Approx. 20-minute walk from Yoshii Station on the Matsuura Railway, or a 3-minute walk from the Fukushi Center Mae bus stop (Saihoku bus).",
-    "access_car": "西九州自動車道「佐々IC」から約15分。",
+    "access_car": "西九州自動車道「佐々IC」から約15分",
     "access_car_en": "Approx. 15 minutes from Sasa IC on the Nishi-Kyushu Expressway.",
     "userApproved": true
   },
