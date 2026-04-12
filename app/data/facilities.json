@@ -1295,7 +1295,7 @@
     "region": "Chugoku",
     "prefecture": "岡山県",
     "address": "岡山県岡山市北区津島東3丁目",
-    "description": "岡山市内に位置する縄文時代前期から後期にかけての貝塚です。約6000年前の地層から、日本最古級とされる栽培種のイネの細胞化石（プラント・オパール）が発見されたことで全国的に知られています。 この発見は、日本の稲作の起源を考える上で非常に重要な意味を持っています。瀬戸内海の縄文海進期に海岸線だったこの場所で、当時の人々の暮らしや食生活、そして農耕の始まりに思いを馳せることができる貴重な史跡です。プラント・オパール（植物珪酸体）の発見により、肉眼では識別困難な栽培植物の証拠が得られ、日本の農業史研究に革新をもたらしました。",
+    "description": "縄文前期〜後期の貝塚。約6,000年前の地層から、日本最古級とされる栽培種イネのプラント・オパール（細胞化石）が発見されたことで知られます。日本の稲作の起源論争に一石を投じた極めて重要な遺跡であり、当時の生業の多様性を今に伝えています。",
     "url": "https://townweb.e-okayamacity.jp/mino-rengou/minorekisi/asanebana/asanebana.html",
     "thumbnail": "/images/facilities/asanebana-kaizuka_ai.png",
     "tags": [
@@ -1314,7 +1314,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR津山線法界院駅から徒歩約20分",
+    "access_public": "JR津山線法界院駅から徒歩約20分。岡山大学筋バス停から徒歩約5分",
     "access_public_en": "",
     "access_car": "山陽道岡山ICから国道53号経由で約15分",
     "access_car_en": "",
