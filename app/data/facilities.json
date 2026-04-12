@@ -2243,7 +2243,9 @@
     },
     "copy": "瀬戸内の縄文晩期文化を象徴する「門田式土器」のふるさと",
     "thumbnail": "/images/facilities/077_remaster_b.png",
-    "userApproved": true
+    "userApproved": true,
+    "access_public": "JR赤穂線 邑久（おく）駅からタクシーで約5分、または徒歩約25分。JR岡山駅から岡電バス「新山」行き乗車、「新山」バス停下車、徒歩約5分",
+    "access_car": "ブルーライン「瀬戸内IC」から約5分"
   },
   {
     "id": "078",
