@@ -47,6 +47,47 @@ if (!API_KEY) {
   process.exit(1);
 }
 
+// ========== Copy自動生成関数 ==========
+async function generateCopy(description, model) {
+  try {
+    const prompt = `以下の遺跡説明文から、14文字以下の意味のあるキャッチコピーを日本語で生成してください。
+
+【要件】
+- 14文字以内（句読点を含む）
+- 説明文の最も重要な特徴を表現
+- 日本語として成立する文章
+- 断ち切られた形にならないこと
+
+【返却形式】
+{"copy": "キャッチコピー"}
+
+【説明文】
+${description}`;
+
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 256,
+      },
+    });
+
+    const responseText = result.response.text();
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      const copy = parsed.copy.substring(0, 14); // 念のため14文字でトリム
+      console.log(`[COPY] 生成: "${copy}" (${copy.length}字)`);
+      return copy;
+    }
+  } catch (err) {
+    console.warn(`[COPY] 生成失敗: ${err.message}`);
+  }
+
+  return null; // 生成失敗時は null
+}
+
 // ========== メイン処理 ==========
 async function main() {
   try {
@@ -233,9 +274,22 @@ JSON配列のみ出力。説明や注釈は不要。`;
       if (!candidate.lng) candidate.lng = 0;
       if (!candidate.tags) candidate.tags = [];
 
+      // Copy自動生成（ない場合またはバリデーション失敗時）
+      if (!candidate.copy || candidate.copy.length > 14 || !candidate.copy.trim()) {
+        console.log(`[COPY] ${candidate.name} の copy を自動生成中...`);
+        const generatedCopy = await generateCopy(candidate.description, model);
+        if (generatedCopy) {
+          candidate.copy = generatedCopy;
+        } else {
+          // 生成失敗時のフォールバック（説明の最初の14文字）
+          candidate.copy = candidate.description.substring(0, 14);
+          console.log(`[COPY] フォールバック: "${candidate.copy}"`);
+        }
+      }
+
       existingData.push(candidate);
       addedCount++;
-      console.log(`[ADD] ✅ ${candidate.name} (ID: ${candidate.id})`);
+      console.log(`[ADD] ✅ ${candidate.name} (ID: ${candidate.id}, copy: "${candidate.copy}")`);
     }
 
     if (addedCount > 0) {
