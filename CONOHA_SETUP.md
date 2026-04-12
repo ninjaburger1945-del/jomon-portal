@@ -95,6 +95,21 @@ pm2 status
 - `jomon-generate-missing` — 欠落イラスト生成
 - `jomon-events` — イベントコレクト
 
+### ステップ 5: GitHub Actions SSH セットアップ（自動デプロイ有効化）
+
+GitHub Actions からの自動デプロイを有効にするため、SSH キーペアを生成します：
+
+```bash
+bash scripts/setup-github-ssh.sh
+```
+
+このスクリプトが以下を実行：
+- デプロイ用 SSH キーペア生成（`~/.ssh/jomon-deploy`）
+- 公開鍵を `~/.ssh/authorized_keys` に登録
+- **秘密鍵を表示**（コピーして使用）
+
+⚠️ **重要：** スクリプト実行後に表示される秘密鍵を**全文コピー**し、次のステップで GitHub Secrets に登録してください。
+
 ---
 
 ## GitHub Secrets 設定
@@ -106,27 +121,31 @@ GitHub Actions による自動デプロイを有効にするため、Secrets を
 1. GitHub リポジトリ → **Settings** → **Secrets and variables** → **Actions**
 2. **New repository secret** をクリック
 
-### 設定する Secrets
+### 設定する Secrets（順番重要）
 
-| Secret Name | 説明 | 取得方法 |
-|-------------|------|---------|
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Gemini API キー | Google Cloud Console |
-| `GOOGLE_CUSTOM_SEARCH_API_KEY` | Google Custom Search API | Google Cloud Console |
-| `GOOGLE_CUSTOM_SEARCH_ENGINE_ID` | カスタム検索エンジン ID | Google Custom Search |
-| `CONOHA_SSH_KEY` | ConoHa サーバー SSH 秘密鍵 | `cat ~/.ssh/id_rsa` (サーバー上) |
-| `CONOHA_SERVER_IP` | ConoHa サーバー IP アドレス | ConoHa コントロールパネル |
-| `CONOHA_USER` | サーバーのログインユーザー名 | 通常は `root` または username |
-| `SLACK_WEBHOOK` | Slack 通知用 Webhook URL | (オプション) Slack App 設定 |
+| Secret Name | 説明 | 優先度 |
+|-------------|------|--------|
+| `CONOHA_SSH_KEY` | ConoHa SSH **秘密鍵**（setup-github-ssh.sh実行後） | 🔴 必須 |
+| `CONOHA_SERVER_IP` | ConoHa サーバー IP アドレス | 🔴 必須 |
+| `CONOHA_USER` | サーバーのログインユーザー名 | 🔴 必須 |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Gemini API キー | 🔴 必須 |
+| `GOOGLE_CUSTOM_SEARCH_API_KEY` | Google Custom Search API | 🔴 必須 |
+| `GOOGLE_CUSTOM_SEARCH_ENGINE_ID` | カスタム検索エンジン ID | 🔴 必須 |
+| `SLACK_WEBHOOK` | Slack 通知用 Webhook URL | 🟡 オプション |
 
-### SSH キー取得方法
+### 詳細な登録手順
 
-ConoHa サーバー上で：
+**詳しくは [GITHUB_SECRETS_SETUP.md](GITHUB_SECRETS_SETUP.md) を参照してください。**
 
-```bash
-cat ~/.ssh/id_rsa
-```
-
-出力をコピーして GitHub Secrets に登録します。
+**重要なポイント：**
+1. `bash scripts/setup-github-ssh.sh` を実行して秘密鍵を生成
+2. 表示された秘密鍵を**全文**コピー（`-----BEGIN` から `-----END` まで）
+3. GitHub Secrets に登録：
+   - `CONOHA_SSH_KEY` = 秘密鍵の内容
+   - `CONOHA_SERVER_IP` = サーバーの IP アドレス
+   - `CONOHA_USER` = ログインユーザー名
+4. API キーも登録
+5. GitHub Actions で手動トリガーテスト
 
 ---
 

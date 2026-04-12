@@ -42,7 +42,7 @@ jobs:
           ssh ${{ secrets.CONOHA_USER }}@${{ secrets.CONOHA_SERVER_IP }} << 'DEPLOY_EOF'
           cd ~/jomon-portal
           git pull origin main
-          npm install
+          npm install --legacy-peer-deps
           npm run build
           pm2 restart jomon-web || pm2 start ecosystem.config.js --only jomon-web
           pm2 save
