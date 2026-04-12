@@ -1053,10 +1053,14 @@ export default function AdminPage() {
                 <input
                   type="text"
                   value={editingFacility.copy || ""}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, copy: e.target.value })}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, copy: e.target.value.substring(0, 14) })}
+                  maxLength={14}
                   style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
-                  placeholder="e.g., 日本最大級縄文集落跡"
+                  placeholder="e.g., 日本最大級縄文集落跡 (max 14 chars)"
                 />
+                <small style={{ color: "#666", marginTop: "4px", display: "block" }}>
+                  {(editingFacility.copy || "").length}/14 characters
+                </small>
               </label>
             </div>
 
