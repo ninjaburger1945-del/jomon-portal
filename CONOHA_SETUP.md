@@ -232,6 +232,23 @@ env | grep GOOGLE_
 source ~/.env.local
 ```
 
+### npm インストールエラー（ピアデペンデンシー衝突）
+
+ConoHa環境は `--legacy-peer-deps` フラグで対応済みです：
+
+```bash
+# 手動インストール時
+npm install --legacy-peer-deps
+
+# または .npmrc で設定済みのため通常のインストールでも動作
+npm install
+```
+
+設定内容：
+- `.npmrc` にピアデペンデンシー無視設定
+- `auto-deploy.yml` で npm install に --legacy-peer-deps を指定
+- `setup-conoha.sh` で npm install に --legacy-peer-deps を指定
+
 ### API キーエラー
 
 ```bash

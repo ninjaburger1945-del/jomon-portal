@@ -68,7 +68,7 @@ fi
 
 # ============= 3. 依存関係インストール =============
 log_info "npm 依存関係をインストール中..."
-npm install
+npm install --legacy-peer-deps
 
 # ============= 4. 環境変数ファイル確認 =============
 log_info ".env.local ファイルをチェック中..."
