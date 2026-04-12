@@ -69,27 +69,9 @@ jobs:
           echo "[CRAWLER] Starting crawler (timeout: 45min)"
           node scripts/daily-crawler.js
         env:
-          # ✅ ここが運命の分かれ道！Googleの鍵をプログラムに渡します
+          # ✅ Googleの鍵をプログラムに渡します
           GEMINI_API_KEY20261336: ${{ secrets.GEMINI_API_KEY20261336 }}
           GOOGLESEARCH_SERVICE_ACCOUNT: ${{ secrets.GOOGLESEARCH_SERVICE_ACCOUNT }}
           GOOGLESEARCH_CX: ${{ secrets.GOOGLESEARCH_CX }}
-
-      - name: Commit and Push Database and Image Updates
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add app/data/facilities.json
-          git add public/images/facilities/
-
-          STATUS=$(git status --porcelain)
-          if [[ -n "$STATUS" ]]; then
-            git commit -m "chore(data): auto-added new Jomon facility and AI image [skip ci]"
-            git push origin main || (git pull --rebase origin main && git push origin main)
-          else
-            echo "[GIT] No changes to commit"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-      - name: Build
-        run: npm run build
+          # [skip ci] をコミットメッセージに含めて Vercel ビルドをスキップ
+          SKIP_CI: true

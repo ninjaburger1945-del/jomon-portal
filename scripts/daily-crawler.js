@@ -310,8 +310,51 @@ JSON配列のみ出力。説明や注釈は不要。`;
           console.warn(`[IMAGE] ⚠️ ${facility.name} のイラスト生成失敗: ${err.message}`);
         }
       }
-      // 更新を保存
+      // 更新を保存（イラスト生成完了後の最終保存）
       fs.writeFileSync(FACILITIES_PATH, JSON.stringify(existingData, null, 2), "utf-8");
+
+      // イラスト生成完了後、まとめてGitコマンドでコミット＆プッシュ
+      console.log(`\n[GIT] ========== Git操作開始 ==========`);
+      try {
+        const { exec } = require('child_process');
+        const util = require('util');
+        const execPromise = util.promisify(exec);
+
+        // Git 設定が未設定の場合は初期化（GitHub Actions環境対応）
+        try {
+          await execPromise('git config user.email');
+        } catch {
+          console.log('[GIT] Setting git user config...');
+          await execPromise('git config user.email "action@github.com"');
+          await execPromise('git config user.name "GitHub Action"');
+        }
+
+        // コミットメッセージ（[skip ci]を付与して不要なビルドをスキップ）
+        const skipCi = process.env.SKIP_CI === 'true' ? ' [skip ci]' : '';
+        const commitMessage = `chore(crawler): add ${candidates[0].name} [${candidates[0].region}] ${skipCi}`.trim();
+
+        // facilities.json をステージング
+        console.log('[GIT] Staging facilities.json...');
+        await execPromise('git add app/data/facilities.json public/facilities.json');
+
+        // 変更があるかチェック
+        const { stdout: diffOutput } = await execPromise('git diff --cached --quiet app/data/facilities.json public/facilities.json', { timeout: 5000 }).catch(() => ({ stdout: '' }));
+
+        // コミット実行
+        console.log('[GIT] Committing changes...');
+        await execPromise(`git commit -m "${commitMessage}"`);
+
+        // プッシュ実行（リベースで競合対応）
+        console.log('[GIT] Pushing to GitHub...');
+        await execPromise('git pull --rebase --autostash origin main');
+        await execPromise('git push origin main');
+
+        console.log('[GIT] ✅ Successfully committed and pushed to GitHub');
+      } catch (gitErr) {
+        // git push 失敗時もスクリプト失敗とはしない（ローカル変更は保持）
+        console.warn('[GIT] ⚠️ Git operation failed:', gitErr.message);
+        console.log('[GIT] Facilities data was saved locally. Manual push may be needed.');
+      }
     } else {
       console.log(`[RESULT] 既存 ${existingData.length} 件を維持`);
     }

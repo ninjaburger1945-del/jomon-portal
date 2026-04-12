@@ -31,17 +31,9 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY20261336 }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          # イベント情報のみの更新時はビルドをスキップ
+          # Vercel への負荷軽減: SKIP_CI=true で [skip ci] をコミットメッセージに追加
+          SKIP_CI: true
 
-      - name: Commit and push if changed
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          if git diff --quiet app/data/events.json; then
-            echo "No changes to events.json"
-          else
-            echo "Changes detected in events.json"
-            git add app/data/events.json
-            git commit -m "chore(events): update events from auto-collection"
-            git pull --rebase --autostash origin main
-            git push origin main
-          fi
+      # コミット＆プッシュはスクリプト内で一括実行
+      # git push を1回に統一してVercelビルド回数を削減

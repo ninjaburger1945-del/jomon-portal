@@ -238,56 +238,47 @@ ${textContent}`;
     fs.writeFileSync(eventsPath, JSON.stringify(updatedEvents, null, 2) + '\n', 'utf8');
     console.log(`[collect-events] Updated events.json: ${newEvents.length} new events added, total: ${updatedEvents.length}`);
 
-    // 5. GitHub API でコミット（環境変数が設定されている場合のみ）
-    const token = process.env.GITHUB_TOKEN;
-    const repo = process.env.GITHUB_REPOSITORY;
-
-    if (token && repo && newEvents.length > 0) {
+    // 5. 全件処理完了後に、まとめてGitコマンドでコミット＆プッシュ
+    if (newEvents.length > 0) {
       try {
-        const octokit = new Octokit({ auth: token });
-        const [owner, repoName] = repo.split('/');
-        const branch = 'main';
-        const filePath = 'app/data/events.json';
+        const { exec } = require('child_process');
+        const util = require('util');
+        const execPromise = util.promisify(exec);
 
-        // 既存ファイルのSHAを取得
-        let sha = null;
+        // Git 設定が未設定の場合は初期化（GitHub Actions環境対応）
         try {
-          const getRes = await octokit.rest.repos.getContent({
-            owner,
-            repo: repoName,
-            path: filePath,
-            ref: branch,
-          });
-          sha = getRes.data.sha;
-        } catch (err) {
-          console.log('[collect-events] New file will be created');
+          await execPromise('git config user.email');
+        } catch {
+          console.log('[collect-events] Setting git user config...');
+          await execPromise('git config user.email "action@github.com"');
+          await execPromise('git config user.name "GitHub Action"');
         }
 
-        // ファイルをコミット
-        const fileContent = fs.readFileSync(eventsPath, 'utf8');
-        const putParams = {
-          owner,
-          repo: repoName,
-          path: filePath,
-          branch,
-          message: `chore(events): auto-collect ${newEvents.length} new events`,
-          content: Buffer.from(fileContent).toString('base64'),
-        };
+        // コミットメッセージ（[skip ci] はオプション）
+        const skipCi = process.env.SKIP_CI === 'true' ? ' [skip ci]' : '';
+        const commitMessage = `chore(events): auto-collect ${newEvents.length} new events${skipCi}`;
 
-        if (sha) {
-          putParams.sha = sha;
-        }
+        // events.json をステージング
+        console.log('[collect-events] Staging events.json...');
+        await execPromise('git add app/data/events.json');
 
-        await octokit.rest.repos.createOrUpdateFileContents(putParams);
-        console.log('[collect-events] Committed to GitHub');
-      } catch (githubErr) {
-        console.error('[collect-events] GitHub API error:', githubErr.message);
-        // GitHub 失敗はスクリプトの失敗とはしない（ローカル変更は保持）
+        // コミット実行
+        console.log('[collect-events] Committing changes...');
+        await execPromise(`git commit -m "${commitMessage}"`);
+
+        // プッシュ実行（リベースで競合対応）
+        console.log('[collect-events] Pushing to GitHub...');
+        await execPromise('git pull --rebase --autostash origin main');
+        await execPromise('git push origin main');
+
+        console.log('[collect-events] Successfully committed and pushed to GitHub');
+      } catch (gitErr) {
+        // git push 失敗時もスクリプト失敗とはしない（ローカル変更は保持）
+        console.warn('[collect-events] Git operation failed:', gitErr.message);
+        console.log('[collect-events] Events were saved locally. Manual push may be needed.');
       }
-    } else if (!token || !repo) {
-      console.log('[collect-events] GitHub credentials not set. Skipping commit. (OK for local testing)');
     } else {
-      console.log('[collect-events] No new events to commit');
+      console.log('[collect-events] No new events found. Skipping commit.');
     }
 
     console.log('[collect-events] Event collection completed successfully');
