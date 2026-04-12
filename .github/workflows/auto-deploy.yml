@@ -37,7 +37,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.CONOHA_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.CONOHA_SERVER_IP }} >> ~/.ssh/known_hosts
+          ssh-keyscan -t rsa ${{ secrets.CONOHA_SERVER_IP }} >> ~/.ssh/known_hosts 2>&1
 
           ssh ${{ secrets.CONOHA_USER }}@${{ secrets.CONOHA_SERVER_IP }} << 'DEPLOY_EOF'
           cd ~/jomon-portal
