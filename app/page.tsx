@@ -140,33 +140,16 @@ export default function Home() {
 
   const newestFacilityId = facilitiesData[facilitiesData.length - 1]?.id;
 
-  // 最新施設の地方を取得（New! バッジ用：1つの地域のみ）
-  const newestRegion = (() => {
-    const latest = facilitiesData[facilitiesData.length - 1];
-    if (!latest) return null;
-    if (latest.region === "Chugoku" || latest.region === "Shikoku") return "ChugokuShikoku";
-    if (latest.region === "Kyushu" || latest.region === "Okinawa") return "KyushuOkinawa";
-    return latest.region;
-  })();
+  // 最新施設の地方を取得（New! バッジ用）
+  const newestRegion = facilitiesData[facilitiesData.length - 1]?.region ?? null;
   const allTags = Array.from(new Set(facilitiesData.flatMap(f => f.tags)));
 
   // Count facilities by region
   const regionCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     facilitiesData.forEach(f => {
-      let mappedRegion = f.region;
-      if (f.region === "Chugoku" || f.region === "Shikoku") {
-        mappedRegion = "ChugokuShikoku";
-      } else if (f.region === "Kyushu" || f.region === "Okinawa") {
-        mappedRegion = "KyushuOkinawa";
-      }
-      counts[mappedRegion] = (counts[mappedRegion] || 0) + 1;
+      counts[f.region] = (counts[f.region] || 0) + 1;
     });
-    // DEBUG: region counts confirmation
-    console.log('[regionCounts]', counts);
-    console.log('[REGION_LABELS keys]', Object.keys(REGION_LABELS));
-    console.log('[ChugokuShikoku count]', counts["ChugokuShikoku"]);
-    console.log('[KyushuOkinawa count]', counts["KyushuOkinawa"]);
     return counts;
   }, []);
 
@@ -211,16 +194,7 @@ export default function Home() {
         (facility.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
         facility.prefecture.includes(searchQuery);
       const matchType = selectedType === "" || facility.tags.includes(selectedType);
-      const matchRegion = (() => {
-        if (selectedRegion === "") return true;
-        if (selectedRegion === "ChugokuShikoku") {
-          return facility.region === "Chugoku" || facility.region === "Shikoku";
-        }
-        if (selectedRegion === "KyushuOkinawa") {
-          return facility.region === "Kyushu" || facility.region === "Okinawa";
-        }
-        return facility.region === selectedRegion;
-      })();
+      const matchRegion = selectedRegion === "" || facility.region === selectedRegion;
       const matchPref = selectedPrefecture === "" || facility.prefecture === selectedPrefecture;
       return matchQuery && matchType && matchRegion && matchPref;
     });
@@ -280,16 +254,8 @@ export default function Home() {
     return `https://image.pollinations.ai/prompt/${prompt}?width=600&height=400&nologo=true`;
   };
 
-  // Helper function: Map raw region to display region
-  const mapRegionToDisplay = (rawRegion: string): string => {
-    if (rawRegion === "Chugoku" || rawRegion === "Shikoku") {
-      return "ChugokuShikoku";
-    }
-    if (rawRegion === "Kyushu" || rawRegion === "Okinawa") {
-      return "KyushuOkinawa";
-    }
-    return rawRegion;
-  };
+  // Helper function: Use region as-is (facilities.json already has unified regions)
+  const mapRegionToDisplay = (rawRegion: string): string => rawRegion;
 
   // イベントカルーセル自動ローテーション
   useEffect(() => {
