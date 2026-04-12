@@ -492,7 +492,9 @@ async function generateFacilityImage(facilityId, facilityName, description) {
       fs.writeFileSync(outputPath, buffer);
 
       console.log(`[IMAGE] ✅ [${facilityId}] 生成完了 (${buffer.length} bytes)`);
-      return `/images/facilities/${facilityId}_ai.png`;
+      // タイムスタンプをクエリパラメータに追加してキャッシュを無効化
+      const timestamp = Date.now();
+      return `/images/facilities/${facilityId}_ai.png?t=${timestamp}`;
     } catch (error) {
       if (attempt < 3) {
         console.warn(`[IMAGE] ⚠️ [${facilityId}] 試行${attempt}失敗: ${error.message}. リトライします...`);
