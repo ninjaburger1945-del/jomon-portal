@@ -25,9 +25,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR青森駅から青森市営バスまたは「ねぶたん号」で約30〜40分、新青森駅から「ねぶたん号」で約15分。三内丸山遺跡前バス停下車すぐ",
     "access_public_en": "",
-    "access_car": "東北自動車道青森ICから約5分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -57,9 +55,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR中央本線茅野駅からアルピコ交通バスで約20分。尖石縄文考古館バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "中央自動車道諏訪ICから国道152号経由で約30分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -89,9 +85,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR総武本線都賀駅からバスで約10分。加曽利貝塚バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "京葉道路穴川ICから約10分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -121,9 +115,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR八戸駅または本八戸駅からバス。是川縄文館バス停から下車すぐ",
     "access_public_en": "",
-    "access_car": "八戸自動車道八戸ICから約10分、八戸北ICまたは八戸是川ICから約5分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -153,9 +145,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR信濃境駅から徒歩約15分",
     "access_public_en": "",
-    "access_car": "中央自動車道小淵沢ICから約10分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -185,9 +175,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR小浜線三方駅から徒歩約25分、またはレンタサイクルで約10分。バス利用時は鳥浜貝塚前バス停から徒歩約3分",
     "access_public_en": "",
-    "access_car": "舞鶴若狭自動車道三方五湖スマートICから約5分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -217,9 +205,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR信越本線・上越新幹線長岡駅からバスで約20分。県立歴史博物館前バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "関越自動車道長岡ICから国道8号経由で約5分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -248,9 +234,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR日豊本線国分駅からバスで約20分。縄文の森入口バス停から徒歩約10分",
     "access_public_en": "",
-    "access_car": "東九州自動車道国分ICから県道2号経由で約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -280,9 +264,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR中央本線甲府駅からバスで約25分。考古博物館バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "中央道甲府南ICから約5分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -311,9 +293,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR函館本線函館駅からバスで約1時間40分。函館バス大船バス停から徒歩約2分",
     "access_public_en": "",
-    "access_car": "函館新道函館ICから国道278号経由で約1時間",
     "access_car_en": "",
     "userApproved": true
   },
@@ -343,9 +323,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR花輪線鹿角花輪駅からバスで約30分",
     "access_public_en": "",
-    "access_car": "東北道鹿角八幡平ICから約10分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -375,9 +353,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR奥羽本線鷹ノ巣駅からバスで約20分。伊勢堂岱遺跡前バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "日本海沿岸東北自動車道鷹巣ICから国道105号経由で約10分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -407,9 +383,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR奥羽本線青森駅からバスで約35分。小牧野遺跡前バス停から徒歩約2分",
     "access_public_en": "",
-    "access_car": "東北自動車道青森中央ICから約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -439,9 +413,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR五能線 木造駅からタクシーで約15分。つがる市コミュニティバス 亀ヶ岡遺跡入口バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "東北道 浪岡ICから国道101号経由で約40分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -471,9 +443,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR室蘭本線黄金駅からバスで約10分。北黄金貝塚バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "道央自動車道伊達ICから国道37号経由で約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -502,9 +472,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR函館駅から函館バスで約90分。垣ノ島遺跡下バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "函館空港から車で約40分、JR函館駅から車で約60分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -534,9 +502,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR室蘭本線洞爺駅から道南バスで約30分。高砂町バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "道央自動車道虻田洞爺湖ICから国道230号経由で約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -565,9 +531,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR東北本線一戸駅からバスで約15分。御所野遺跡バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "東北自動車道一戸ICから車で約5分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -596,9 +560,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR篠ノ井線塩尻駅から市バスで約15分。平出遺跡公園前バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "中央道塩尻ICから県道25号経由で約10分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -627,9 +589,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR大森駅北口から徒歩約5分、または大井町駅から東急バスで大森操車所下車すぐ",
     "access_public_en": "",
-    "access_car": "駐車場なし（公共交通機関の利用を推奨）",
     "access_car_en": "",
     "userApproved": true
   },
@@ -658,9 +618,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR中央本線下諏訪駅からタクシーで約40分。バスの場合は下諏訪町循環バス「高木」バス停から徒歩約3時間30分",
     "access_public_en": "",
-    "access_car": "中央道諏訪ICから県道254号経由で約40分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -689,9 +647,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "豊橋鉄道渥美線三河田原駅から豊鉄バスで約15分。豊鉄バス伊良湖本線吉胡バス停から徒歩約7分",
     "access_public_en": "",
-    "access_car": "東名高速道路豊川ICから国道23号・259号経由で約60分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -720,9 +676,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR小浜線若狭鳥浜駅からタクシーで約5分。若狭町営バス鳥浜バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "舞鶴若狭自動車道若狭三方ICから国道27号経由で約10分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -751,9 +705,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR山陽本線笠岡駅からバスで約20分。大島西バス停から徒歩約20分",
     "access_public_en": "",
-    "access_car": "山陽道笠岡ICから国道2号経由で約20分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -782,9 +734,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR予讃線松山駅からJR四国バス・町営バス乗り継ぎで約80分。久万高原町営バス上黒岩線上黒岩バス停から徒歩約1時間（山道）",
     "access_public_en": "",
-    "access_car": "松山自動車道久万高原スマートICから国道33号線・県道12号線経由で約20分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -813,9 +763,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR仙石線野蒜駅から東松島市コミュニティバスで約20分。宮戸市民センター前バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "三陸自動車道鳴瀬奥松島ICから県道27号経由で約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -844,9 +792,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR中央本線茅野駅からバスで約30分。八ヶ岳自然文化園バス停から徒歩約20分",
     "access_public_en": "",
-    "access_car": "中央道諏訪南ICから県道17号経由で約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -875,9 +821,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR武蔵野線船橋法典駅から徒歩約20分。柏井町一丁目バス停から徒歩約3分",
     "access_public_en": "",
-    "access_car": "京葉道路原木ICから県道180号経由で約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -907,9 +851,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR武武蔵野線市川大野駅からバスで約10分。曽谷バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "京葉道路市川ICから約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -938,9 +880,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR筑肥線菜畑駅から徒歩約5分。菜畑駅前バス停から徒歩約3分",
     "access_public_en": "",
-    "access_car": "西九州自動車道唐津ICから約10分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -970,9 +910,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR函館本線函館駅からバスで約80分。縄文文化交流センター前バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "函館新外環状道路函館空港ICから国道278号経由で約40分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1001,9 +939,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR福島駅からバスで約25分。宮畑バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "東北自動車道福島西ICから約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1032,9 +968,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "のと鉄道七尾線穴水駅からバス乗り継ぎ約1時間半。能登町ふれあいバス真脇遺跡前バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "能越自動車道のと里山空港ICから国道249号経由で約40分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1064,9 +998,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "京成本線海神駅から徒歩約15分。船橋中央病院前バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "京葉道路花輪ICから国道14号経由で約10分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1095,9 +1027,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "東武東上線みずほ台駅からバスで約10分。水子貝塚公園バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "関越自動車道所沢ICから県道266号経由で約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1126,9 +1056,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR相模線下溝駅からバス約10分。勝坂入口バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "圏央道相模原愛川ICから約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1158,9 +1086,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR中央本線石和温泉駅からバスで約1時間。釈迦堂遺跡博物館バス停から徒歩すぐ",
     "access_public_en": "",
-    "access_car": "中央道一宮御坂ICから国道137号経由で約5分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1189,9 +1115,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "路線バスで帝釈バス停下車、徒歩約20分",
     "access_public_en": "",
-    "access_car": "中国自動車道東城ICから約20分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1221,9 +1145,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "北総鉄道北国分駅から徒歩約15分。京成バス堀之内貝塚公園バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "京葉道路市川ICから約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1252,9 +1174,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR常磐線土浦駅からJRバス関東で約40分。陸平貝塚バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "圏央道稲敷ICから県道5号線経由で約20分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1283,9 +1203,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR宇野線彦崎駅からバスまたはタクシーで約5分。彦崎バス停から徒歩約15分",
     "access_public_en": "",
-    "access_car": "瀬戸中央自動車道早島ICから県道21号経由で約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1314,9 +1232,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR津山線法界院駅から徒歩約20分。岡山大学筋バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "山陽道岡山ICから国道53号経由で約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1346,9 +1262,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR湖西線大津京駅から徒歩約10分。京阪バス歴史博物館前バス停から徒歩約1分",
     "access_public_en": "",
-    "access_car": "名神高速道路大津ICから約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1379,9 +1293,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR宇都宮線蓮田駅からバスで約10分。黒浜中央バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "東北道岩槻ICから県道87号経由で約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1411,9 +1323,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR予讃線宇和島駅から宇和島自動車バス城辺・御荘方面行きで約70分。城辺バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "松山自動車道（宇和島道路）宇和島朝日ICから国道56号経由で約45分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1444,9 +1354,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR飯山線・ほくほく線 十日町駅から徒歩約10分。越後交通 本町6丁目停留所から徒歩約10分",
     "access_public_en": "",
-    "access_car": "関越自動車道 六日町ICから国道253号経由で約25分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1477,9 +1385,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR信越本線長岡駅からバスで約25分。関原南バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "関越自動車道長岡ICから約5分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1510,9 +1416,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "ゆいレールてだこ浦西駅から車で約20分。荻堂バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "沖縄自動車道北中城ICから約10分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1543,9 +1447,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR奥羽本線舟形駅から徒歩約20分。舟形駅から舟形町営バスで「中央公民館前」下車、徒歩約5分。舟形町営バス中央公民館前バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "東北中央自動車道舟形ICから約5分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1576,9 +1478,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR常磐線水戸駅北口からバスで約20分、常澄庁舎前バス停から徒歩約10分",
     "access_public_en": "",
-    "access_car": "北関東自動車道水戸大洗ICから約5分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1608,9 +1508,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR鹿児島本線 折尾駅からバスで約30分。山鹿郵便局前バス停から徒歩約15分",
     "access_public_en": "",
-    "access_car": "九州自動車道 鞍手ICから約25分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1639,9 +1537,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR長崎本線 佐賀駅から車で約20分。佐賀駅バスセンターから昭和バスで約30分、「ひがしせふり温泉」下車、徒歩約5分",
     "access_public_en": "",
-    "access_car": "長崎自動車道 佐賀大和ICから約5分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1671,9 +1567,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR小海線 小海駅から北相木村営バスで「考古博物館前」下車すぐ（※本数少なめのため注意）",
     "access_public_en": "",
-    "access_car": "上信越自動車道 佐久ICから約60分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1703,9 +1597,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "土佐くろしお鉄道「宿毛駅」から車で約5分。高知西南交通「宿毛歴史館前」バス停下車すぐ",
     "access_public_en": "",
-    "access_car": "四万十町中央ICから国道56号線経由で約70分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1735,9 +1627,7 @@
     "description_en": "A guidance facility for the nationally designated historic site, Sakuramachi Site, located in Oyabe City, Toyama Prefecture. This complex archaeological site, dating from the Early Jomon to the medieval period, is highly valued for the large number of wooden artifacts and plant remains excavated from its low-lying wetlands. The facility exhibits artifacts such as lacquered combs, pottery, and stone tools, providing an easy-to-understand explanation of Jomon people's life, technology, and spiritual culture. It also features a recreated \"Jomon Forest\" and reconstructed pit dwellings, allowing visitors to experience the Jomon way of life. The excellent preservation of organic materials like woodwork and basketry makes it a crucial site for Jomon culture research in Japan.",
     "location_en": "Oyabe, Toyama",
     "address_en": "2333 Sakuramachi, Oyabe, Toyama 932-0824",
-    "access_public": "あいの風とやま鉄道「石動駅」から徒歩約20分。小矢部市営バス「桜町」バス停から徒歩約5分",
     "access_public_en": "Approx. 20-minute walk from Isurugi Station on the Ainokaze Toyama Railway Line, or a 5-minute walk from the 'Sakuramachi' bus stop on the Oyabe City Bus line.",
-    "access_car": "能越自動車道 小矢部東ICから約5分",
     "access_car_en": "Approx. 5 minutes from the Oyabe-Higashi IC on the Noetsu Expressway.",
     "userApproved": true
   },
@@ -1767,9 +1657,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "青い森鉄道「七戸十和田駅」からタクシーで約15分。七戸十和田駅からバス「七戸案内所」下車後、タクシーで約10分",
     "access_public_en": "",
-    "access_car": "上北自動車道「七戸IC」から約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1799,9 +1687,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR宇都宮線「間々田駅」から車で約10分。小山市コミュニティバス「寺野東遺跡入口」下車、徒歩約3分",
     "access_public_en": "",
-    "access_car": "東北自動車道「佐野藤岡IC」から約30分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1831,9 +1717,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR常磐線 土浦駅からバスで約15分。「上高津」バス停から徒歩約5分",
     "access_public_en": "",
-    "access_car": "常磐自動車道 桜土浦ICから約10分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1862,9 +1746,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "Chuo, Chitose-shi, Hokkaido",
-    "access_public": "JR千歳線「千歳駅」からタクシーで約20分。バスは千歳駅より北海道中央バス「埋蔵文化財センター」下車すぐ（便数僅少）",
     "access_public_en": "",
-    "access_car": "道央自動車道「千歳IC」から約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1894,9 +1776,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR浜松駅下車。JR浜松駅バスターミナル2番のりばから「（蜆塚経由）佐鳴台団地」行き乗車、「博物館」下車すぐ",
     "access_public_en": "",
-    "access_car": "東名高速道路 浜松西ICから約15分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -1926,9 +1806,7 @@
     "description_en": "This center in Higashiomi, Shiga, conducts research and exhibition of the Koryuji Site Complex, a multi-period site from the Early Jomon to the Kofun period. Designated a National Historic Site, it is especially valuable for its numerous Early Jomon pit-dwelling remains and pottery, offering significant academic insights into the dawn of Jomon culture and settled life in the Kinki region. The exhibition room allows visitors to see precious pottery and stone tools unearthed from the site up close, providing a tangible connection to the lives and technologies of ancient people.",
     "location_en": "Higashiomi City",
     "address_en": "461 Ichikogawara-cho, Higashiomi, Shiga",
-    "access_public": "JR琵琶湖線「能登川駅」または近江鉄道「八日市駅」からバス利用。ちょこっとバス「埋蔵文化財センター」バス停下車すぐ",
     "access_public_en": "From JR Notogawa Station or Ohmi Railway Yokaichi Station, take the 'Chokotto Bus' and get off at the 'Maizobunkazai Center' stop.",
-    "access_car": "名神高速道路「八日市IC」から約15分",
     "access_car_en": "Approx. 15 minutes from Yokaichi IC on the Meishin Expressway.",
     "userApproved": true
   },
@@ -1958,9 +1836,7 @@
     "description_en": "This museum exhibits artifacts from the Yano Site, a nationally designated historic site and one of the largest Jomon period (Late Jomon, c. 3,000 years ago) settlements in western Japan. Discoveries include a circular stone arrangement believed to be for rituals, diverse pottery, stone tools, and clay figurines, offering a glimpse into the spiritual and daily lives of the people. Artifacts indicating exchange with Kyushu and Kinki regions highlight its importance as a key Jomon cultural hub in Shikoku.",
     "location_en": "",
     "address_en": "85-1 Nishiyano, Kokufu-cho, Tokushima City, Tokushima Prefecture",
-    "access_public": "JR徳島線「府中駅」から徒歩約25分。徳島バス「矢野」バス停下車、徒歩約5分",
     "access_public_en": "Approx. 25-minute walk from Fuchu Station (JR Tokushima Line), or 5-minute walk from Yano bus stop (Tokushima Bus).",
-    "access_car": "徳島自動車道「藍住IC」から約20分",
     "access_car_en": "Approx. 20 minutes from Aizumi IC on the Tokushima Expressway.",
     "userApproved": true
   },
@@ -1989,9 +1865,7 @@
     "description_en": "This facility preserves the Tokoro Ruins, a nationally designated historic site with remains from the Jomon to the Ainu cultural periods. The vast site features reconstructed Jomon pit dwellings, allowing visitors to experience historical changes. The adjacent archaeological center exhibits artifacts from each era. While known for its Okhotsk culture collection, it also has a substantial Jomon period display. It is a leading multi-period site in Japan for understanding the continuous history of ancient peoples adapting to the harsh Okhotsk coast environment.",
     "location_en": "",
     "address_en": "371 Tokoro, Tokoro-cho, Kitami-shi, Hokkaido",
-    "access_public": "JR石北本線 網走駅から車で約40分。網走バス「常呂」バス停から徒歩約20分",
     "access_public_en": "Approx. 40-min drive from JR Abashiri Station. Approx. 20-min walk from 'Tokoro' bus stop (Abashiri Bus).",
-    "access_car": "女満別空港から車で約40分",
     "access_car_en": "Approx. 40 minutes by car from Memanbetsu Airport or central Abashiri.",
     "userApproved": true
   },
@@ -2020,9 +1894,7 @@
     "description_en": "This is the guidance facility for the Kamegaoka Stone Age Site, a nationally designated historic site famous for the excavation of the \"Shakoki-dogu\" (goggle-eyed clay figurine). As the center of the Kamegaoka culture, which represents the Late Jomon period, it houses and exhibits numerous valuable artifacts, including elaborate pottery, lacquerware, and clay figurines designated as Important Cultural Properties. The nickname \"Karuko\" means \"wetland\" in the Ainu language, reflecting the environment where the site was formed. The museum provides an easy-to-understand introduction to Jomon life and spirituality through dioramas and videos, allowing visitors to experience the high level of cultural achievement in northern Tohoku. It is a key facility for deeply understanding the Kamegaoka site, a component of the \"Jomon Prehistoric Sites in Northern Japan\" World Heritage Site.",
     "location_en": "Tohoku, Aomori",
     "address_en": "59-1 Wakamidori, Kizukuri, Tsugaru City, Aomori Prefecture",
-    "access_public": "JR五能線「木造駅」から車で約15分。木造駅からのシャトルバス「しゃこちゃんバス」で約20分「カルコ」下車",
     "access_public_en": "From JR Kizukuri Station, take the \"Shako-chan Bus\" for about 20 minutes and get off at \"Karuko\".",
-    "access_car": "東北自動車道「浪岡IC」から約40分",
     "access_car_en": "Approximately 40 minutes from Namioka IC on the Tohoku Expressway.",
     "userApproved": true
   },
@@ -2052,9 +1924,7 @@
     "description_en": "Located in Iwatsuki-ku, Saitama City, this is an inland shell midden from the Early to Late Jomon period, designated as a National Historic Site. Characterized by layers of Yamato shijimi clams, it reveals the lifestyle of Jomon people from about 5,000 years ago. Artifacts are displayed at the Saitama City Museum.",
     "location_en": "Saitama",
     "address_en": "Shinpukuji, Iwatsuki-ku, Saitama-shi, Saitama",
-    "access_public": "東武アーバンパークライン岩槻駅から徒歩約23分。バスの場合は岩槻高校南バス停等から徒歩約3分",
     "access_public_en": "From JR Omiya Station East Exit, take a bus to 'Shiritsu Hakubutsukan' and walk 1 min (to Saitama City Museum).",
-    "access_car": "東北自動車道蓮田スマートICから約13分",
     "access_car_en": "Approx. 15 min from Tohoku Expressway Iwatsuki IC.",
     "userApproved": true
   },
@@ -2084,9 +1954,7 @@
     "description_en": "This museum is adjacent to the Hashimuregawa Ruins, a nationally designated historic site. The site is extremely important in Japanese archaeological history as the location where the first Jomon period pit-dwelling remains were discovered in 1924. The museum displays a wealth of materials, including dioramas recreating an Early Jomon period settlement and numerous artifacts such as pottery, stone tools, and ornaments excavated from the site. As a complex ruin with layers of human activity from the Jomon to medieval periods, it offers a unique opportunity to learn about the transitions in life and culture over time.",
     "location_en": "Kagoshima",
     "address_en": "2290 Junicho, Ibusuki, Kagoshima",
-    "access_public": "JR指宿枕崎線「指宿駅」から徒歩約10分",
     "access_public_en": "Approx. 15-minute walk from JR Ibusuki Station (Ibusuki Makurazaki Line).",
-    "access_car": "指宿スカイライン「谷山IC」から約50分",
     "access_car_en": "Approx. 50 minutes from the Taniyama IC on the Ibusuki Skyline.",
     "userApproved": true
   },
@@ -2116,9 +1984,7 @@
     "description_en": "A nationally designated historic site in Sasebo City, Nagasaki, this cave is crucial for understanding the period from the Paleolithic to the Incipient Jomon era. Its most significant discovery is the 'Toryumon' (bean-pattern) pottery, dated to about 16,000 years ago, making it one of the world's oldest pottery fragments. This finding is vital for studies on the origin of pottery. In addition to Toryumon pottery, linear-relief pottery and stone tools were also found, providing valuable insights into the lives of people during the transition from Paleolithic to Jomon culture. The cave is now protected by a shelter and is open to the public with explanatory panels. Artifacts are displayed at the nearby Fukui Cave Museum.",
     "location_en": "Sasebo, Nagasaki",
     "address_en": "Setogoe-cho, Sasebo-shi, Nagasaki-ken",
-    "access_public": "松浦鉄道西九州線 泉福寺駅から徒歩約5分。西肥バス「瀬戸越」バス停から徒歩約3分",
     "access_public_en": "Approx. 5-minute walk from Senpukuji Station on the Matsuura Railway Nishi-Kyushu Line, or a 3-minute walk from the 'Setogoe' bus stop (Sasebo Bus).",
-    "access_car": "西九州自動車道 佐世保中央ICから約10分",
     "access_car_en": "Approx. 10 minutes from the Sasebo-Chuo IC on the Nishi-Kyushu Expressway.",
     "userApproved": true
   },
@@ -2148,9 +2014,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "835 Shimofunawatou-otsu, Tsunan Town, Nakauonuma District, Niigata Prefecture",
-    "access_public": "JR飯山線「津南駅」からタクシーで約10分。南越後観光バス「大割野」バス停から徒歩約20分",
     "access_public_en": "",
-    "access_car": "関越自動車道「塩沢石打IC」から車で約40分",
     "access_car_en": "",
     "userApproved": true
   },
@@ -2180,9 +2044,7 @@
     "description_en": "This is a guidance facility for the Fukui Cave, a nationally designated historic site and a key location for understanding the Incipient Jomon period. The cave is critically important as it was the first place in Japan where Paleolithic stone tools and Jomon pottery (Ryukisenmon pottery) were discovered in the same stratum, shedding light on the transition from the Paleolithic to the Jomon period. The museum uses elaborate replicas and video materials to clearly explain the changes in people's lives over approximately 20,000 years. The exhibition showcasing the discovery of some of Japan's oldest pottery, such as Tsubumon and Ryukisenmon pottery, is a must-see.",
     "location_en": "Sasebo, Nagasaki",
     "address_en": "473 Tateishi, Yoshii-cho, Sasebo-shi, Nagasaki",
-    "access_public": "松浦鉄道「吉井駅」から徒歩約20分。西肥バス「福祉センター前」バス停から徒歩約3分",
     "access_public_en": "Approx. 20-minute walk from Yoshii Station on the Matsuura Railway, or a 3-minute walk from the Fukushi Center Mae bus stop (Saihoku bus).",
-    "access_car": "西九州自動車道「佐々IC」から約15分",
     "access_car_en": "Approx. 15 minutes from Sasa IC on the Nishi-Kyushu Expressway.",
     "userApproved": true
   },
@@ -2210,8 +2072,6 @@
     "description_en": "Located next to the national historic site 'Oonaka Ruins,' this museum allows visitors to learn about the archaeology of Hyogo Prefecture through hands-on exhibits. It houses and displays a diverse collection of artifacts from the Jomon period to modern times.",
     "needsCheck": true,
     "thumbnail": "/images/facilities/070_remaster_a.png",
-    "access_public": "JR神戸線「土山駅」から徒歩約15分.。JR土山駅南口からバス「大中遺跡南」下車、徒歩5分.",
-    "access_car": "第二神明道路「明石西IC」から約3km.",
     "userApproved": true
   },
   {
@@ -2238,8 +2098,6 @@
     "description_en": "This museum permanently exhibits artifacts from the Mikoshiba site, a nationally designated historic site that represents the Incipient Jomon period. The polished stone tools, considered among the oldest and 'most beautiful' in Japan, are a must-see.",
     "needsCheck": true,
     "thumbnail": "/images/facilities/071_remaster_c.png",
-    "access_public": "JR飯田線 伊那市駅から徒歩約4分。伊那バスターミナルから徒歩約3分",
-    "access_car": "中央自動車道 伊那ICから約15分",
     "userApproved": true
   },
   {
@@ -2266,9 +2124,7 @@
     "description_en": "A nationally designated historic site, this cave complex was inhabited from the Middle Jomon period to early modern times. It holds archaeological significance as the first cave site in Japan to undergo full-scale investigation.",
     "needsCheck": true,
     "userApproved": true,
-    "thumbnail": "/images/facilities/072_remaster_b.png",
-    "access_public": "JR氷見線氷見駅から加越能バスで約30分、「大境」下車徒歩5分。「大境」バス停から徒歩5分",
-    "access_car": "能越自動車道 灘浦ICから約10分"
+    "thumbnail": "/images/facilities/072_remaster_b.png"
   },
   {
     "id": "073",
@@ -2292,9 +2148,7 @@
     "copy": "琵琶湖に眠る縄文の食卓",
     "needsCheck": true,
     "userApproved": true,
-    "thumbnail": "/images/facilities/073_remaster_b.png",
-    "access_public": "京阪石山坂本線「粟津駅」下車、東へ徒歩約10分。なし",
-    "access_car": "名神高速道路「瀬田西IC」から約10分"
+    "thumbnail": "/images/facilities/073_remaster_b.png"
   },
   {
     "id": "074",
@@ -2316,8 +2170,6 @@
       "rank": "S"
     },
     "copy": "北海道の縄文の鼓動を感じよう",
-    "access_public": "JR大麻駅から徒歩約20分。新札幌駅バスターミナルからJRバス等で「くりの木公園前」下車徒歩約5分",
-    "access_car": "道央自動車道 江別西ICから約10分",
     "thumbnail": "/images/facilities/074_remaster_b.png",
     "userApproved": true
   },
@@ -2342,8 +2194,6 @@
       "rank": "A"
     },
     "copy": "キウス周堤墓群を育んだ、千歳の縄文文化に触れる。",
-    "access_public": "JR千歳駅から車で約10分。千歳市コミュニティバス「千歳市埋蔵文化財センター」下車",
-    "access_car": "道央自動車道千歳ICから約10分",
     "thumbnail": "/images/facilities/075_remaster_b.png",
     "userApproved": true
   },
@@ -2368,8 +2218,6 @@
       "rank": "A"
     },
     "copy": "噴火湾の恵みと共生した、縄文人の営みを紐解く。",
-    "access_public": "JR稀府駅から徒歩約10分。なし",
-    "access_car": "道央自動車道伊達ICから約15分",
     "thumbnail": "/images/facilities/076_remaster_c.png",
     "userApproved": true
   },
@@ -2394,8 +2242,6 @@
       "rank": "B"
     },
     "copy": "瀬戸内の縄文晩期文化を象徴する「門田式土器」のふるさと",
-    "access_public": "JR赤穂線 邑久（おく）駅からタクシーで約5分、または徒歩約25分",
-    "access_car": "岡山ブルーライン",
     "thumbnail": "/images/facilities/077_remaster_b.png",
     "userApproved": true
   },
@@ -2420,8 +2266,6 @@
     },
     "copy": "「四国のヴィーナス」が微笑む、瀬戸内縄文文化の発信拠点。",
     "thumbnail": "/images/facilities/078_remaster_c.png",
-    "access_public": "JR予讃線「松山駅」からタクシーで約10分。伊予鉄バス（空港線ほか）「考古館前」停留所下車すぐ",
-    "access_car": "松山自動車道「松山IC」から約20分（無料駐車場あり）",
     "userApproved": true
   },
   {
@@ -2445,8 +2289,6 @@
     },
     "copy": "縄文の美が息づく、朱塗りの装身具の宝庫。",
     "thumbnail": "/images/facilities/079_remaster_a.png",
-    "access_public": "JR千歳線「島松駅」から徒歩約15分。恵庭市コミュニティバス（ecoバス）「郷土資料館」バス停下車すぐ",
-    "access_car": "道央自動車道「恵庭IC」から約10分",
     "userApproved": true
   },
   {
@@ -2470,8 +2312,6 @@
     },
     "copy": "黒潮が運んだ縄文の記憶、轟式土器の美に触れる。",
     "thumbnail": "/images/facilities/080_remaster_a.png",
-    "access_public": "JR土讃線「後免駅」からタクシーで約10分。とさでん交通バス「高知医療センター」経由便で「埋蔵文化財センター前」下車すぐ",
-    "access_car": "高知自動車道「南国IC」から約15分",
     "userApproved": true
   },
   {
@@ -2496,8 +2336,6 @@
     },
     "copy": "貝飾りが伝える縄文九州の拠点",
     "thumbnail": "/images/facilities/081_remaster_a.png",
-    "access_public": "JR鹿児島本線「宇土駅」からタクシーで約15分。熊本桜町バスターミナルから熊本バス「阿高」バス停下車、徒歩約5分",
-    "access_car": "九州自動車道「御船IC」または「城南スマートIC」から車で約15分",
     "userApproved": true
   },
   {
@@ -2522,8 +2360,6 @@
     },
     "copy": "火山灰が守り抜いた奇跡",
     "thumbnail": "/images/facilities/082_remaster_b.png",
-    "access_public": "JR函館本線「森駅」より徒歩約20分。函館バス「森町役場前」バス停下車、徒歩約5分",
-    "access_car": "道央自動車道「森IC」から車で約5分",
     "userApproved": true
   }
 ]

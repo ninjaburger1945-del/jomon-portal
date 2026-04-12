@@ -270,25 +270,7 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
                         <h2 className={styles.sectionTitle}>施設概要</h2>
                         <p className={styles.description}>{facility.description}</p>
 
-                        {facility.access_public || facility.access_car ? (
-                            <div className={styles.accessSection}>
-                                <h2 className={styles.sectionTitle}>アクセス情報</h2>
-                                <div className={styles.accessBox}>
-                                    {facility.access_public && (
-                                        <div className={styles.accessRow}>
-                                            <span className={styles.accessModeLabel}>🚌 公共交通機関</span>
-                                            <p className={styles.accessInfoText}>{facility.access_public}</p>
-                                        </div>
-                                    )}
-                                    {facility.access_car && (
-                                        <div className={styles.accessRow}>
-                                            <span className={styles.accessModeLabel}>🚗 車</span>
-                                            <p className={styles.accessInfoText}>{facility.access_car}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ) : facility.access ? (
+                        {facility.access ? (
                             <div className={styles.accessSection}>
                                 <h2 className={styles.sectionTitle}>アクセス情報</h2>
                                 <div className={styles.accessBox}>
