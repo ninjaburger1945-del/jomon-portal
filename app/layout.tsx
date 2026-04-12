@@ -1,25 +1,8 @@
 import type { Metadata } from "next";
-import { Noto_Sans_JP, Noto_Serif_JP, Shippori_Mincho } from "next/font/google";
+// ⚠️ Google Fonts removed for Cloudflare Pages compatibility (Turbopack issue)
+// System fonts fallback used in globals.css
 import Footer from "./components/Footer";
 import "./globals.css";
-
-const notoSansJP = Noto_Sans_JP({
-  variable: "--font-noto-sans-jp",
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "900"],
-});
-
-const notoSerifJP = Noto_Serif_JP({
-  variable: "--font-noto-serif-jp",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
-
-const shipporiMincho = Shippori_Mincho({
-  variable: "--font-shippori-mincho",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
 
 export const metadata: Metadata = {
   title: "Jomon Portal",
@@ -65,7 +48,7 @@ export default function RootLayout({
           </>
         ) : null}
       </head>
-      <body className={`${notoSansJP.variable} ${notoSerifJP.variable} ${shipporiMincho.variable}`}>
+      <body>
         {children}
         <Footer />
       </body>

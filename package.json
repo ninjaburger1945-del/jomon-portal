@@ -4,11 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npx @cloudflare/next-on-pages",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "pages:build": "npm run build",
-    "pages:functions": "./dist/functions"
+    "lint": "eslint"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
