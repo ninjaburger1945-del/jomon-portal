@@ -13,25 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Build
-        run: npm run build
-        env:
-          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
-          GOOGLE_CUSTOM_SEARCH_API_KEY: ${{ secrets.GOOGLE_CUSTOM_SEARCH_API_KEY }}
-          GOOGLE_CUSTOM_SEARCH_ENGINE_ID: ${{ secrets.GOOGLE_CUSTOM_SEARCH_ENGINE_ID }}
-
       - name: Deploy to ConoHa
         run: |
           mkdir -p ~/.ssh
@@ -40,12 +21,18 @@ jobs:
           ssh-keyscan -t rsa ${{ secrets.CONOHA_SERVER_IP }} >> ~/.ssh/known_hosts 2>&1
 
           ssh ${{ secrets.CONOHA_USER }}@${{ secrets.CONOHA_SERVER_IP }} << 'DEPLOY_EOF'
+          set -e
           cd ~/jomon-portal
+          echo "[DEPLOY] Git pull..."
           git pull origin main
+          echo "[DEPLOY] npm install..."
           npm install --legacy-peer-deps
+          echo "[DEPLOY] npm run build..."
           npm run build
+          echo "[DEPLOY] pm2 restart..."
           pm2 restart jomon-web || pm2 start ecosystem.config.js --only jomon-web
           pm2 save
+          echo "[DEPLOY] ✅ Deployment complete"
           DEPLOY_EOF
 
       - name: Verify Deploy
