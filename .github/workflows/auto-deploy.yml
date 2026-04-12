@@ -1,0 +1,72 @@
+name: ConoHa Auto Deploy & Remaster
+
+on:
+  schedule:
+    # クローラー実行後デプロイ（毎日 1:00 AM JST = UTC 16:00前日）
+    - cron: '0 16 * * *'
+    # 週末イラスト処理後デプロイ（毎週土曜 5:00 AM JST = UTC 20:00前日金曜）
+    - cron: '0 20 * * 5'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+        env:
+          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+          GOOGLE_CUSTOM_SEARCH_API_KEY: ${{ secrets.GOOGLE_CUSTOM_SEARCH_API_KEY }}
+          GOOGLE_CUSTOM_SEARCH_ENGINE_ID: ${{ secrets.GOOGLE_CUSTOM_SEARCH_ENGINE_ID }}
+
+      - name: Deploy to ConoHa
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.CONOHA_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.CONOHA_SERVER_IP }} >> ~/.ssh/known_hosts
+
+          ssh ${{ secrets.CONOHA_USER }}@${{ secrets.CONOHA_SERVER_IP }} << 'DEPLOY_EOF'
+          cd ~/jomon-portal
+          git pull origin main
+          npm install
+          npm run build
+          pm2 restart jomon-web || pm2 start ecosystem.config.js --only jomon-web
+          pm2 save
+          DEPLOY_EOF
+
+      - name: Verify Deploy
+        run: |
+          ssh ${{ secrets.CONOHA_USER }}@${{ secrets.CONOHA_SERVER_IP }} "pm2 status"
+
+      - name: Notify on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.3
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "❌ jomon-portal デプロイ失敗",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*ConoHa Auto Deploy Failed*\nワークフロー: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                }
+              ]
+            }
