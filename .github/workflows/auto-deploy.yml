@@ -51,22 +51,3 @@ jobs:
       - name: Verify Deploy
         run: |
           ssh ${{ secrets.CONOHA_USER }}@${{ secrets.CONOHA_SERVER_IP }} "pm2 status"
-
-      - name: Notify on failure
-        if: failure()
-        uses: slackapi/slack-github-action@v1.24.3
-        with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
-          payload: |
-            {
-              "text": "❌ jomon-portal デプロイ失敗",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*ConoHa Auto Deploy Failed*\nワークフロー: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  }
-                }
-              ]
-            }
