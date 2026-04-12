@@ -451,7 +451,7 @@
     "region": "Hokkaido",
     "prefecture": "北海道",
     "address": "北海道伊達市北黄金町75",
-    "description": "世界遺産。内浦湾を望む台地上に形成された大規模な貝塚集落で、水場遺構など貴重で珍しい祭祀の痕跡が良好な状態で保存されています。階段状に広がる貝層から、長期にわたる安定した季節的な居住パターンが明確に読み取れます。北海道南西部における海洋資源への巧妙な適応と定住の成功例として、考古学上極めて重要な遺跡です。内浦湾の縄文海進による海面上昇と人間活動の関係を研究する上で、この遺跡は極めて重要な地層記録を保有しています。",
+    "description": "世界遺産。噴火湾を望む高台にあり、水場遺構から発見された祭祀の痕跡が特徴。隣接する北黄金貝塚情報センターでは、クジラの骨で作られた刀状の道具（骨刀）など、海洋資源を高度に活用した生活の証拠が展示されています。",
     "url": "https://jomon-japan.jp/learn/jomon-sites/kitakogane",
     "thumbnail": "/images/facilities/kitakogane_ai.png",
     "tags": [
@@ -471,7 +471,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR室蘭本線黄金駅からバスで約10分",
+    "access_public": "JR室蘭本線黄金駅からバスで約10分。北黄金貝塚バス停から徒歩約1分",
     "access_public_en": "",
     "access_car": "道央自動車道伊達ICから国道37号経由で約15分",
     "access_car_en": "",
