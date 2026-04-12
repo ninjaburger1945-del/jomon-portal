@@ -438,9 +438,11 @@ JSON配列のみ出力。説明や注釈は不要。`;
         await execPromise(`git commit -m "${commitMessage}"`);
 
         // プッシュ実行（リベースで競合対応）
-        console.log('[GIT] Pushing to GitHub...');
-        await execPromise('git pull --rebase --autostash origin main');
-        await execPromise('git push origin main');
+        // ⚠️ TEMPORARILY DISABLED - git push causing excessive Vercel charges
+        // console.log('[GIT] Pushing to GitHub...');
+        // await execPromise('git pull --rebase --autostash origin main');
+        // await execPromise('git push origin main');
+        console.log('[GIT] ⚠️ Git push DISABLED temporarily due to cost concerns');
 
         console.log('[GIT] ✅ Successfully committed and pushed to GitHub');
       } catch (gitErr) {

@@ -373,4 +373,5 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
     );
 }
 
-export const revalidate = 3600; // ISR: Revalidate every 1 hour. Deployment triggers full rebuild for fresh data.
+// ISR disabled to prevent excessive Vercel Function executions
+// export const revalidate = 3600;

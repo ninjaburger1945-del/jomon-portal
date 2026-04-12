@@ -385,9 +385,11 @@ ${textContent}`;
         await execPromise(`git commit -m "${commitMessage}"`);
 
         // プッシュ実行（リベースで競合対応）
-        console.log('[collect-events] 🚀 Pushing to GitHub (with [skip ci] flag)...');
-        await execPromise('git pull --rebase --autostash origin main');
-        await execPromise('git push origin main');
+        // ⚠️ TEMPORARILY DISABLED - git push causing excessive Vercel charges
+        // console.log('[collect-events] 🚀 Pushing to GitHub (with [skip ci] flag)...');
+        // await execPromise('git pull --rebase --autostash origin main');
+        // await execPromise('git push origin main');
+        console.log('[collect-events] ⚠️ Git push DISABLED temporarily due to cost concerns');
 
         console.log('\n[collect-events] ✅ Successfully committed and pushed to GitHub');
         console.log('[collect-events] 🛡️  Build skip flag [skip ci] active - Vercel build NOT triggered\n');
