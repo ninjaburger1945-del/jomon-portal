@@ -982,7 +982,7 @@
     "region": "Tohoku",
     "prefecture": "福島県",
     "address": "福島県福島市岡島字宮田78",
-    "description": "縄文時代の重要な集落跡である宮畑遺跡を整備した歴史公園と資料館。大規模な掘立柱建物跡などが丁寧に復元されています。福島県福島市の遺跡は、縄文時代全体を通じて継続した重要で安定した居住地として機能していたことが明らかになっています。復元された建物から、縄文人の建築技術の段階的な発達と高度さを具体的に理解できます。掘立柱建物は通常の竪穴建物より高度な技術を要するもので、その出現は建築技術の進化を示す重要な指標です。",
+    "description": "文時代中期〜晩期の重要集落である宮畑遺跡を整備した史跡公園。シンボルである「大規模掘立柱建物」や「土屋根竪穴建物」が精緻に復元されています。体験学習施設では、出土した「土面」などの貴重な資料見学や、当時の生活体験が可能で、福島の縄文文化を五感で楽しめます。",
     "url": "http://www.f-shinkoukousha.or.jp/jyomopia/index.html",
     "thumbnail": "/images/facilities/jomopia-miyahata_ai.png",
     "tags": [
@@ -1001,7 +1001,7 @@
     "description_en": "",
     "location_en": "",
     "address_en": "",
-    "access_public": "JR福島駅からバスで約25分",
+    "access_public": "JR福島駅からバスで約25分。宮畑バス停から徒歩約1分",
     "access_public_en": "",
     "access_car": "東北自動車道福島西ICから約15分",
     "access_car_en": "",
