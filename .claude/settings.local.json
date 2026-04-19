@@ -104,7 +104,26 @@
       "Bash(pkill -f \"node\")",
       "Bash(rm:*)",
       "Bash(curl -s https://raw.githubusercontent.com/ninjaburger1945-del/jomon-portal/main/scripts/daily-crawler.js)",
-      "Bash(env)"
+      "Bash(env)",
+      "Bash(vercel --prod)",
+      "Bash(curl -s \"https://www.jomon-portal.jp/api/facilities\")",
+      "Bash(curl -s \"https://www.jomon-portal.jp/facilities.json\")",
+      "Bash(curl -s \"https://www.jomon-portal.jp/facility/001\")",
+      "Bash(vercel deploy:*)",
+      "WebFetch(domain:www.jomon-portal.jp)",
+      "Bash(json ...)",
+      "Bash(git diff:*)",
+      "Bash(vercel project:*)",
+      "Bash(vercel help:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(pkill -f \"next build\")",
+      "Bash(chmod +x:*)",
+      "Bash(curl -s http://localhost:3001/api/deep-remaster -X POST -H \"Content-Type: application/json\" -d '{\"facilityId\":\"test\",\"description\":\"test description\"}')",
+      "Bash(gh workflow:*)",
+      "Bash(curl -s https://jomon-portal.vercel.app/facilities.json)",
+      "Bash(curl -s https://jomon-portal.vercel.app/api/facilities)",
+      "Bash(curl -s -X POST http://localhost:3000/api/save-facilities -H 'Content-Type: application/json' -d '{\"facilities\":[{\"id\":\"test\",\"name\":\"Test\",\"prefecture\":\"Tokyo\",\"description\":\"Test facility\"}]}')"
     ]
   }
 }

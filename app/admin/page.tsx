@@ -236,11 +236,11 @@ export default function AdminPage() {
       const updated = facilities.filter((f) => f.id !== id);
       try {
         // API保存を最優先（UI更新の前）
-        await saveFacilitiesToGithub(updated);
+        await saveFacilities(updated);
 
         // API成功時のみUIを更新
         setFacilities(updated);
-        setError("✓ Deleted and deployed!");
+        setError("✓ 削除完了！キャッシュ再生成中... ブラウザをリロードすると最新データが表示されます。");
       } catch (err) {
         console.error("Delete error:", err);
         setError(`Failed to delete: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -249,11 +249,11 @@ export default function AdminPage() {
     }
   };
 
-  const saveFacilitiesToGithub = async (updatedFacilities: Facility[], retryCount = 0) => {
+  const saveFacilities = async (updatedFacilities: Facility[], retryCount = 0) => {
     const maxRetries = 3;
     try {
       console.log("Calling save-facilities API...");
-      console.log(`[saveFacilitiesToGithub] Facilities count: ${updatedFacilities.length}`);
+      console.log(`[saveFacilities] Facilities count: ${updatedFacilities.length}`);
 
       // Validate each facility can be stringified before sending
       for (let i = 0; i < updatedFacilities.length; i++) {
@@ -261,13 +261,13 @@ export default function AdminPage() {
         try {
           JSON.stringify(f);
         } catch (err) {
-          console.error(`[saveFacilitiesToGithub] Facility ${i} (ID: ${f?.id}) is not JSON serializable:`, err);
+          console.error(`[saveFacilities] Facility ${i} (ID: ${f?.id}) is not JSON serializable:`, err);
           throw new Error(`Facility ${f?.id || i} contains non-serializable data. Check browser console for details.`);
         }
       }
 
       const requestBody = JSON.stringify({ facilities: updatedFacilities });
-      console.log(`[saveFacilitiesToGithub] Request body size: ${requestBody.length} bytes`);
+      console.log(`[saveFacilities] Request body size: ${requestBody.length} bytes`);
 
       const response = await fetch("/api/save-facilities", {
         method: "POST",
@@ -284,15 +284,15 @@ export default function AdminPage() {
           console.log(`SHA conflict, retrying... (attempt ${retryCount + 1}/${maxRetries})`);
           // 少し待ってからリトライ
           await new Promise(r => setTimeout(r, 500));
-          return saveFacilitiesToGithub(updatedFacilities, retryCount + 1);
+          return saveFacilities(updatedFacilities, retryCount + 1);
         }
         throw new Error(error.error || error.message || "Failed to save");
       }
 
-      console.log("Successfully saved to GitHub!");
+      console.log("Successfully saved to local file!");
       return true;
     } catch (err) {
-      console.error("GitHub save error:", err);
+      console.error("Save error:", err);
       throw err;
     }
   };
@@ -492,7 +492,7 @@ export default function AdminPage() {
         f.id === deepRemasterFacility.id ? { ...f, thumbnail: localPath } : f
       );
 
-      await saveFacilitiesToGithub(updatedFacilities);
+      await saveFacilities(updatedFacilities);
 
       // Note: cleanup-images is temporarily disabled to prevent accidentally deleting
       // recently-generated remaster images when multiple facilities are processed in quick succession.
@@ -501,7 +501,7 @@ export default function AdminPage() {
       setFacilities(updatedFacilities);
       setShowRemasterModal(false);
       setDeepRemasterFacility(null);
-      setError("✓ ディープリマスター完了！画像とデータをGitHubに保存しました。");
+      setError("✓ ディープリマスター完了！画像とデータをローカルに保存しました。キャッシュ再生成中...");
     } catch (err) {
       console.error("[handleConfirmRemaster]", err);
       setRemasterError(err instanceof Error ? err.message : "保存に失敗しました");
@@ -541,7 +541,7 @@ export default function AdminPage() {
     setSaving(true);
     try {
       // API保存を最優先（UI更新の前）
-      await saveFacilitiesToGithub(updated);
+      await saveFacilities(updated);
 
       // API成功時のみUIを更新
       setFacilities(updated);
@@ -554,16 +554,16 @@ export default function AdminPage() {
         try {
           const xResponse = await postToXApi(facilityToSave);
           if (xResponse.posted) {
-            setError("✓ Saved and deployed! 📱 Posted to X!");
+            setError("✓ ローカル保存完了！キャッシュ再生成中... 📱 Posted to X!");
           } else {
-            setError(`✓ Saved and deployed! ${xResponse.reason}`);
+            setError(`✓ ローカル保存完了！キャッシュ再生成中... ${xResponse.reason}`);
           }
         } catch (xErr) {
           console.warn("X post failed:", xErr);
-          setError("✓ Saved and deployed! (X post failed)");
+          setError("✓ ローカル保存完了！キャッシュ再生成中... (X post failed)");
         }
       } else {
-        setError("✓ Saved and deployed! Changes pushed to GitHub.");
+        setError("✓ ローカル保存完了！キャッシュ再生成中... ブラウザをリロードすると最新データが表示されます。");
       }
       setPostToX(false);
     } catch (err) {

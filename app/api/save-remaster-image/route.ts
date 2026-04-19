@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from 'next/server';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import path from 'path';
 
-export const maxDuration = 60; // Vercel timeout
+export const maxDuration = 60; // ConoHa timeout
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,18 +22,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
-    const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
-
-    if (!token || !repo) {
-      return NextResponse.json(
-        { error: 'GitHub credentials not configured' },
-        { status: 500 }
-      );
-    }
+    // ★ GitHub 認証なし。ローカルに直接保存
+    console.log('[API] save-remaster-image: Using local file save (no GitHub token required)');
 
     // Extract Base64 from data URL or fetch from URL
-    let base64Content: string;
+    let imageBuffer: Buffer;
 
     if (pollinationsUrl.startsWith('data:image')) {
       // Data URL format: data:image/png;base64,<base64>
@@ -42,7 +37,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      base64Content = match[1];
+      imageBuffer = Buffer.from(match[1], 'base64');
     } else {
       // Fetch image from URL (Pollinations or other)
       const imgRes = await fetch(pollinationsUrl, {
@@ -56,62 +51,24 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const imageBuffer = await imgRes.arrayBuffer();
-      base64Content = Buffer.from(imageBuffer).toString('base64');
+      imageBuffer = Buffer.from(await imgRes.arrayBuffer());
     }
 
-    // GitHub API path
-    const githubPath = `public/images/facilities/${facilityId}_remaster_${conceptLabel}.png`;
-    const apiUrl = `https://api.github.com/repos/${repo}/contents/${githubPath}`;
+    // ★ ローカルファイルに直接保存（GitHub API は使わない）
+    const filename = `${facilityId}_remaster_${conceptLabel}.png`;
+    const imagesDir = path.join(process.cwd(), 'public', 'images', 'facilities');
 
-    // Get existing SHA if file exists
-    let existingSha: string | undefined;
-    try {
-      const getRes = await fetch(apiUrl, {
-        headers: {
-          Authorization: `token ${token}`,
-          Accept: 'application/vnd.github.v3+json',
-        },
-      });
-      if (getRes.ok) {
-        const fileData = await getRes.json();
-        existingSha = fileData.sha;
-      }
-      // 404 is normal for new files
-    } catch {
-      // Ignore SHA fetch errors
+    // ディレクトリが存在しなければ作成
+    if (!existsSync(imagesDir)) {
+      mkdirSync(imagesDir, { recursive: true });
+      console.log('[API] Created images directory:', imagesDir);
     }
 
-    // GitHub API PUT to commit
-    const putBody: Record<string, string> = {
-      message: `chore(images): add deep remaster for facility ${facilityId}`,
-      content: base64Content,
-      branch: 'main',
-    };
+    const filePath = path.join(imagesDir, filename);
+    writeFileSync(filePath, imageBuffer);
+    console.log('[API] Saved remaster image to:', filePath);
 
-    if (existingSha) {
-      putBody.sha = existingSha;
-    }
-
-    const putRes = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: {
-        Authorization: `token ${token}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/vnd.github.v3+json',
-      },
-      body: JSON.stringify(putBody),
-    });
-
-    if (!putRes.ok) {
-      const errData = await putRes.json();
-      return NextResponse.json(
-        { error: `GitHub PUT failed: ${putRes.status}`, details: errData },
-        { status: 502 }
-      );
-    }
-
-    const localPath = `/images/facilities/${facilityId}_remaster_${conceptLabel}.png`;
+    const localPath = `/images/facilities/${filename}`;
     return NextResponse.json({ success: true, localPath });
   } catch (error) {
     console.error('[save-remaster-image] Error:', error);
