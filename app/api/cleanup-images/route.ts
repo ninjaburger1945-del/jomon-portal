@@ -1,9 +1,12 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { readdirSync, unlinkSync, existsSync } from 'fs';
 import { readFileSync } from 'fs';
-import path from 'path';
 
 export const maxDuration = 300; // 5 minutes timeout for large cleanups
+
+// 🔴 唯一の正解：/root/jomon-portal/app/data/facilities.json
+const DATA_FACILITIES_PATH = '/root/jomon-portal/app/data/facilities.json';
+const IMAGES_DIR = '/root/jomon-portal/public/images/facilities';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,14 +14,13 @@ export async function POST(request: NextRequest) {
     console.log('[cleanup-images] Starting cleanup (local mode)...');
 
     // facilities.json をローカルから読み込み
-    console.log('[cleanup-images] Reading facilities.json from local file...');
-    const facilitiesPath = path.join(process.cwd(), 'app', 'data', 'facilities.json');
+    console.log('[cleanup-images] Reading from:', DATA_FACILITIES_PATH);
 
-    if (!existsSync(facilitiesPath)) {
-      throw new Error(`facilities.json not found at ${facilitiesPath}`);
+    if (!existsSync(DATA_FACILITIES_PATH)) {
+      throw new Error(`facilities.json not found at ${DATA_FACILITIES_PATH}`);
     }
 
-    const facilitiesContent = readFileSync(facilitiesPath, 'utf-8');
+    const facilitiesContent = readFileSync(DATA_FACILITIES_PATH, 'utf-8');
     const facilities = JSON.parse(facilitiesContent);
 
     const usedImages = new Set(
@@ -30,14 +32,12 @@ export async function POST(request: NextRequest) {
     console.log('[cleanup-images] Found', usedImages.size, 'used images');
 
     // public/images/facilities/ ディレクトリから全ファイル取得
-    const imagesDir = path.join(process.cwd(), 'public', 'images', 'facilities');
-
-    if (!existsSync(imagesDir)) {
-      console.log('[cleanup-images] Images directory does not exist:', imagesDir);
+    if (!existsSync(IMAGES_DIR)) {
+      console.log('[cleanup-images] Images directory does not exist:', IMAGES_DIR);
       return NextResponse.json({ success: true, deletedCount: 0 });
     }
 
-    const files = readdirSync(imagesDir);
+    const files = readdirSync(IMAGES_DIR);
     console.log('[cleanup-images] Found', files.length, 'files in directory');
 
     const imagesToDelete = files.filter((filename: string) => {
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     for (const filename of imagesToDelete) {
       try {
-        const filePath = path.join(imagesDir, filename);
+        const filePath = `${IMAGES_DIR}/${filename}`;
         unlinkSync(filePath);
         console.log('[cleanup-images] Deleted', filename);
         successCount++;
