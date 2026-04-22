@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server';
 import { unstable_noStore as noStore } from 'next/cache';
 import fs from 'fs';
-import path from 'path';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+// 🔴 OS 絶対パス（必要に応じて修正）
+const DATA_FACILITIES_PATH = '/root/jomon-portal/app/data/facilities.json';
+
 export async function GET() {
   noStore();
   try {
-    const filePath = path.join(process.cwd(), 'app/data/facilities.json');
-    console.log('[GET /api/facilities] process.cwd():', process.cwd());
-    console.log('[GET /api/facilities] filePath:', filePath);
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    console.log('[GET /api/facilities] Reading from:', DATA_FACILITIES_PATH);
+    const fileContent = fs.readFileSync(DATA_FACILITIES_PATH, 'utf-8');
     const facilities = JSON.parse(fileContent);
 
     const response = NextResponse.json(facilities);
@@ -25,9 +25,9 @@ export async function GET() {
     response.headers.delete('Last-Modified');
     return response;
   } catch (error) {
-    console.error('Failed to load facilities:', error);
+    console.error('[GET /api/facilities] Error:', error);
     return NextResponse.json(
-      { error: 'Failed to load facilities' },
+      { error: 'Failed to load facilities', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
-import path from 'path';
 import { unstable_noStore as noStore } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+// 🔴 OS 絶対パス（必要に応じて修正）
+const DATA_EVENTS_PATH = '/root/jomon-portal/app/data/events.json';
+
 export async function GET() {
   noStore();
   try {
-    const filePath = path.join(process.cwd(), 'app/data/events.json');
-    console.log('[GET /api/events] process.cwd():', process.cwd());
-    console.log('[GET /api/events] filePath:', filePath);
-    const fileContents = fs.readFileSync(filePath, 'utf8');
+    console.log('[GET /api/events] Reading from:', DATA_EVENTS_PATH);
+    const fileContents = fs.readFileSync(DATA_EVENTS_PATH, 'utf8');
     const events = JSON.parse(fileContents);
 
     const response = NextResponse.json(events);
@@ -25,7 +25,7 @@ export async function GET() {
     response.headers.delete('Last-Modified');
     return response;
   } catch (error) {
-    console.error('[api/events]', error);
+    console.error('[GET /api/events] Error:', error);
     return NextResponse.json(
       { error: 'Failed to load events', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

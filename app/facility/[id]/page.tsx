@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { unstable_noStore as noStore } from "next/cache";
 import fs from "fs";
-import path from "path";
 import styles from "./page.module.css";
 import newsData from "../../data/news.json";
 
@@ -18,12 +17,18 @@ interface FacilityJSON {
     [key: string]: unknown;
 }
 
+// 🔴 OS 絶対パス
+const DATA_FACILITIES_PATH = '/root/jomon-portal/app/data/facilities.json';
+
 function loadFacilities(): Facility[] {
-    const filePath = path.join(process.cwd(), 'app/data/facilities.json');
-    console.log('[loadFacilities] process.cwd():', process.cwd());
-    console.log('[loadFacilities] filePath:', filePath);
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(fileContent) as Facility[];
+    console.log('[loadFacilities] Reading from:', DATA_FACILITIES_PATH);
+    try {
+        const fileContent = fs.readFileSync(DATA_FACILITIES_PATH, 'utf-8');
+        return JSON.parse(fileContent) as Facility[];
+    } catch (error) {
+        console.error('[loadFacilities] Error:', error);
+        return [];
+    }
 }
 
 const REGION_LABELS: Record<string, string> = {

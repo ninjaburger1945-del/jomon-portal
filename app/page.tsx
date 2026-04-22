@@ -1,10 +1,13 @@
 import { unstable_noStore as noStore } from "next/cache";
 import fs from "fs";
-import path from "path";
 import PageContent from './_components/PageContent';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+// 🔴 OS 絶対パス（Next.js プロジェクト根の物理位置に合わせて修正してください）
+const DATA_FACILITIES_PATH = '/root/jomon-portal/app/data/facilities.json';
+const DATA_EVENTS_PATH = '/root/jomon-portal/app/data/events.json';
 
 interface Facility {
   id: string;
@@ -36,20 +39,25 @@ interface JomonEvent {
 
 function loadDataSync() {
   noStore();
-  const facilitiesPath = path.join(process.cwd(), 'app/data/facilities.json');
-  const eventsPath = path.join(process.cwd(), 'app/data/events.json');
 
-  console.log('[Home/loadDataSync] process.cwd():', process.cwd());
-  console.log('[Home/loadDataSync] facilitiesPath:', facilitiesPath);
-  console.log('[Home/loadDataSync] eventsPath:', eventsPath);
+  console.log('[Home/loadDataSync] Reading from:', DATA_FACILITIES_PATH);
+  console.log('[Home/loadDataSync] Reading from:', DATA_EVENTS_PATH);
 
-  const facilitiesContent = fs.readFileSync(facilitiesPath, 'utf-8');
-  const eventsContent = fs.readFileSync(eventsPath, 'utf-8');
+  try {
+    const facilitiesContent = fs.readFileSync(DATA_FACILITIES_PATH, 'utf-8');
+    const eventsContent = fs.readFileSync(DATA_EVENTS_PATH, 'utf-8');
 
-  return {
-    facilities: JSON.parse(facilitiesContent) as Facility[],
-    events: JSON.parse(eventsContent) as JomonEvent[],
-  };
+    return {
+      facilities: JSON.parse(facilitiesContent) as Facility[],
+      events: JSON.parse(eventsContent) as JomonEvent[],
+    };
+  } catch (error) {
+    console.error('[Home/loadDataSync] Error reading files:', error);
+    return {
+      facilities: [] as Facility[],
+      events: [] as JomonEvent[],
+    };
+  }
 }
 
 export default async function Home() {
