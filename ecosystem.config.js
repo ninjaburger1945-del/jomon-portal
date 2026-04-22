@@ -4,6 +4,7 @@ module.exports = {
       name: "jomon-web",
       script: "npm",
       args: "start",
+      cwd: "/c/Users/ninja/.gemini/antigravity/scratch/jomon-portal",
       env: {
         NODE_ENV: "production",
         PORT: 3000

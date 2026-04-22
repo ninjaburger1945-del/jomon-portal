@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 // v1.0.1 - Cloudflare Pages optimized
 const nextConfig: NextConfig = {
   trailingSlash: true,
+  turbopack: {},
   images: {
     remotePatterns: [
       {
@@ -29,6 +30,20 @@ const nextConfig: NextConfig = {
   onDemandEntries: {
     maxInactiveAge: 25000,
     pagesBufferLength: 5,
+  },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: [
+          '**/node_modules/**',
+          '**/.git/**',
+          '**/app/data/**',
+          '**/public/images/**',
+        ],
+      };
+    }
+    return config;
   },
 };
 

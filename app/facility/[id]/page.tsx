@@ -1,9 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import { unstable_noStore as noStore } from "next/cache";
+import fs from "fs";
+import path from "path";
 import styles from "./page.module.css";
-import facilitiesData from "../../data/facilities.json";
 import newsData from "../../data/news.json";
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const dynamicParams = true;
+
+interface FacilityJSON {
+    id: string;
+    name: string;
+    [key: string]: unknown;
+}
+
+function loadFacilities(): Facility[] {
+    const filePath = path.join(process.cwd(), 'app/data/facilities.json');
+    console.log('[loadFacilities] process.cwd():', process.cwd());
+    console.log('[loadFacilities] filePath:', filePath);
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    return JSON.parse(fileContent) as Facility[];
+}
 
 const REGION_LABELS: Record<string, string> = {
   "Hokkaido": "北海道",
@@ -64,18 +85,14 @@ function isWalkableFromStation(train?: string): boolean {
     return m ? parseInt(m[1]) <= 10 : false;
 }
 
-export async function generateStaticParams() {
-    return facilitiesData.map((facility) => ({
-        id: facility.id,
-    }));
-}
-
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+    noStore();
     const { id } = await params;
-    const facility = facilitiesData.find((f) => f.id === id);
+    const facilitiesData = loadFacilities();
+    const facility = facilitiesData.find((f) => f.id === id) as Facility | undefined;
     if (!facility) return { title: '施設が見つかりません' };
 
-    const descBase = facility.description ? facility.description.substring(0, 120) : '';
+    const descBase = facility.description ? (facility.description as string).substring(0, 120) : '';
     const metaDesc = `${descBase}（${facility.prefecture}）`;
     return {
         title: `${facility.name}の見どころ・アクセス情報｜JOMON PORTAL`,
@@ -99,7 +116,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function FacilityPage({ params }: { params: Promise<{ id: string }> }) {
+    noStore();
+    const _h = headers();
     const { id } = await params;
+    const facilitiesData = loadFacilities();
     const facility = facilitiesData.find((f) => f.id === id) as Facility | undefined;
 
     if (!facility) {
@@ -120,7 +140,7 @@ export default async function FacilityPage({ params }: { params: Promise<{ id: s
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     };
     const relatedFacilities = facility.lat != null && facility.lng != null
-        ? (facilitiesData as Facility[])
+        ? facilitiesData
             .filter(f => f.id !== facility.id && f.lat != null && f.lng != null)
             .sort((a, b) =>
                 haversine(facility.lat!, facility.lng!, a.lat!, a.lng!) -

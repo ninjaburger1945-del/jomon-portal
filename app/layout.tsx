@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { unstable_noStore as noStore } from "next/cache";
 // ⚠️ Google Fonts removed for Cloudflare Pages compatibility (Turbopack issue)
 // System fonts fallback used in globals.css
 import Footer from "./components/Footer";
 import "./globals.css";
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Jomon Portal",
@@ -19,6 +24,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  noStore();
+  const _h = headers();
   return (
     <html lang="ja">
       <head>

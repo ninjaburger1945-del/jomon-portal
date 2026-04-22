@@ -1,25 +1,10 @@
-"use client";
+'use client';
 
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useMemo, useEffect, useRef } from "react";
 import styles from "./page.module.css";
-import facilitiesDataFallback from "./data/facilities.json";
-
-interface JomonEvent {
-  id: string;
-  title: string;
-  date_start: string;
-  date_end?: string;
-  time?: string;
-  location?: string;
-  facility_name?: string;
-  prefecture?: string;
-  region?: string;
-  url?: string;
-  category?: string;
-  description?: string;
-}
+import { loadData } from './actions';
 
 const REGION_LABELS: Record<string, string> = {
   "Hokkaido": "北海道",
@@ -69,7 +54,7 @@ const isLgJpUrl = (url: string) =>
   !!url && /\.(lg|go)\.jp/i.test(url);
 
 export default function Home() {
-  const [facilitiesData, setFacilitiesData] = useState(facilitiesDataFallback);
+  const [facilitiesData, setFacilitiesData] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
@@ -81,7 +66,7 @@ export default function Home() {
   const [firstVisibleIndex, setFirstVisibleIndex] = useState(0);
   const [showFloating, setShowFloating] = useState(false);
   const [upcomingEventCount, setUpcomingEventCount] = useState(0);
-  const [upcomingEvents, setUpcomingEvents] = useState<JomonEvent[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [heroImageIndex, setHeroImageIndex] = useState(0);
 
@@ -98,54 +83,42 @@ export default function Home() {
     if (pref) setSelectedPrefecture(pref);
   }, []);
 
-  // 施設データとイベント情報を取得
+  // Server Action で facility と events を取得
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // facilities.json を動的に取得
-        const facilitiesRes = await fetch('/facilities.json', { cache: 'no-store' });
-        if (facilitiesRes.ok) {
-          const facilities = await facilitiesRes.json();
-          setFacilitiesData(facilities);
+        const { facilities, events } = await loadData();
+        setFacilitiesData(facilities);
+
+        if (facilities.length > 0) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const thirtyDaysLater = new Date(today);
+          thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
+
+          // 現在開催中 or これから30日以内に開催予定のイベント
+          const activeAndUpcoming = events.filter((e: any) => {
+            const startDate = new Date(e.date_start);
+            startDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(e.date_end || e.date_start);
+            endDate.setHours(23, 59, 59, 999);
+
+            const isActive = startDate <= today && endDate >= today;
+            const isUpcoming = startDate > today && startDate <= thirtyDaysLater;
+
+            return isActive || isUpcoming;
+          });
+
+          activeAndUpcoming.sort((a: any, b: any) =>
+            new Date(a.date_start).getTime() - new Date(b.date_start).getTime()
+          );
+
+          setUpcomingEventCount(activeAndUpcoming.length);
+          setUpcomingEvents(activeAndUpcoming.slice(0, 5));
+          setCurrentEventIndex(0);
         }
       } catch (error) {
-        console.error('[fetch facilities]', error);
-      }
-
-      try {
-        // イベント情報を取得
-        const res = await fetch('/api/events', { cache: 'no-store' });
-        const events: JomonEvent[] = await res.json();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const thirtyDaysLater = new Date(today);
-        thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
-
-        // 現在開催中 or これから30日以内に開催予定のイベント
-        const activeAndUpcoming = events.filter((e) => {
-          const startDate = new Date(e.date_start);
-          startDate.setHours(0, 0, 0, 0);
-          const endDate = new Date(e.date_end || e.date_start);
-          endDate.setHours(23, 59, 59, 999);
-
-          // 開催中：startDate ≤ 今日 ≤ endDate
-          const isActive = startDate <= today && endDate >= today;
-          // 直近30日以内：startDate が今日から30日以内
-          const isUpcoming = startDate > today && startDate <= thirtyDaysLater;
-
-          return isActive || isUpcoming;
-        });
-
-        // 開催日が近い順にソート
-        activeAndUpcoming.sort((a, b) =>
-          new Date(a.date_start).getTime() - new Date(b.date_start).getTime()
-        );
-
-        setUpcomingEventCount(activeAndUpcoming.length);
-        setUpcomingEvents(activeAndUpcoming.slice(0, 5)); // 直近5件
-        setCurrentEventIndex(0);
-      } catch (error) {
-        console.error('[fetch events]', error);
+        console.error('[fetchData]', error);
       }
     };
     fetchData();
@@ -164,7 +137,7 @@ export default function Home() {
       counts[f.region] = (counts[f.region] || 0) + 1;
     });
     return counts;
-  }, []);
+  }, [facilitiesData]);
 
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -221,7 +194,7 @@ export default function Home() {
       result = [...result].reverse();
     }
     return result;
-  }, [searchQuery, selectedType, selectedRegion, selectedPrefecture, sortByDistance, userLocation]);
+  }, [facilitiesData, searchQuery, selectedType, selectedRegion, selectedPrefecture, sortByDistance, userLocation]);
 
   useEffect(() => {
     setVisibleCount(30);
@@ -575,7 +548,7 @@ export default function Home() {
                           {facility.prefecture}
                           {distance !== null && ` ・ ${distance.toFixed(1)} km`}
                         </span>
-                        {facility.tags.slice(0, 2).map(tag => (
+                        {facility.tags.slice(0, 2).map((tag: string) => (
                           <span key={tag} className={styles.cardTag}>{tag}</span>
                         ))}
                       </div>

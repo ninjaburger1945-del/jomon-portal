@@ -1,80 +1,99 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { rename } from 'fs/promises';
 import path from 'path';
 
-export const maxDuration = 60; // ConoHa timeout
+export const maxDuration = 60;
+
+const MAX_BASE64_SIZE = 15 * 1024 * 1024; // 15MB
+const VALID_CONCEPT_LABELS = ['a', 'b', 'c'];
+const IMAGES_DIR = path.join(process.cwd(), 'public', 'images', 'facilities');
+
+function getImageBuffer(source: string): Promise<Buffer> {
+  if (source.startsWith('data:image')) {
+    // Data URL: data:image/png;base64,<base64>
+    const match = source.match(/base64,(.+)$/);
+    if (!match) throw new Error('Invalid data URL format');
+
+    const base64 = match[1];
+    if (base64.length > MAX_BASE64_SIZE) {
+      throw new Error(`Base64 data exceeds ${MAX_BASE64_SIZE / 1024 / 1024}MB limit`);
+    }
+
+    return Promise.resolve(Buffer.from(base64, 'base64'));
+  } else {
+    // Fetch from URL
+    return fetch(source, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; JomonPortalBot/1.0)' },
+    }).then(async (res) => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      return Buffer.from(await res.arrayBuffer());
+    });
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { pollinationsUrl, facilityId, conceptLabel } = await request.json();
+    const body = await request.json();
 
-    if (!pollinationsUrl || !facilityId || !conceptLabel) {
+    // フィールド名マッピング（複数のフィールド名に対応）
+    const imageUrl = body.pollinationsUrl || body.imageUrl;
+    const facilityId = body.facilityId || body.id;
+    const conceptLabel = body.conceptLabel || body.concept;
+
+    // バリデーション
+    if (!imageUrl) {
       return NextResponse.json(
-        { error: 'pollinationsUrl, facilityId, conceptLabel are required' },
+        { error: 'imageUrl (or pollinationsUrl) is required' },
+        { status: 400 }
+      );
+    }
+    if (!facilityId) {
+      return NextResponse.json(
+        { error: 'facilityId (or id) is required' },
+        { status: 400 }
+      );
+    }
+    if (!conceptLabel) {
+      return NextResponse.json(
+        { error: 'conceptLabel (or concept) is required' },
+        { status: 400 }
+      );
+    }
+    if (!VALID_CONCEPT_LABELS.includes(conceptLabel)) {
+      return NextResponse.json(
+        { error: `conceptLabel must be one of: ${VALID_CONCEPT_LABELS.join(', ')}` },
         { status: 400 }
       );
     }
 
-    if (!['a', 'b', 'c'].includes(conceptLabel)) {
-      return NextResponse.json(
-        { error: 'conceptLabel must be a, b, or c' },
-        { status: 400 }
-      );
+    // 画像バッファを取得
+    const imageBuffer = await getImageBuffer(imageUrl);
+
+    // ディレクトリ作成
+    if (!existsSync(IMAGES_DIR)) {
+      mkdirSync(IMAGES_DIR, { recursive: true });
     }
 
-    // ★ GitHub 認証なし。ローカルに直接保存
-    console.log('[API] save-remaster-image: Using local file save (no GitHub token required)');
-
-    // Extract Base64 from data URL or fetch from URL
-    let imageBuffer: Buffer;
-
-    if (pollinationsUrl.startsWith('data:image')) {
-      // Data URL format: data:image/png;base64,<base64>
-      const match = pollinationsUrl.match(/base64,(.+)$/);
-      if (!match) {
-        return NextResponse.json(
-          { error: 'Invalid data URL format' },
-          { status: 400 }
-        );
-      }
-      imageBuffer = Buffer.from(match[1], 'base64');
-    } else {
-      // Fetch image from URL (Pollinations or other)
-      const imgRes = await fetch(pollinationsUrl, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; JomonPortalBot/1.0)' },
-      });
-
-      if (!imgRes.ok) {
-        return NextResponse.json(
-          { error: `Failed to fetch image: ${imgRes.status}` },
-          { status: 502 }
-        );
-      }
-
-      imageBuffer = Buffer.from(await imgRes.arrayBuffer());
-    }
-
-    // ★ ローカルファイルに直接保存（GitHub API は使わない）
+    // ファイル保存（atomic write）
     const filename = `${facilityId}_remaster_${conceptLabel}.png`;
-    const imagesDir = path.join(process.cwd(), 'public', 'images', 'facilities');
+    const filePath = path.join(IMAGES_DIR, filename);
+    const tmpPath = `${filePath}.tmp`;
 
-    // ディレクトリが存在しなければ作成
-    if (!existsSync(imagesDir)) {
-      mkdirSync(imagesDir, { recursive: true });
-      console.log('[API] Created images directory:', imagesDir);
-    }
+    writeFileSync(tmpPath, imageBuffer);
+    // atomic rename
+    await rename(tmpPath, filePath);
 
-    const filePath = path.join(imagesDir, filename);
-    writeFileSync(filePath, imageBuffer);
-    console.log('[API] Saved remaster image to:', filePath);
+    console.log('[API] Saved remaster image:', filePath);
 
-    const localPath = `/images/facilities/${filename}`;
-    return NextResponse.json({ success: true, localPath });
+    return NextResponse.json({
+      success: true,
+      localPath: `/images/facilities/${filename}`,
+      size: imageBuffer.length,
+    });
   } catch (error) {
     console.error('[save-remaster-image] Error:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

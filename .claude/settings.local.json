@@ -123,7 +123,10 @@
       "Bash(gh workflow:*)",
       "Bash(curl -s https://jomon-portal.vercel.app/facilities.json)",
       "Bash(curl -s https://jomon-portal.vercel.app/api/facilities)",
-      "Bash(curl -s -X POST http://localhost:3000/api/save-facilities -H 'Content-Type: application/json' -d '{\"facilities\":[{\"id\":\"test\",\"name\":\"Test\",\"prefecture\":\"Tokyo\",\"description\":\"Test facility\"}]}')"
+      "Bash(curl -s -X POST http://localhost:3000/api/save-facilities -H 'Content-Type: application/json' -d '{\"facilities\":[{\"id\":\"test\",\"name\":\"Test\",\"prefecture\":\"Tokyo\",\"description\":\"Test facility\"}]}')",
+      "Bash(npx eslint *)",
+      "Bash(curl -I \"http://localhost:3000/api/facilities?t=$\\(date +%s\\)\")",
+      "Bash(nginx -T)"
     ]
   }
 }
