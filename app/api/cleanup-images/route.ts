@@ -2,6 +2,8 @@ import { NextResponse, NextRequest } from 'next/server';
 import { readdirSync, unlinkSync, existsSync } from 'fs';
 import { readFileSync } from 'fs';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 export const maxDuration = 300; // 5 minutes timeout for large cleanups
 
 // 🔴 唯一の正解：/root/jomon-portal/app/data/facilities.json

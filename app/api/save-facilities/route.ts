@@ -3,6 +3,9 @@ import { revalidatePath } from 'next/cache';
 import fs from 'fs/promises';
 import fsSyncOps from 'fs';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface Facility {
   id: string;
   name: string;
