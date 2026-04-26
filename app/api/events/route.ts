@@ -21,6 +21,9 @@ export async function GET() {
     const fileContents = fs.readFileSync(DATA_EVENTS_PATH, 'utf8');
     const events = JSON.parse(fileContents);
 
+    console.log(`[GET /api/events] Loaded from: ${DATA_EVENTS_PATH}`);
+    console.log(`[GET /api/events] First 50 chars: ${fileContents.substring(0, 50)}`);
+
     const response = NextResponse.json(events);
     response.headers.set('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate, proxy-revalidate');
     response.headers.set('Pragma', 'no-cache');

@@ -53,9 +53,17 @@ function loadDataSync() {
     const facilitiesContent = fs.readFileSync(DATA_FACILITIES_PATH, 'utf-8');
     const eventsContent = fs.readFileSync(DATA_EVENTS_PATH, 'utf-8');
 
+    const facilities = JSON.parse(facilitiesContent) as Facility[];
+    const events = JSON.parse(eventsContent) as JomonEvent[];
+
+    console.log(`[Home/loadDataSync] Loaded facilities from: ${DATA_FACILITIES_PATH}`);
+    console.log(`[Home/loadDataSync] First 50 chars: ${facilitiesContent.substring(0, 50)}`);
+    console.log(`[Home/loadDataSync] Loaded events from: ${DATA_EVENTS_PATH}`);
+    console.log(`[Home/loadDataSync] First 50 chars: ${eventsContent.substring(0, 50)}`);
+
     return {
-      facilities: JSON.parse(facilitiesContent) as Facility[],
-      events: JSON.parse(eventsContent) as JomonEvent[],
+      facilities,
+      events,
     };
   } catch (error) {
     console.error('[Home/loadDataSync] Error reading files:', error);

@@ -24,7 +24,10 @@ function loadFacilities(): Facility[] {
     console.log('[loadFacilities] Reading from:', DATA_FACILITIES_PATH);
     try {
         const fileContent = fs.readFileSync(DATA_FACILITIES_PATH, 'utf-8');
-        return JSON.parse(fileContent) as Facility[];
+        const data = JSON.parse(fileContent) as Facility[];
+        console.log(`[loadFacilities] Loaded from: ${DATA_FACILITIES_PATH}`);
+        console.log(`[loadFacilities] First 50 chars: ${fileContent.substring(0, 50)}`);
+        return data;
     } catch (error) {
         console.error('[loadFacilities] Error:', error);
         return [];

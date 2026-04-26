@@ -21,6 +21,9 @@ export async function GET() {
     const fileContent = fs.readFileSync(DATA_FACILITIES_PATH, 'utf-8');
     const facilities = JSON.parse(fileContent);
 
+    console.log(`[GET /api/facilities] Loaded from: ${DATA_FACILITIES_PATH}`);
+    console.log(`[GET /api/facilities] First 50 chars: ${fileContent.substring(0, 50)}`);
+
     const response = NextResponse.json(facilities);
     response.headers.set('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate, proxy-revalidate');
     response.headers.set('Pragma', 'no-cache');
