@@ -10,8 +10,10 @@ const DATA_FACILITIES_PATH = '/root/jomon-portal/app/data/facilities.json';
 
 export async function GET() {
   noStore();
+  const _dynamicBuster = Date.now();
+
   try {
-    console.log('[GET /api/facilities] Reading from:', DATA_FACILITIES_PATH);
+    console.log('[GET /api/facilities] Cache buster:', _dynamicBuster, 'Reading from:', DATA_FACILITIES_PATH);
     const fileContent = fs.readFileSync(DATA_FACILITIES_PATH, 'utf-8');
     const facilities = JSON.parse(fileContent);
 

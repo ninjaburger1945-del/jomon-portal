@@ -92,6 +92,8 @@ function isWalkableFromStation(train?: string): boolean {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
     noStore();
+    const _dynamicBuster = Date.now();
+
     const { id } = await params;
     const facilitiesData = loadFacilities();
     const facility = facilitiesData.find((f) => f.id === id) as Facility | undefined;
@@ -122,6 +124,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function FacilityPage({ params }: { params: Promise<{ id: string }> }) {
     noStore();
+    const _dynamicBuster = Date.now();
     const _h = headers();
     const { id } = await params;
     const facilitiesData = loadFacilities();

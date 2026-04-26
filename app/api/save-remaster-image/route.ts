@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { rename } from 'fs/promises';
+import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -86,6 +87,14 @@ export async function POST(request: NextRequest) {
     await rename(tmpPath, filePath);
 
     console.log('[API] Saved remaster image:', filePath);
+
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/');
+      console.log('[save-remaster-image] ✅ Cache revalidated');
+    } catch (err) {
+      console.warn('[save-remaster-image] Revalidation warning:', err);
+    }
 
     return NextResponse.json({
       success: true,

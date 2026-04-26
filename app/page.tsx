@@ -40,6 +40,8 @@ interface JomonEvent {
 function loadDataSync() {
   noStore();
 
+  const _dynamicBuster = Date.now();
+  console.log('[Home/loadDataSync] Cache buster:', _dynamicBuster);
   console.log('[Home/loadDataSync] Reading from:', DATA_FACILITIES_PATH);
   console.log('[Home/loadDataSync] Reading from:', DATA_EVENTS_PATH);
 

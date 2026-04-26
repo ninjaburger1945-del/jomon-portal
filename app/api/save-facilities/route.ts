@@ -51,16 +51,12 @@ export async function POST(request: NextRequest) {
     await fs.rename(tmpPath, DATA_FACILITIES_PATH);
     console.log('[POST /api/save-facilities] ✅ Saved to:', DATA_FACILITIES_PATH);
 
-    // ISR: Revalidate all affected paths
+    // キャッシュ破壊：全ページとレイアウトのキャッシュを明示的に削除
     try {
-      revalidatePath('/');
-      revalidatePath('/facilities');
-      revalidatePath('/facility');
-      revalidatePath('/admin');
-      revalidatePath('/about');
-      revalidatePath('/search');
       revalidatePath('/', 'layout');
-      console.log('[POST /api/save-facilities] Cache revalidated');
+      revalidatePath('/');
+      revalidatePath('/facility', 'layout');
+      console.log('[POST /api/save-facilities] ✅ All caches revalidated');
     } catch (err) {
       console.warn('[POST /api/save-facilities] Revalidation warning:', err);
     }

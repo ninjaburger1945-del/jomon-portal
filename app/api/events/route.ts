@@ -10,8 +10,10 @@ const DATA_EVENTS_PATH = '/root/jomon-portal/app/data/events.json';
 
 export async function GET() {
   noStore();
+  const _dynamicBuster = Date.now();
+
   try {
-    console.log('[GET /api/events] Reading from:', DATA_EVENTS_PATH);
+    console.log('[GET /api/events] Cache buster:', _dynamicBuster, 'Reading from:', DATA_EVENTS_PATH);
     const fileContents = fs.readFileSync(DATA_EVENTS_PATH, 'utf8');
     const events = JSON.parse(fileContents);
 

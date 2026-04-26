@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { readdirSync, unlinkSync, existsSync } from 'fs';
 import { readFileSync } from 'fs';
+import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -71,6 +72,14 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[cleanup-images] Cleanup complete! Deleted:', successCount, 'Failed:', failureCount);
+
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/');
+      console.log('[cleanup-images] ✅ Cache revalidated');
+    } catch (err) {
+      console.warn('[cleanup-images] Revalidation warning:', err);
+    }
 
     return NextResponse.json({
       success: true,
