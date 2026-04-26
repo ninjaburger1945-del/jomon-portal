@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import { unstable_noStore as noStore } from 'next/cache';
+import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -9,11 +10,14 @@ export const revalidate = 0;
 const DATA_EVENTS_PATH = '/root/jomon-portal/app/data/events.json';
 
 export async function GET() {
+  // Next.js に「このAPIは動的である」と強制認識させる
+  headers();
   noStore();
   const _dynamicBuster = Date.now();
+  const _requestId = Math.random().toString(36).substring(2);
 
   try {
-    console.log('[GET /api/events] Cache buster:', _dynamicBuster, 'Reading from:', DATA_EVENTS_PATH);
+    console.log(`[GET /api/events] Dynamic request ${_requestId} at ${new Date(_dynamicBuster).toISOString()} - Reading from: ${DATA_EVENTS_PATH}`);
     const fileContents = fs.readFileSync(DATA_EVENTS_PATH, 'utf8');
     const events = JSON.parse(fileContents);
 

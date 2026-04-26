@@ -1,4 +1,5 @@
 import { unstable_noStore as noStore } from "next/cache";
+import { headers } from "next/headers";
 import fs from "fs";
 import PageContent from './_components/PageContent';
 
@@ -38,10 +39,13 @@ interface JomonEvent {
 }
 
 function loadDataSync() {
+  // Next.js に「このページは動的である」と強制認識させる
+  headers();
   noStore();
 
   const _dynamicBuster = Date.now();
-  console.log('[Home/loadDataSync] Cache buster:', _dynamicBuster);
+  const _requestId = Math.random().toString(36).substring(2);
+  console.log(`[Home/loadDataSync] Dynamic render - Request ${_requestId} at ${new Date(_dynamicBuster).toISOString()}`);
   console.log('[Home/loadDataSync] Reading from:', DATA_FACILITIES_PATH);
   console.log('[Home/loadDataSync] Reading from:', DATA_EVENTS_PATH);
 

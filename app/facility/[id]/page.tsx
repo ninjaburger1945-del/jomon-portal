@@ -91,8 +91,11 @@ function isWalkableFromStation(train?: string): boolean {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+    // Next.js に「このページは動的である」と強制認識させる
+    headers();
     noStore();
     const _dynamicBuster = Date.now();
+    const _requestId = Math.random().toString(36).substring(2);
 
     const { id } = await params;
     const facilitiesData = loadFacilities();
@@ -123,9 +126,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function FacilityPage({ params }: { params: Promise<{ id: string }> }) {
+    // Next.js に「このページは動的である」と強制認識させる
+    headers();
     noStore();
     const _dynamicBuster = Date.now();
-    const _h = headers();
+    const _requestId = Math.random().toString(36).substring(2);
     const { id } = await params;
     const facilitiesData = loadFacilities();
     const facility = facilitiesData.find((f) => f.id === id) as Facility | undefined;
