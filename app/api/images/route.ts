@@ -1,16 +1,18 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
-import path from 'path';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const IMAGES_DIR = '/root/jomon-portal/public/images/facilities';
 
 export async function GET() {
   try {
-    const imagesDir = path.join(process.cwd(), 'public/images/facilities');
-
-    if (!fs.existsSync(imagesDir)) {
+    if (!fs.existsSync(IMAGES_DIR)) {
       return NextResponse.json([]);
     }
 
-    const files = fs.readdirSync(imagesDir);
+    const files = fs.readdirSync(IMAGES_DIR);
     const imageFiles = files.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f));
 
     return NextResponse.json(imageFiles);

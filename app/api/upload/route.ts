@@ -1,6 +1,10 @@
 import { NextResponse, NextRequest } from 'next/server';
 import fs from 'fs';
-import path from 'path';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const IMAGES_DIR = '/root/jomon-portal/public/images/facilities';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,18 +34,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const imagesDir = path.join(process.cwd(), 'public/images/facilities');
-
     // Create directory if it doesn't exist
-    if (!fs.existsSync(imagesDir)) {
-      fs.mkdirSync(imagesDir, { recursive: true });
+    if (!fs.existsSync(IMAGES_DIR)) {
+      fs.mkdirSync(IMAGES_DIR, { recursive: true });
     }
 
     // Generate filename
     const timestamp = Date.now();
     const originalName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
     const filename = `${timestamp}_${originalName}`;
-    const filepath = path.join(imagesDir, filename);
+    const filepath = `${IMAGES_DIR}/${filename}`;
 
     // Save file
     const buffer = Buffer.from(await file.arrayBuffer());

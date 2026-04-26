@@ -1,13 +1,14 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { rename } from 'fs/promises';
-import path from 'path';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 export const maxDuration = 60;
 
 const MAX_BASE64_SIZE = 15 * 1024 * 1024; // 15MB
 const VALID_CONCEPT_LABELS = ['a', 'b', 'c'];
-const IMAGES_DIR = path.join(process.cwd(), 'public', 'images', 'facilities');
+const IMAGES_DIR = '/root/jomon-portal/public/images/facilities';
 
 function getImageBuffer(source: string): Promise<Buffer> {
   if (source.startsWith('data:image')) {
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     // ファイル保存（atomic write）
     const filename = `${facilityId}_remaster_${conceptLabel}.png`;
-    const filePath = path.join(IMAGES_DIR, filename);
+    const filePath = `${IMAGES_DIR}/${filename}`;
     const tmpPath = `${filePath}.tmp`;
 
     writeFileSync(tmpPath, imageBuffer);
