@@ -409,69 +409,132 @@ export default function AdminPage() {
     return (
       <div style={{
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        flexDirection: "column",
         minHeight: "100vh",
         backgroundColor: "#f5f5f5"
       }}>
         <div style={{
-          backgroundColor: "white",
-          padding: "40px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-          width: "100%",
-          maxWidth: "400px"
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "20px"
         }}>
-          <h1 style={{ textAlign: "center", marginBottom: "30px", color: "#333" }}>Admin Login</h1>
+          <div style={{
+            backgroundColor: "white",
+            padding: "40px",
+            borderRadius: "8px",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+            width: "100%",
+            maxWidth: "400px"
+          }}>
+            <h1 style={{ textAlign: "center", marginBottom: "15px", color: "#333" }}>Admin Login</h1>
 
-          {error && (
-            <div style={{
-              backgroundColor: "#fee",
-              color: "#c00",
-              padding: "10px",
-              borderRadius: "4px",
-              marginBottom: "15px",
-              fontSize: "14px"
-            }}>
-              {error}
-            </div>
-          )}
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "block",
+                textAlign: "center",
+                marginBottom: "20px",
+                fontSize: "13px",
+                color: "#0066cc",
+                textDecoration: "none",
+                borderBottom: "1px solid #0066cc"
+              }}
+            >
+              🌐 ポータルサイトを開く
+            </a>
 
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleLogin()}
-            placeholder="Enter password"
-            style={{
-              width: "100%",
-              padding: "12px",
-              marginBottom: "15px",
-              border: "1px solid #ddd",
-              borderRadius: "4px",
-              fontSize: "16px",
-              boxSizing: "border-box"
-            }}
-            autoFocus
-          />
+            {error && (
+              <div style={{
+                backgroundColor: "#fee",
+                color: "#c00",
+                padding: "10px",
+                borderRadius: "4px",
+                marginBottom: "15px",
+                fontSize: "14px"
+              }}>
+                {error}
+              </div>
+            )}
 
-          <button
-            onClick={handleLogin}
-            style={{
-              width: "100%",
-              padding: "12px",
-              backgroundColor: "#0066cc",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              fontSize: "16px",
-              cursor: "pointer",
-              fontWeight: "bold"
-            }}
-          >
-            Login
-          </button>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleLogin()}
+              placeholder="Enter password"
+              style={{
+                width: "100%",
+                padding: "12px",
+                marginBottom: "15px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                fontSize: "16px",
+                boxSizing: "border-box"
+              }}
+              autoFocus
+            />
+
+            <button
+              onClick={handleLogin}
+              style={{
+                width: "100%",
+                padding: "12px",
+                backgroundColor: "#0066cc",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                fontSize: "16px",
+                cursor: "pointer",
+                fontWeight: "bold"
+              }}
+            >
+              Login
+            </button>
+          </div>
         </div>
+
+        {/* フッター */}
+        <footer style={{
+          backgroundColor: "white",
+          borderTop: "1px solid #ddd",
+          padding: "20px",
+          textAlign: "center",
+          fontSize: "13px",
+          color: "#666"
+        }}>
+          <nav style={{ marginBottom: "10px" }}>
+            <a href="/about" style={{ color: "#0066cc", textDecoration: "none", marginRight: "15px" }}>
+              このサイトについて
+            </a>
+            <span style={{ margin: "0 10px", color: "#ccc" }}>|</span>
+            <a href="/events" style={{ color: "#0066cc", textDecoration: "none", marginRight: "15px" }}>
+              イベント情報
+            </a>
+            <span style={{ margin: "0 10px", color: "#ccc" }}>|</span>
+            <a href="/privacy-policy" style={{ color: "#0066cc", textDecoration: "none", marginRight: "15px" }}>
+              プライバシーポリシー
+            </a>
+            <span style={{ margin: "0 10px", color: "#ccc" }}>|</span>
+            <a
+              href="https://forms.gle/tU9VMU4mLtGBstrf7"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#0066cc", textDecoration: "none" }}
+            >
+              お問い合わせ
+            </a>
+          </nav>
+          <p style={{ margin: "10px 0 0 0" }}>
+            &copy; 2026 JOMON PORTAL &nbsp;·&nbsp;
+            <a href="/" style={{ color: "#0066cc", textDecoration: "none" }}>
+              jomon-portal.jp
+            </a>
+          </p>
+        </footer>
       </div>
     );
   }
@@ -1518,6 +1581,46 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      {/* フッター */}
+      <footer style={{
+        backgroundColor: "white",
+        borderTop: "1px solid #ddd",
+        padding: "20px",
+        textAlign: "center",
+        fontSize: "13px",
+        color: "#666",
+        marginTop: "40px"
+      }}>
+        <nav style={{ marginBottom: "10px" }}>
+          <a href="/about" style={{ color: "#0066cc", textDecoration: "none", marginRight: "15px" }}>
+            このサイトについて
+          </a>
+          <span style={{ margin: "0 10px", color: "#ccc" }}>|</span>
+          <a href="/events" style={{ color: "#0066cc", textDecoration: "none", marginRight: "15px" }}>
+            イベント情報
+          </a>
+          <span style={{ margin: "0 10px", color: "#ccc" }}>|</span>
+          <a href="/privacy-policy" style={{ color: "#0066cc", textDecoration: "none", marginRight: "15px" }}>
+            プライバシーポリシー
+          </a>
+          <span style={{ margin: "0 10px", color: "#ccc" }}>|</span>
+          <a
+            href="https://forms.gle/tU9VMU4mLtGBstrf7"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#0066cc", textDecoration: "none" }}
+          >
+            お問い合わせ
+          </a>
+        </nav>
+        <p style={{ margin: "10px 0 0 0" }}>
+          &copy; 2026 JOMON PORTAL &nbsp;·&nbsp;
+          <a href="/" style={{ color: "#0066cc", textDecoration: "none" }}>
+            jomon-portal.jp
+          </a>
+        </p>
+      </footer>
 
       <style>{`
         @keyframes spin {
