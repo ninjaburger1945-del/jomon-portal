@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   turbopack: {},
   images: {
+    localPatterns: [
+      {
+        pathname: '/images/**',
+      },
+    ],
     remotePatterns: [
       {
         protocol: 'https',

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { unstable_noStore as noStore } from "next/cache";
 // ⚠️ Google Fonts removed for Cloudflare Pages compatibility (Turbopack issue)
@@ -9,10 +9,15 @@ import "./globals.css";
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
   title: "Jomon Portal",
   description: "日本全国の縄文遺跡・博物館・資料館を網羅するポータルサイト。",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
   icons: {
     icon: '/favicon.svg',
     apple: '/favicon.svg',
