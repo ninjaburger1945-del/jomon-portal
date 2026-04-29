@@ -1582,46 +1582,6 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* フッター */}
-      <footer style={{
-        backgroundColor: "white",
-        borderTop: "1px solid #ddd",
-        padding: "20px",
-        textAlign: "center",
-        fontSize: "13px",
-        color: "#666",
-        marginTop: "40px"
-      }}>
-        <nav style={{ marginBottom: "10px" }}>
-          <a href="/about" style={{ color: "#0066cc", textDecoration: "none", marginRight: "15px" }}>
-            このサイトについて
-          </a>
-          <span style={{ margin: "0 10px", color: "#ccc" }}>|</span>
-          <a href="/events" style={{ color: "#0066cc", textDecoration: "none", marginRight: "15px" }}>
-            イベント情報
-          </a>
-          <span style={{ margin: "0 10px", color: "#ccc" }}>|</span>
-          <a href="/privacy-policy" style={{ color: "#0066cc", textDecoration: "none", marginRight: "15px" }}>
-            プライバシーポリシー
-          </a>
-          <span style={{ margin: "0 10px", color: "#ccc" }}>|</span>
-          <a
-            href="https://forms.gle/tU9VMU4mLtGBstrf7"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "#0066cc", textDecoration: "none" }}
-          >
-            お問い合わせ
-          </a>
-        </nav>
-        <p style={{ margin: "10px 0 0 0" }}>
-          &copy; 2026 JOMON PORTAL &nbsp;·&nbsp;
-          <a href="/" style={{ color: "#0066cc", textDecoration: "none" }}>
-            jomon-portal.jp
-          </a>
-        </p>
-      </footer>
-
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
