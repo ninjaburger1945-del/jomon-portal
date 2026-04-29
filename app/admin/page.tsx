@@ -9,7 +9,21 @@ interface Facility {
   description?: string;
   url?: string;
   thumbnail?: string;
-  order?: number;
+  region?: string;
+  address?: string;
+  tags?: string[];
+  lat?: number;
+  lng?: number;
+  copy?: string;
+  access?: {
+    train?: string;
+    bus?: string;
+    car?: string;
+    rank?: string;
+  };
+  name_en?: string;
+  description_en?: string;
+  address_en?: string;
   [key: string]: any;
 }
 
@@ -38,6 +52,8 @@ export default function AdminPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const [remasterLoading, setRemasterLoading] = useState(false);
   const [remasterError, setRemasterError] = useState("");
+  const [remasterLocked, setRemasterLocked] = useState(false);
+  const [lockTimeRemaining, setLockTimeRemaining] = useState(0);
 
   // 編集機能
   const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
@@ -46,9 +62,22 @@ export default function AdminPage() {
 
   // ソート機能
   const [showSortModal, setShowSortModal] = useState(false);
-  const [sortingFacility, setSortingFacility] = useState<Facility | null>(null);
-  const [newOrder, setNewOrder] = useState(0);
   const [sortError, setSortError] = useState("");
+
+  // ロック時間カウントダウン
+  useEffect(() => {
+    if (!remasterLocked) return;
+    const interval = setInterval(() => {
+      setLockTimeRemaining((prev) => {
+        if (prev <= 1) {
+          setRemasterLocked(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [remasterLocked]);
 
   // ログイン処理
   const handleLogin = () => {
@@ -62,7 +91,7 @@ export default function AdminPage() {
     }
   };
 
-  // 施設一覧を読み込み
+  // 施設一覧を読み込み（ID降順でソート）
   const loadFacilities = async () => {
     setLoading(true);
     setError("");
@@ -71,7 +100,9 @@ export default function AdminPage() {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       if (!Array.isArray(data)) throw new Error("Invalid response");
-      setFacilities(data);
+      // ID降順でソート
+      const sorted = [...data].sort((a, b) => b.id.localeCompare(a.id));
+      setFacilities(sorted);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to load";
       setError(msg);
@@ -120,8 +151,13 @@ export default function AdminPage() {
     }
   };
 
-  // ディープリマスター：3案の画像を生成
+  // ディープリマスター：3案の画像を生成（429対策付き）
   const handleGenerateRemaster = async (facility: Facility) => {
+    if (remasterLocked) {
+      setRemasterError(`制限中です。あと${lockTimeRemaining}秒お待ちください。`);
+      return;
+    }
+
     setRemasteringFacility(facility);
     setRemasterLoading(true);
     setRemasterError("");
@@ -148,24 +184,52 @@ export default function AdminPage() {
       // APIからプロンプトを取得
       const prompts = await response.json();
 
-      // 3つの画像を順番に生成（API呼び出し）
+      // 3つの画像を順番に生成（429対策付き）
       const images: string[] = [];
       const conceptKeys = ["concept_a", "concept_b", "concept_c"];
 
       for (const key of conceptKeys) {
-        try {
-          const prompt = prompts[key];
-          const imgResponse = await fetch("/api/generate-image-imagen", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt }),
-          });
+        let retryCount = 0;
+        const maxRetries = 3;
+        let success = false;
 
-          if (imgResponse.ok) {
-            const imgData = await imgResponse.json();
-            images.push(imgData.dataUrl || "");
+        while (retryCount < maxRetries && !success) {
+          try {
+            const prompt = prompts[key];
+            const imgResponse = await fetch("/api/generate-image-imagen", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt }),
+            });
+
+            if (imgResponse.status === 429) {
+              // 429: Too Many Requests
+              if (retryCount < maxRetries - 1) {
+                // 指数バックオフで待機
+                const waitTime = Math.pow(2, retryCount) * 2000;
+                await new Promise((r) => setTimeout(r, waitTime));
+                retryCount++;
+              } else {
+                throw new Error(
+                  "API制限中です。1分ほど待機してからお試しください。"
+                );
+              }
+            } else if (imgResponse.ok) {
+              const imgData = await imgResponse.json();
+              images.push(imgData.dataUrl || "");
+              success = true;
+            } else {
+              throw new Error(`HTTP ${imgResponse.status}`);
+            }
+          } catch (err) {
+            if (retryCount === maxRetries - 1) {
+              throw err;
+            }
+            retryCount++;
           }
-        } catch {
+        }
+
+        if (!success) {
           images.push("");
         }
       }
@@ -174,6 +238,12 @@ export default function AdminPage() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to generate";
       setRemasterError(msg);
+
+      // 429エラーの場合はロック
+      if (msg.includes("API制限中") || msg.includes("制限")) {
+        setRemasterLocked(true);
+        setLockTimeRemaining(60);
+      }
     } finally {
       setRemasterLoading(false);
     }
@@ -201,7 +271,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           facilityId: remasteringFacility.id,
           imageUrl: remasterImages[selectedImageIndex],
-          concept: concept, // ✅ concept フィールドを追加
+          concept: concept,
         }),
       });
 
@@ -323,7 +393,6 @@ export default function AdminPage() {
       setSaveStatus("saved");
       setSaveMessage("✓ 施設の順序を保存しました！");
       setShowSortModal(false);
-      setSortingFacility(null);
       setTimeout(() => {
         setSaveStatus("");
         setSaveMessage("");
@@ -409,7 +478,7 @@ export default function AdminPage() {
 
   // ===== メイン管理画面
   return (
-    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div style={{ padding: "20px", maxWidth: "1400px", margin: "0 auto" }}>
       {/* ヘッダー */}
       <div style={{
         display: "flex",
@@ -586,7 +655,7 @@ export default function AdminPage() {
                   <th style={{ padding: "10px", textAlign: "left", minWidth: "60px" }}>ID</th>
                   <th style={{ padding: "10px", textAlign: "left", minWidth: "150px" }}>名称</th>
                   <th style={{ padding: "10px", textAlign: "left", minWidth: "100px" }}>都道府県</th>
-                  <th style={{ padding: "10px", textAlign: "center", minWidth: "180px" }}>アクション</th>
+                  <th style={{ padding: "10px", textAlign: "center", minWidth: "200px" }}>アクション</th>
                 </tr>
               </thead>
               <tbody>
@@ -614,18 +683,19 @@ export default function AdminPage() {
                       </button>
                       <button
                         onClick={() => handleGenerateRemaster(facility)}
+                        disabled={remasterLocked}
                         style={{
                           padding: "5px 10px",
-                          backgroundColor: "#7B2FBE",
+                          backgroundColor: remasterLocked ? "#ccc" : "#7B2FBE",
                           color: "white",
                           border: "none",
                           borderRadius: "3px",
-                          cursor: "pointer",
+                          cursor: remasterLocked ? "not-allowed" : "pointer",
                           fontSize: "11px",
                           fontWeight: "bold"
                         }}
                       >
-                        🎨 Remaster
+                        {remasterLocked ? `🎨 ${lockTimeRemaining}s` : "🎨 Remaster"}
                       </button>
                       {index > 0 && (
                         <button
@@ -701,16 +771,15 @@ export default function AdminPage() {
           justifyContent: "center",
           zIndex: 1000,
           padding: "20px",
-          boxSizing: "border-box"
+          boxSizing: "border-box",
+          overflowY: "auto"
         }}>
           <div style={{
             backgroundColor: "white",
             borderRadius: "12px",
             padding: "30px",
-            maxWidth: "600px",
+            maxWidth: "800px",
             width: "100%",
-            maxHeight: "95vh",
-            overflow: "auto",
             boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
           }}>
             <h2 style={{ margin: "0 0 20px 0", fontSize: "22px", color: "#333" }}>
@@ -730,83 +799,375 @@ export default function AdminPage() {
               </div>
             )}
 
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>
-                施設名
-              </label>
-              <input
-                type="text"
-                value={editingFacility.name}
-                onChange={(e) => setEditingFacility({ ...editingFacility, name: e.target.value })}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  fontSize: "13px",
-                  boxSizing: "border-box"
-                }}
-              />
+            <div style={{
+              maxHeight: "70vh",
+              overflowY: "auto",
+              paddingRight: "10px"
+            }}>
+              {/* 基本情報 */}
+              <div style={{ marginBottom: "20px" }}>
+                <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#333", borderBottom: "2px solid #ddd", paddingBottom: "5px" }}>基本情報</h3>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>施設名（日本語）</label>
+                  <input
+                    type="text"
+                    value={editingFacility.name}
+                    onChange={(e) => setEditingFacility({ ...editingFacility, name: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>施設名（英語）</label>
+                  <input
+                    type="text"
+                    value={editingFacility.name_en || ""}
+                    onChange={(e) => setEditingFacility({ ...editingFacility, name_en: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "12px" }}>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>都道府県</label>
+                    <input
+                      type="text"
+                      value={editingFacility.prefecture}
+                      onChange={(e) => setEditingFacility({ ...editingFacility, prefecture: e.target.value })}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        fontSize: "13px",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>地域（Region）</label>
+                    <input
+                      type="text"
+                      value={editingFacility.region || ""}
+                      onChange={(e) => setEditingFacility({ ...editingFacility, region: e.target.value })}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        fontSize: "13px",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>住所（日本語）</label>
+                  <input
+                    type="text"
+                    value={editingFacility.address || ""}
+                    onChange={(e) => setEditingFacility({ ...editingFacility, address: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>住所（英語）</label>
+                  <input
+                    type="text"
+                    value={editingFacility.address_en || ""}
+                    onChange={(e) => setEditingFacility({ ...editingFacility, address_en: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* 説明・コンテンツ */}
+              <div style={{ marginBottom: "20px" }}>
+                <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#333", borderBottom: "2px solid #ddd", paddingBottom: "5px" }}>説明・コンテンツ</h3>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>説明（日本語）</label>
+                  <textarea
+                    value={editingFacility.description || ""}
+                    onChange={(e) => setEditingFacility({ ...editingFacility, description: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box",
+                      minHeight: "80px"
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>説明（英語）</label>
+                  <textarea
+                    value={editingFacility.description_en || ""}
+                    onChange={(e) => setEditingFacility({ ...editingFacility, description_en: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box",
+                      minHeight: "80px"
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>キャッチコピー（14文字以内推奨）</label>
+                  <input
+                    type="text"
+                    value={editingFacility.copy || ""}
+                    onChange={(e) => setEditingFacility({ ...editingFacility, copy: e.target.value })}
+                    maxLength={14}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                  <span style={{ fontSize: "12px", color: "#999" }}>
+                    {(editingFacility.copy || "").length}/14
+                  </span>
+                </div>
+              </div>
+
+              {/* URL・画像 */}
+              <div style={{ marginBottom: "20px" }}>
+                <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#333", borderBottom: "2px solid #ddd", paddingBottom: "5px" }}>URL・画像</h3>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>公式URL</label>
+                  <input
+                    type="url"
+                    value={editingFacility.url || ""}
+                    onChange={(e) => setEditingFacility({ ...editingFacility, url: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>サムネイル画像パス</label>
+                  <input
+                    type="text"
+                    value={editingFacility.thumbnail || ""}
+                    onChange={(e) => setEditingFacility({ ...editingFacility, thumbnail: e.target.value })}
+                    placeholder="/images/facilities/..."
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* アクセス情報 */}
+              <div style={{ marginBottom: "20px" }}>
+                <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#333", borderBottom: "2px solid #ddd", paddingBottom: "5px" }}>アクセス情報</h3>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>公共交通アクセス</label>
+                  <textarea
+                    value={editingFacility.access?.train || ""}
+                    onChange={(e) => setEditingFacility({
+                      ...editingFacility,
+                      access: { ...editingFacility.access, train: e.target.value }
+                    })}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box",
+                      minHeight: "60px"
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>バスアクセス</label>
+                  <textarea
+                    value={editingFacility.access?.bus || ""}
+                    onChange={(e) => setEditingFacility({
+                      ...editingFacility,
+                      access: { ...editingFacility.access, bus: e.target.value }
+                    })}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box",
+                      minHeight: "60px"
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>車でのアクセス</label>
+                  <textarea
+                    value={editingFacility.access?.car || ""}
+                    onChange={(e) => setEditingFacility({
+                      ...editingFacility,
+                      access: { ...editingFacility.access, car: e.target.value }
+                    })}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box",
+                      minHeight: "60px"
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>アクセスランク</label>
+                  <input
+                    type="text"
+                    value={editingFacility.access?.rank || ""}
+                    onChange={(e) => setEditingFacility({
+                      ...editingFacility,
+                      access: { ...editingFacility.access, rank: e.target.value }
+                    })}
+                    placeholder="A / B / C など"
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      fontSize: "13px",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* 地理情報 */}
+              <div style={{ marginBottom: "20px" }}>
+                <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#333", borderBottom: "2px solid #ddd", paddingBottom: "5px" }}>地理情報</h3>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>緯度</label>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      value={editingFacility.lat || 0}
+                      onChange={(e) => setEditingFacility({ ...editingFacility, lat: parseFloat(e.target.value) || 0 })}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        fontSize: "13px",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>経度</label>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      value={editingFacility.lng || 0}
+                      onChange={(e) => setEditingFacility({ ...editingFacility, lng: parseFloat(e.target.value) || 0 })}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        fontSize: "13px",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* タグ */}
+              <div style={{ marginBottom: "20px" }}>
+                <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#333", borderBottom: "2px solid #ddd", paddingBottom: "5px" }}>タグ</h3>
+
+                <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>
+                  タグ（カンマ区切り）
+                </label>
+                <input
+                  type="text"
+                  value={(editingFacility.tags || []).join(", ")}
+                  onChange={(e) => setEditingFacility({
+                    ...editingFacility,
+                    tags: e.target.value.split(",").map(t => t.trim()).filter(t => t)
+                  })}
+                  placeholder="博物館, 国宝, 土器 など"
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    border: "1px solid #ddd",
+                    borderRadius: "4px",
+                    fontSize: "13px",
+                    boxSizing: "border-box"
+                  }}
+                />
+              </div>
             </div>
 
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>
-                都道府県
-              </label>
-              <input
-                type="text"
-                value={editingFacility.prefecture}
-                onChange={(e) => setEditingFacility({ ...editingFacility, prefecture: e.target.value })}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  fontSize: "13px",
-                  boxSizing: "border-box"
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>
-                説明
-              </label>
-              <textarea
-                value={editingFacility.description || ""}
-                onChange={(e) => setEditingFacility({ ...editingFacility, description: e.target.value })}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  fontSize: "13px",
-                  boxSizing: "border-box",
-                  minHeight: "100px"
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>
-                URL
-              </label>
-              <input
-                type="url"
-                value={editingFacility.url || ""}
-                onChange={(e) => setEditingFacility({ ...editingFacility, url: e.target.value })}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  fontSize: "13px",
-                  boxSizing: "border-box"
-                }}
-              />
-            </div>
-
-            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #ddd" }}>
               <button
                 onClick={() => {
                   setShowEditModal(false);
@@ -953,9 +1314,8 @@ export default function AdminPage() {
               <button
                 onClick={() => {
                   setShowSortModal(false);
-                  setSortingFacility(null);
                   setSortError("");
-                  loadFacilities(); // 元の順序に戻す
+                  loadFacilities();
                 }}
                 style={{
                   padding: "8px 16px",
