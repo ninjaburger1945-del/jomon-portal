@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 interface Facility {
   id: string;
@@ -10,6 +11,19 @@ interface Facility {
   description: string;
   description_en?: string;
   location_en?: string;
+  address?: string;
+  address_en?: string;
+  access_public?: string;
+  access_public_en?: string;
+  access_car?: string;
+  access_car_en?: string;
+  url?: string;
+  thumbnail?: string;
+  region?: string;
+  tags?: string[];
+  copy?: string;
+  lat?: number;
+  lng?: number;
   [key: string]: any;
 }
 
@@ -17,6 +31,7 @@ type SortKey = "id" | "name" | "prefecture" | "description";
 type SortOrder = "asc" | "desc";
 
 export default function AdminPage() {
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState("");
@@ -28,8 +43,6 @@ export default function AdminPage() {
   const [availableImages, setAvailableImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [postToX, setPostToX] = useState(false);
-  const [statsData, setStatsData] = useState<any>(null);
-  const [statsLoading, setStatsLoading] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("id");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,16 +76,13 @@ export default function AdminPage() {
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
-      // Toggle sort order if clicking the same column
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
-      // Set new sort key and default to ascending
       setSortKey(key);
       setSortOrder("asc");
     }
   };
 
-  // Compute filtered and sorted facilities using useMemo for performance
   const filteredAndSortedFacilities = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     const filtered = query === ""
@@ -98,6 +108,9 @@ export default function AdminPage() {
       const response = await fetch("/api/facilities", { cache: 'no-store' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid response format");
+      }
       setFacilities(data);
       setError("");
     } catch (err) {
@@ -108,29 +121,9 @@ export default function AdminPage() {
     }
   };
 
-  const loadStats = async () => {
-    setStatsLoading(true);
-    try {
-      const response = await fetch("/api/stats", { cache: 'no-store' });
-      const data = await response.json();
-      setStatsData(data);
-    } catch (err) {
-      console.error("Failed to load stats:", err);
-      setStatsData({
-        pageviews: 0,
-        visitors: 0,
-        daily: [],
-        error: `API エラー: ${err instanceof Error ? err.message : '不明なエラー'}`
-      });
-    } finally {
-      setStatsLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (isAuthenticated) {
       loadFacilities();
-      loadStats();
     }
   }, [isAuthenticated]);
 
@@ -139,7 +132,9 @@ export default function AdminPage() {
       const response = await fetch("/api/images", { cache: 'no-store' });
       if (response.ok) {
         const images = await response.json();
-        setAvailableImages(images);
+        if (Array.isArray(images)) {
+          setAvailableImages(images);
+        }
       }
     } catch (err) {
       console.error("Failed to load images:", err);
@@ -184,7 +179,6 @@ export default function AdminPage() {
 
   const handleEditClick = (facility: Facility) => {
     console.log("Edit clicked for:", facility.id);
-    // facilities.json の access 情報を access_public/access_car に反映
     const facilityCopy = { ...facility };
     if (facility.access) {
       facilityCopy.access_public = `${facility.access.train}。${facility.access.bus}`;
@@ -235,16 +229,12 @@ export default function AdminPage() {
     if (confirm("Are you sure you want to delete this facility?")) {
       const updated = facilities.filter((f) => f.id !== id);
       try {
-        // API保存を最優先（UI更新の前）
         await saveFacilities(updated);
-
-        // API成功時のみUIを更新
         setFacilities(updated);
-        setError("✓ 削除完了！キャッシュ再生成中... ブラウザをリロードすると最新データが表示されます。");
+        setError("✓ 削除完了！キャッシュ再生成中...");
       } catch (err) {
         console.error("Delete error:", err);
         setError(`Failed to delete: ${err instanceof Error ? err.message : "Unknown error"}`);
-        // UIは更新しない（データ一貫性を保持）
       }
     }
   };
@@ -255,14 +245,13 @@ export default function AdminPage() {
       console.log("Calling save-facilities API...");
       console.log(`[saveFacilities] Facilities count: ${updatedFacilities.length}`);
 
-      // Validate each facility can be stringified before sending
       for (let i = 0; i < updatedFacilities.length; i++) {
         const f = updatedFacilities[i];
         try {
           JSON.stringify(f);
         } catch (err) {
           console.error(`[saveFacilities] Facility ${i} (ID: ${f?.id}) is not JSON serializable:`, err);
-          throw new Error(`Facility ${f?.id || i} contains non-serializable data. Check browser console for details.`);
+          throw new Error(`Facility ${f?.id || i} contains non-serializable data.`);
         }
       }
 
@@ -278,15 +267,22 @@ export default function AdminPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        // 409エラー（SHA競合）の場合はリトライ
+        const errText = await response.text();
+        console.error(`[saveFacilities] Error response (${response.status}):`, errText.substring(0, 500));
+
+        let error;
+        try {
+          error = JSON.parse(errText);
+        } catch {
+          error = { error: errText };
+        }
+
         if (error.status === 409 && retryCount < maxRetries) {
           console.log(`SHA conflict, retrying... (attempt ${retryCount + 1}/${maxRetries})`);
-          // 少し待ってからリトライ
           await new Promise(r => setTimeout(r, 500));
           return saveFacilities(updatedFacilities, retryCount + 1);
         }
-        throw new Error(error.error || error.message || "Failed to save");
+        throw new Error(error.error || error.message || `HTTP ${response.status}`);
       }
 
       console.log("Successfully saved to local file!");
@@ -494,14 +490,10 @@ export default function AdminPage() {
 
       await saveFacilities(updatedFacilities);
 
-      // Note: cleanup-images is temporarily disabled to prevent accidentally deleting
-      // recently-generated remaster images when multiple facilities are processed in quick succession.
-      // TODO: Re-enable cleanup-images after adding safer logic to track temporary vs permanent images.
-
       setFacilities(updatedFacilities);
       setShowRemasterModal(false);
       setDeepRemasterFacility(null);
-      setError("✓ ディープリマスター完了！画像とデータをローカルに保存しました。キャッシュ再生成中...");
+      setError("✓ ディープリマスター完了！画像とデータをローカルに保存しました。");
     } catch (err) {
       console.error("[handleConfirmRemaster]", err);
       setRemasterError(err instanceof Error ? err.message : "保存に失敗しました");
@@ -518,12 +510,10 @@ export default function AdminPage() {
 
     const facilityToSave = { ...editingFacility };
 
-    // If new facility, generate ID from name
     if (isNewFacility) {
       if (!facilityToSave.id) {
         facilityToSave.id = generateIdFromName(facilityToSave.name);
       }
-      // Check if ID already exists
       if (facilities.some(f => f.id === facilityToSave.id)) {
         setError("A facility with this ID already exists. Please modify the ID.");
         return;
@@ -540,30 +530,27 @@ export default function AdminPage() {
 
     setSaving(true);
     try {
-      // API保存を最優先（UI更新の前）
       await saveFacilities(updated);
 
-      // API成功時のみUIを更新
       setFacilities(updated);
       setShowEditModal(false);
       setEditingFacility(null);
       setIsNewFacility(false);
 
-      // Post to X if checkbox is enabled
       if (postToX) {
         try {
           const xResponse = await postToXApi(facilityToSave);
           if (xResponse.posted) {
-            setError("✓ ローカル保存完了！キャッシュ再生成中... 📱 Posted to X!");
+            setError("✓ ローカル保存完了！📱 Posted to X!");
           } else {
-            setError(`✓ ローカル保存完了！キャッシュ再生成中... ${xResponse.reason}`);
+            setError(`✓ ローカル保存完了！${xResponse.reason}`);
           }
         } catch (xErr) {
           console.warn("X post failed:", xErr);
-          setError("✓ ローカル保存完了！キャッシュ再生成中... (X post failed)");
+          setError("✓ ローカル保存完了！(X post failed)");
         }
       } else {
-        setError("✓ ローカル保存完了！キャッシュ再生成中... ブラウザをリロードすると最新データが表示されます。");
+        setError("✓ ローカル保存完了！");
       }
       setPostToX(false);
     } catch (err) {
@@ -571,7 +558,6 @@ export default function AdminPage() {
       setError(
         `Failed to save: ${err instanceof Error ? err.message : "Unknown error"}`
       );
-      // UIは更新しない（データ一貫性を保持）
     } finally {
       setSaving(false);
     }
@@ -836,7 +822,6 @@ export default function AdminPage() {
         )}
       </section>
 
-      {/* Edit/Create Modal */}
       {showEditModal && editingFacility && (
         <div style={{
           position: "fixed",
@@ -864,7 +849,6 @@ export default function AdminPage() {
           }}>
             <h2 style={{ fontSize: "clamp(16px, 4vw, 20px)", margin: "0 0 15px 0" }}>{isNewFacility ? "新規施設追加" : "Edit Facility"}</h2>
 
-            {/* ID Field (editable only for new facilities) */}
             {isNewFacility && (
               <div style={{ marginBottom: "15px" }}>
                 <label>
@@ -929,105 +913,6 @@ export default function AdminPage() {
 
             <div style={{ marginBottom: "15px" }}>
               <label>
-                <strong>Description (English):</strong>
-                <textarea
-                  value={editingFacility.description_en || ""}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, description_en: e.target.value })}
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "100px" }}
-                />
-              </label>
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label>
-                <strong>Location (English):</strong>
-                <input
-                  type="text"
-                  value={editingFacility.location_en || ""}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, location_en: e.target.value })}
-                  placeholder="e.g., Aomori Prefecture, Tohoku"
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
-                />
-              </label>
-            </div>
-
-            <hr style={{ margin: "20px 0" }} />
-
-            <div style={{ marginBottom: "15px" }}>
-              <label>
-                <strong>🚌 Access by Public Transport (Japanese):</strong>
-                <textarea
-                  value={editingFacility.access_public || ""}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, access_public: e.target.value })}
-                  placeholder="e.g., JR奥羽本線青森駅からバスで約35分。縄文時遊館前バス停から徒歩約2分"
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "60px" }}
-                />
-              </label>
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label>
-                <strong>🚌 Access by Public Transport (English):</strong>
-                <textarea
-                  value={editingFacility.access_public_en || ""}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, access_public_en: e.target.value })}
-                  placeholder="e.g., About 35 minutes by bus from JR Aomori Station. About 2 minutes on foot from Jomon Yūkan bus stop."
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "60px" }}
-                />
-              </label>
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label>
-                <strong>🚗 Access by Car (Japanese):</strong>
-                <textarea
-                  value={editingFacility.access_car || ""}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, access_car: e.target.value })}
-                  placeholder="e.g., 東北道青森ICから国道7号経由で約15分"
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "60px" }}
-                />
-              </label>
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label>
-                <strong>🚗 Access by Car (English):</strong>
-                <textarea
-                  value={editingFacility.access_car_en || ""}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, access_car_en: e.target.value })}
-                  placeholder="e.g., About 15 minutes via Route 7 from Aomori IC on the Tohoku Expressway"
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "60px" }}
-                />
-              </label>
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label>
-                <strong>Address (Japanese):</strong>
-                <input
-                  type="text"
-                  value={editingFacility.address || ""}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, address: e.target.value })}
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
-                />
-              </label>
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label>
-                <strong>Address (English):</strong>
-                <input
-                  type="text"
-                  value={editingFacility.address_en || ""}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, address_en: e.target.value })}
-                  placeholder="e.g., 1-1 Sannai, Aomori City, Aomori Prefecture"
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
-                />
-              </label>
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label>
                 <strong>URL:</strong>
                 <input
                   type="url"
@@ -1040,83 +925,8 @@ export default function AdminPage() {
 
             <div style={{ marginBottom: "15px" }}>
               <label>
-                <strong>Copy (Tagline):</strong>
-                <input
-                  type="text"
-                  value={editingFacility.copy || ""}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, copy: e.target.value.substring(0, 14) })}
-                  maxLength={14}
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
-                  placeholder="e.g., 日本最大級縄文集落跡 (max 14 chars)"
-                />
-                <small style={{ color: "#666", marginTop: "4px", display: "block" }}>
-                  {(editingFacility.copy || "").length}/14 characters
-                </small>
+                <strong>Thumbnail Image</strong>
               </label>
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label>
-                <strong>Region:</strong>
-                <select
-                  value={editingFacility.region || "Tohoku"}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, region: e.target.value })}
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
-                >
-                  <option value="Hokkaido">北海道</option>
-                  <option value="Tohoku">東北</option>
-                  <option value="Kanto">関東</option>
-                  <option value="Chubu">中部</option>
-                  <option value="Kinki">近畿</option>
-                  <option value="ChugokuShikoku">中国・四国</option>
-                  <option value="KyushuOkinawa">九州・沖縄</option>
-                </select>
-              </label>
-            </div>
-
-            <div style={{ marginBottom: "15px" }}>
-              <label>
-                <strong>Tags (comma-separated):</strong>
-                <input
-                  type="text"
-                  value={(editingFacility.tags || []).join(", ")}
-                  onChange={(e) => setEditingFacility({
-                    ...editingFacility,
-                    tags: e.target.value.split(",").map(t => t.trim()).filter(Boolean)
-                  })}
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
-                  placeholder="e.g., 世界遺産, 博物館"
-                />
-              </label>
-            </div>
-
-            <div style={{ marginBottom: "15px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-              <label>
-                <strong>Latitude:</strong>
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={editingFacility.lat || 0}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, lat: parseFloat(e.target.value) || 0 })}
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", fontSize: "16px" }}
-                />
-              </label>
-              <label>
-                <strong>Longitude:</strong>
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={editingFacility.lng || 0}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, lng: parseFloat(e.target.value) || 0 })}
-                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", fontSize: "16px" }}
-                />
-              </label>
-            </div>
-
-            <hr style={{ margin: "20px 0" }} />
-
-            <div style={{ marginBottom: "15px" }}>
-              <strong>Thumbnail Image</strong>
               {editingFacility.thumbnail && (
                 <div style={{ marginTop: "10px", marginBottom: "10px" }}>
                   <img
@@ -1124,36 +934,8 @@ export default function AdminPage() {
                     alt="Current thumbnail"
                     style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "4px" }}
                   />
-                  <div style={{ marginTop: "8px" }}>
-                    <a
-                      href={editingFacility.thumbnail}
-                      download
-                      style={{ color: "#0066cc", textDecoration: "none", marginRight: "10px" }}
-                    >
-                      ⬇ Download Current Image
-                    </a>
-                  </div>
                 </div>
               )}
-
-              <div style={{ marginTop: "10px", marginBottom: "10px" }}>
-                <label>
-                  <strong>Select from existing images:</strong>
-                  <select
-                    value={editingFacility.thumbnail || ""}
-                    onChange={(e) => setEditingFacility({ ...editingFacility, thumbnail: e.target.value })}
-                    style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
-                  >
-                    <option value="">-- None --</option>
-                    {availableImages.map((img) => (
-                      <option key={img} value={`/images/facilities/${img}`}>
-                        {img}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
               <div style={{ marginTop: "10px" }}>
                 <label style={{ display: "block" }}>
                   <strong>Upload new image:</strong>
@@ -1194,10 +976,7 @@ export default function AdminPage() {
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  console.log("Save button clicked");
-                  handleSaveEdit();
-                }}
+                onClick={handleSaveEdit}
                 disabled={saving}
                 style={{ padding: "8px 16px", cursor: saving ? "not-allowed" : "pointer", backgroundColor: saving ? "#666666" : "#0066cc", color: "white", border: "none", borderRadius: "4px", opacity: saving ? 0.6 : 1, fontSize: "14px" }}
               >
@@ -1208,7 +987,6 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Deep Remaster Modal */}
       {showRemasterModal && deepRemasterFacility && (
         <div
           style={{
@@ -1263,9 +1041,6 @@ export default function AdminPage() {
                   marginBottom: '16px',
                 }} />
                 <p style={{ margin: 0, fontSize: '16px' }}>Geminiが遺跡情報を解析中...</p>
-                <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#999' }}>
-                  {deepRemasterFacility.name} のビジュアルコンセプトを生成しています
-                </p>
               </div>
             )}
 
@@ -1273,9 +1048,6 @@ export default function AdminPage() {
               <>
                 <p style={{ fontSize: '13px', color: '#666', marginBottom: '4px' }}>
                   画像をクリックして選択し、「確定保存」でサムネイルを更新します。
-                </p>
-                <p style={{ fontSize: '12px', color: '#999', marginBottom: '16px' }}>
-                  ※ 画像生成に30～60秒かかる場合があります。読み込み中でもしばらくお待ちください。
                 </p>
                 <div style={{
                   display: 'grid',
@@ -1303,7 +1075,6 @@ export default function AdminPage() {
                           overflow: 'hidden',
                           cursor: imgUrl ? 'pointer' : 'default',
                           boxShadow: isSelected ? '0 0 0 2px #FF6B35' : 'none',
-                          transition: 'border-color 0.2s, box-shadow 0.2s',
                         }}
                       >
                         <div
@@ -1327,23 +1098,6 @@ export default function AdminPage() {
                                 borderRadius: '50%', animation: 'spin 1s linear infinite',
                                 marginBottom: '8px',
                               }} />
-                              <span style={{ fontSize: '12px' }}>生成中...</span>
-                            </div>
-                          )}
-                          {!isGenerating && !imgUrl && generatingIndex > i && (
-                            <div style={{
-                              position: 'absolute', inset: 0,
-                              display: 'flex', flexDirection: 'column',
-                              alignItems: 'center', justifyContent: 'center',
-                              color: '#999', fontSize: '12px',
-                            }}>
-                              <div style={{
-                                width: '24px', height: '24px',
-                                border: '2px solid #ddd', borderTopColor: '#999',
-                                borderRadius: '50%', animation: 'spin 1s linear infinite',
-                                marginBottom: '6px',
-                              }} />
-                              <span>読み込み中...</span>
                             </div>
                           )}
                           {imgUrl && (
@@ -1417,7 +1171,6 @@ export default function AdminPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
