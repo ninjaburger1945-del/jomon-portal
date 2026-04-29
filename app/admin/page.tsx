@@ -63,6 +63,15 @@ export default function AdminPage() {
   const [savingRemaster, setSavingRemaster] = useState(false);
   const [remasterError, setRemasterError] = useState("");
 
+  // Auto-discover
+  const [discoveryKeyword, setDiscoveryKeyword] = useState("");
+  const [discovering, setDiscovering] = useState(false);
+  const [discoveryDraft, setDiscoveryDraft] = useState<Facility | null>(null);
+  const [generatingDiscovery, setGeneratingDiscovery] = useState(false);
+  const [discoveryImage, setDiscoveryImage] = useState<string | null>(null);
+  const [savingDiscovery, setSavingDiscovery] = useState(false);
+  const [discoveryError, setDiscoveryError] = useState("");
+
   const handleLogin = () => {
     const correctPassword = "jomon2026";
     if (password === correctPassword) {
@@ -502,6 +511,125 @@ export default function AdminPage() {
     }
   };
 
+  const handleDiscover = async () => {
+    if (!discoveryKeyword.trim()) {
+      setDiscoveryError("キーワードを入力してください");
+      return;
+    }
+
+    setDiscovering(true);
+    setDiscoveryError("");
+    setDiscoveryDraft(null);
+    setDiscoveryImage(null);
+
+    try {
+      const response = await fetch("/api/auto-discover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "discover", keyword: discoveryKeyword }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setDiscoveryDraft(data);
+      setDiscoveryError("");
+    } catch (err) {
+      console.error("Discovery error:", err);
+      setDiscoveryError(err instanceof Error ? err.message : "発掘に失敗しました");
+    } finally {
+      setDiscovering(false);
+    }
+  };
+
+  const handleApproveAndGenerate = async () => {
+    if (!discoveryDraft) return;
+
+    setGeneratingDiscovery(true);
+    setDiscoveryError("");
+
+    try {
+      const response = await fetch("/api/auto-discover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "generate-image",
+          facilityDraft: discoveryDraft,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setDiscoveryImage(data.dataUrl || data.imageUrl);
+      setDiscoveryError("");
+    } catch (err) {
+      console.error("Image generation error:", err);
+      setDiscoveryError(err instanceof Error ? err.message : "画像生成に失敗しました");
+    } finally {
+      setGeneratingDiscovery(false);
+    }
+  };
+
+  const handleSaveDiscovery = async () => {
+    if (!discoveryDraft || !discoveryImage) {
+      setDiscoveryError("発掘データと画像が必要です");
+      return;
+    }
+
+    setSavingDiscovery(true);
+    setDiscoveryError("");
+
+    try {
+      const facilityToSave: Facility = {
+        ...discoveryDraft,
+        thumbnail: "",
+        userApproved: true,
+      };
+
+      const updated = [...facilities, facilityToSave];
+
+      const response = await fetch("/api/auto-discover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save",
+          facilityDraft: facilityToSave,
+          imageDataUrl: discoveryImage,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      await saveFacilities(updated);
+      setFacilities(updated);
+
+      setDiscoveryKeyword("");
+      setDiscoveryDraft(null);
+      setDiscoveryImage(null);
+      setError("✓ 新しい遺跡を発掘・保存しました！");
+    } catch (err) {
+      console.error("Save discovery error:", err);
+      setDiscoveryError(err instanceof Error ? err.message : "保存に失敗しました");
+    } finally {
+      setSavingDiscovery(false);
+    }
+  };
+
   const handleSaveEdit = async () => {
     if (!editingFacility || !editingFacility.name) {
       setError("Please fill in the facility name");
@@ -624,6 +752,132 @@ export default function AdminPage() {
           {error}
         </div>
       )}
+
+      {/* Auto-discover section */}
+      <section style={{ backgroundColor: "#f9f5ff", border: "2px solid #e0d0ff", borderRadius: "8px", padding: "15px", marginBottom: "20px" }}>
+        <h2 style={{ margin: "0 0 15px 0", fontSize: "18px", color: "#3d1a6e" }}>🔍 新しい遺跡を自動発掘</h2>
+
+        {discoveryError && (
+          <div style={{ backgroundColor: "#fee", padding: "10px", marginBottom: "15px", borderRadius: "4px", color: "#cc0000", fontSize: "13px" }}>
+            {discoveryError}
+          </div>
+        )}
+
+        {!discoveryDraft ? (
+          <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+            <input
+              type="text"
+              value={discoveryKeyword}
+              onChange={(e) => setDiscoveryKeyword(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleDiscover()}
+              placeholder="キーワード入力（例：北海道 縄文）"
+              style={{
+                flex: 1,
+                padding: "10px",
+                border: "1px solid #d0c0ff",
+                borderRadius: "4px",
+                fontSize: "14px",
+                boxSizing: "border-box"
+              }}
+            />
+            <button
+              onClick={handleDiscover}
+              disabled={discovering || !discoveryKeyword.trim()}
+              style={{
+                padding: "10px 20px",
+                backgroundColor: discovering ? "#999" : "#7B2FBE",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: discovering ? "not-allowed" : "pointer",
+                fontSize: "14px",
+                fontWeight: "600",
+                opacity: discovering ? 0.6 : 1,
+                whiteSpace: "nowrap"
+              }}
+            >
+              {discovering ? "🔍 発掘中..." : "🔍 発掘する"}
+            </button>
+          </div>
+        ) : (
+          <div style={{ backgroundColor: "white", border: "1px solid #e0d0ff", borderRadius: "6px", padding: "15px", marginBottom: "15px" }}>
+            <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#3d1a6e" }}>発掘結果</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", fontSize: "13px", marginBottom: "10px" }}>
+              <div><strong>施設名:</strong> {discoveryDraft.name}</div>
+              <div><strong>都道府県:</strong> {discoveryDraft.prefecture}</div>
+              <div><strong>緯度:</strong> {discoveryDraft.lat}</div>
+              <div><strong>経度:</strong> {discoveryDraft.lng}</div>
+              <div style={{ gridColumn: "1/-1" }}><strong>説明:</strong> {discoveryDraft.description?.substring(0, 100)}...</div>
+              {discoveryDraft.url && <div style={{ gridColumn: "1/-1" }}><strong>URL:</strong> <a href={discoveryDraft.url} target="_blank" rel="noopener noreferrer">{discoveryDraft.url}</a></div>}
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={handleApproveAndGenerate}
+                disabled={generatingDiscovery}
+                style={{
+                  padding: "10px 16px",
+                  backgroundColor: generatingDiscovery ? "#999" : "#7B2FBE",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: generatingDiscovery ? "not-allowed" : "pointer",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  opacity: generatingDiscovery ? 0.6 : 1,
+                }}
+              >
+                {generatingDiscovery ? "🎨 生成中..." : "🎨 イラスト生成"}
+              </button>
+              <button
+                onClick={() => {
+                  setDiscoveryDraft(null);
+                  setDiscoveryImage(null);
+                  setDiscoveryKeyword("");
+                }}
+                style={{
+                  padding: "10px 16px",
+                  backgroundColor: "#999",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                }}
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        )}
+
+        {discoveryImage && (
+          <div style={{ backgroundColor: "white", border: "2px solid #e0d0ff", borderRadius: "6px", padding: "15px" }}>
+            <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#3d1a6e" }}>生成されたイラスト</h3>
+            <img
+              src={discoveryImage}
+              alt="Generated facility illustration"
+              style={{ maxWidth: "100%", maxHeight: "300px", borderRadius: "4px", marginBottom: "10px" }}
+            />
+            <button
+              onClick={handleSaveDiscovery}
+              disabled={savingDiscovery}
+              style={{
+                padding: "10px 20px",
+                backgroundColor: savingDiscovery ? "#999" : "#4CAF50",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: savingDiscovery ? "not-allowed" : "pointer",
+                fontSize: "14px",
+                fontWeight: "600",
+                opacity: savingDiscovery ? 0.6 : 1,
+              }}
+            >
+              {savingDiscovery ? "💾 保存中..." : "✅ 確定保存"}
+            </button>
+          </div>
+        )}
+      </section>
 
       <section>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px", flexWrap: "wrap", gap: "10px" }}>
@@ -913,11 +1167,116 @@ export default function AdminPage() {
 
             <div style={{ marginBottom: "15px" }}>
               <label>
+                <strong>Description (English):</strong>
+                <textarea
+                  value={editingFacility.description_en || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, description_en: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "80px" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Address:</strong>
+                <input
+                  type="text"
+                  value={editingFacility.address || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, address: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Address (English):</strong>
+                <input
+                  type="text"
+                  value={editingFacility.address_en || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, address_en: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Public Access (Train/Bus):</strong>
+                <textarea
+                  value={editingFacility.access_public || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, access_public: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "60px" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Car Access:</strong>
+                <textarea
+                  value={editingFacility.access_car || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, access_car: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box", minHeight: "60px" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
                 <strong>URL:</strong>
                 <input
                   type="url"
                   value={editingFacility.url || ""}
                   onChange={(e) => setEditingFacility({ ...editingFacility, url: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Region:</strong>
+                <input
+                  type="text"
+                  value={editingFacility.region || ""}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, region: e.target.value })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Tags (comma-separated):</strong>
+                <input
+                  type="text"
+                  value={(editingFacility.tags || []).join(", ")}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, tags: e.target.value.split(",").map(t => t.trim()).filter(t => t) })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Latitude:</strong>
+                <input
+                  type="number"
+                  value={editingFacility.lat || 0}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, lat: parseFloat(e.target.value) || 0 })}
+                  style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+                />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label>
+                <strong>Longitude:</strong>
+                <input
+                  type="number"
+                  value={editingFacility.lng || 0}
+                  onChange={(e) => setEditingFacility({ ...editingFacility, lng: parseFloat(e.target.value) || 0 })}
                   style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
                 />
               </label>
@@ -1171,6 +1530,12 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
