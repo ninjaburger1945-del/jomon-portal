@@ -9,6 +9,7 @@ interface Facility {
   description?: string;
   url?: string;
   thumbnail?: string;
+  order?: number;
   [key: string]: any;
 }
 
@@ -37,6 +38,17 @@ export default function AdminPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const [remasterLoading, setRemasterLoading] = useState(false);
   const [remasterError, setRemasterError] = useState("");
+
+  // 編集機能
+  const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editError, setEditError] = useState("");
+
+  // ソート機能
+  const [showSortModal, setShowSortModal] = useState(false);
+  const [sortingFacility, setSortingFacility] = useState<Facility | null>(null);
+  const [newOrder, setNewOrder] = useState(0);
+  const [sortError, setSortError] = useState("");
 
   // ログイン処理
   const handleLogin = () => {
@@ -167,25 +179,29 @@ export default function AdminPage() {
     }
   };
 
-  // 選択した画像をサーバーに保存
+  // 選択した画像をサーバーに保存（concept フィールドを追加）
   const handleSaveRemaster = async () => {
     if (!remasteringFacility || selectedImageIndex === null || !remasterImages[selectedImageIndex]) {
       setRemasterError("画像を選択してください");
       return;
     }
 
-    // 保存状態を「文字列」で管理（Error #130回避）
     setSaveStatus("saving");
     setSaveMessage("");
     setRemasterError("");
 
     try {
+      // conceptラベルを"A", "B", "C"から選択
+      const conceptLabels = ["A", "B", "C"];
+      const concept = conceptLabels[selectedImageIndex];
+
       const response = await fetch("/api/save-remaster-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           facilityId: remasteringFacility.id,
           imageUrl: remasterImages[selectedImageIndex],
+          concept: concept, // ✅ concept フィールドを追加
         }),
       });
 
@@ -209,6 +225,112 @@ export default function AdminPage() {
     } catch (err) {
       setSaveStatus("error");
       const msg = err instanceof Error ? err.message : "Failed to save";
+      setSaveMessage(msg);
+    }
+  };
+
+  // 施設情報を編集用モーダルで開く
+  const handleEditClick = (facility: Facility) => {
+    setEditingFacility({ ...facility });
+    setShowEditModal(true);
+    setEditError("");
+  };
+
+  // 編集内容をサーバーに保存
+  const handleSaveEdit = async () => {
+    if (!editingFacility || !editingFacility.name.trim()) {
+      setEditError("施設名は必須です");
+      return;
+    }
+
+    setSaveStatus("saving");
+    setSaveMessage("");
+
+    try {
+      const response = await fetch(`/api/facilities/${editingFacility.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingFacility),
+      });
+
+      if (!response.ok) {
+        // PUTが対応していない場合はPATCHを試す
+        if (response.status === 405) {
+          const patchResponse = await fetch(`/api/facilities/${editingFacility.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(editingFacility),
+          });
+          if (!patchResponse.ok) throw new Error(`HTTP ${patchResponse.status}`);
+        } else {
+          throw new Error(`HTTP ${response.status}`);
+        }
+      }
+
+      // 成功時：施設一覧をリロード
+      await loadFacilities();
+
+      setSaveStatus("saved");
+      setSaveMessage("✓ 施設情報を更新しました！");
+      setShowEditModal(false);
+      setEditingFacility(null);
+      setTimeout(() => {
+        setSaveStatus("");
+        setSaveMessage("");
+      }, 2000);
+    } catch (err) {
+      setSaveStatus("error");
+      const msg = err instanceof Error ? err.message : "Failed to save";
+      setSaveMessage(msg);
+    }
+  };
+
+  // 施設の順序を変更（上へ）
+  const handleMoveUp = (index: number) => {
+    if (index === 0) return;
+    const newFacilities = [...facilities];
+    [newFacilities[index], newFacilities[index - 1]] = [newFacilities[index - 1], newFacilities[index]];
+    setFacilities(newFacilities);
+  };
+
+  // 施設の順序を変更（下へ）
+  const handleMoveDown = (index: number) => {
+    if (index === facilities.length - 1) return;
+    const newFacilities = [...facilities];
+    [newFacilities[index], newFacilities[index + 1]] = [newFacilities[index + 1], newFacilities[index]];
+    setFacilities(newFacilities);
+  };
+
+  // ソート順序をサーバーに保存
+  const handleSaveOrder = async () => {
+    setSaveStatus("saving");
+    setSaveMessage("");
+    setSortError("");
+
+    try {
+      const response = await fetch("/api/facilities/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          facilityIds: facilities.map((f) => f.id),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      setSaveStatus("saved");
+      setSaveMessage("✓ 施設の順序を保存しました！");
+      setShowSortModal(false);
+      setSortingFacility(null);
+      setTimeout(() => {
+        setSaveStatus("");
+        setSaveMessage("");
+      }, 2000);
+    } catch (err) {
+      setSaveStatus("error");
+      const msg = err instanceof Error ? err.message : "Failed to save order";
       setSaveMessage(msg);
     }
   };
@@ -410,22 +532,39 @@ export default function AdminPage() {
           marginBottom: "20px"
         }}>
           <h2 style={{ margin: 0, fontSize: "20px" }}>Facilities ({facilities.length})</h2>
-          <button
-            onClick={loadFacilities}
-            disabled={loading}
-            style={{
-              padding: "8px 12px",
-              backgroundColor: loading ? "#ccc" : "#2196F3",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: loading ? "not-allowed" : "pointer",
-              fontSize: "13px",
-              fontWeight: "bold"
-            }}
-          >
-            🔄 更新
-          </button>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              onClick={loadFacilities}
+              disabled={loading}
+              style={{
+                padding: "8px 12px",
+                backgroundColor: loading ? "#ccc" : "#2196F3",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: loading ? "not-allowed" : "pointer",
+                fontSize: "13px",
+                fontWeight: "bold"
+              }}
+            >
+              🔄 更新
+            </button>
+            <button
+              onClick={() => setShowSortModal(true)}
+              style={{
+                padding: "8px 12px",
+                backgroundColor: "#FF9800",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "13px",
+                fontWeight: "bold"
+              }}
+            >
+              📋 ソート
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -443,42 +582,413 @@ export default function AdminPage() {
             }}>
               <thead>
                 <tr style={{ backgroundColor: "#f5f5f5", borderBottom: "2px solid #ddd" }}>
+                  <th style={{ padding: "10px", textAlign: "left", width: "40px" }}>No.</th>
                   <th style={{ padding: "10px", textAlign: "left", minWidth: "60px" }}>ID</th>
                   <th style={{ padding: "10px", textAlign: "left", minWidth: "150px" }}>名称</th>
                   <th style={{ padding: "10px", textAlign: "left", minWidth: "100px" }}>都道府県</th>
-                  <th style={{ padding: "10px", textAlign: "center", minWidth: "120px" }}>アクション</th>
+                  <th style={{ padding: "10px", textAlign: "center", minWidth: "180px" }}>アクション</th>
                 </tr>
               </thead>
               <tbody>
-                {facilities.map((facility) => (
+                {facilities.map((facility, index) => (
                   <tr key={facility.id} style={{ borderBottom: "1px solid #eee" }}>
+                    <td style={{ padding: "10px", textAlign: "center", color: "#999" }}>{index + 1}</td>
                     <td style={{ padding: "10px" }}><code style={{ fontSize: "12px" }}>{facility.id}</code></td>
                     <td style={{ padding: "10px" }}>{facility.name}</td>
                     <td style={{ padding: "10px" }}>{facility.prefecture}</td>
-                    <td style={{ padding: "10px", textAlign: "center" }}>
+                    <td style={{ padding: "10px", textAlign: "center", display: "flex", gap: "5px", justifyContent: "center", flexWrap: "wrap" }}>
+                      <button
+                        onClick={() => handleEditClick(facility)}
+                        style={{
+                          padding: "5px 10px",
+                          backgroundColor: "#0066cc",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "3px",
+                          cursor: "pointer",
+                          fontSize: "11px",
+                          fontWeight: "bold"
+                        }}
+                      >
+                        ✎ Edit
+                      </button>
                       <button
                         onClick={() => handleGenerateRemaster(facility)}
                         style={{
-                          padding: "6px 12px",
+                          padding: "5px 10px",
                           backgroundColor: "#7B2FBE",
                           color: "white",
                           border: "none",
-                          borderRadius: "4px",
+                          borderRadius: "3px",
                           cursor: "pointer",
-                          fontSize: "12px",
+                          fontSize: "11px",
                           fontWeight: "bold"
                         }}
                       >
                         🎨 Remaster
                       </button>
+                      {index > 0 && (
+                        <button
+                          onClick={() => handleMoveUp(index)}
+                          style={{
+                            padding: "5px 8px",
+                            backgroundColor: "#666",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "3px",
+                            cursor: "pointer",
+                            fontSize: "11px"
+                          }}
+                        >
+                          ↑
+                        </button>
+                      )}
+                      {index < facilities.length - 1 && (
+                        <button
+                          onClick={() => handleMoveDown(index)}
+                          style={{
+                            padding: "5px 8px",
+                            backgroundColor: "#666",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "3px",
+                            cursor: "pointer",
+                            fontSize: "11px"
+                          }}
+                        >
+                          ↓
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {facilities.length > 0 && (
+              <div style={{ marginTop: "15px", textAlign: "right" }}>
+                <button
+                  onClick={handleSaveOrder}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#4CAF50",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    fontWeight: "bold"
+                  }}
+                >
+                  💾 順序を保存
+                </button>
+              </div>
+            )}
           </div>
         )}
       </section>
+
+      {/* ========== 編集モーダル ========== */}
+      {showEditModal && editingFacility && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.7)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          padding: "20px",
+          boxSizing: "border-box"
+        }}>
+          <div style={{
+            backgroundColor: "white",
+            borderRadius: "12px",
+            padding: "30px",
+            maxWidth: "600px",
+            width: "100%",
+            maxHeight: "95vh",
+            overflow: "auto",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
+          }}>
+            <h2 style={{ margin: "0 0 20px 0", fontSize: "22px", color: "#333" }}>
+              施設を編集: {editingFacility.id}
+            </h2>
+
+            {editError && (
+              <div style={{
+                backgroundColor: "#fee",
+                color: "#c00",
+                padding: "10px",
+                borderRadius: "4px",
+                marginBottom: "15px",
+                fontSize: "13px"
+              }}>
+                {editError}
+              </div>
+            )}
+
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>
+                施設名
+              </label>
+              <input
+                type="text"
+                value={editingFacility.name}
+                onChange={(e) => setEditingFacility({ ...editingFacility, name: e.target.value })}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  border: "1px solid #ddd",
+                  borderRadius: "4px",
+                  fontSize: "13px",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>
+                都道府県
+              </label>
+              <input
+                type="text"
+                value={editingFacility.prefecture}
+                onChange={(e) => setEditingFacility({ ...editingFacility, prefecture: e.target.value })}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  border: "1px solid #ddd",
+                  borderRadius: "4px",
+                  fontSize: "13px",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>
+                説明
+              </label>
+              <textarea
+                value={editingFacility.description || ""}
+                onChange={(e) => setEditingFacility({ ...editingFacility, description: e.target.value })}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  border: "1px solid #ddd",
+                  borderRadius: "4px",
+                  fontSize: "13px",
+                  boxSizing: "border-box",
+                  minHeight: "100px"
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "13px" }}>
+                URL
+              </label>
+              <input
+                type="url"
+                value={editingFacility.url || ""}
+                onChange={(e) => setEditingFacility({ ...editingFacility, url: e.target.value })}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  border: "1px solid #ddd",
+                  borderRadius: "4px",
+                  fontSize: "13px",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingFacility(null);
+                  setEditError("");
+                }}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#ccc",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: "bold"
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#0066cc",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: "bold"
+                }}
+              >
+                💾 保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========== ソートモーダル ========== */}
+      {showSortModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.7)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          padding: "20px",
+          boxSizing: "border-box"
+        }}>
+          <div style={{
+            backgroundColor: "white",
+            borderRadius: "12px",
+            padding: "30px",
+            maxWidth: "600px",
+            width: "100%",
+            maxHeight: "95vh",
+            overflow: "auto",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
+          }}>
+            <h2 style={{ margin: "0 0 20px 0", fontSize: "22px", color: "#333" }}>
+              施設の順序を変更
+            </h2>
+
+            {sortError && (
+              <div style={{
+                backgroundColor: "#fee",
+                color: "#c00",
+                padding: "10px",
+                borderRadius: "4px",
+                marginBottom: "15px",
+                fontSize: "13px"
+              }}>
+                {sortError}
+              </div>
+            )}
+
+            <div style={{
+              maxHeight: "400px",
+              overflowY: "auto",
+              border: "1px solid #ddd",
+              borderRadius: "4px",
+              padding: "10px"
+            }}>
+              {facilities.map((facility, index) => (
+                <div
+                  key={facility.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "10px",
+                    borderBottom: index < facilities.length - 1 ? "1px solid #eee" : "none",
+                    fontSize: "13px"
+                  }}
+                >
+                  <span style={{ marginRight: "10px", color: "#999", minWidth: "25px" }}>
+                    {index + 1}.
+                  </span>
+                  <span style={{ flex: 1 }}>{facility.name}</span>
+                  <div style={{ display: "flex", gap: "5px" }}>
+                    {index > 0 && (
+                      <button
+                        onClick={() => handleMoveUp(index)}
+                        style={{
+                          padding: "4px 8px",
+                          backgroundColor: "#666",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "3px",
+                          cursor: "pointer",
+                          fontSize: "11px"
+                        }}
+                      >
+                        ↑
+                      </button>
+                    )}
+                    {index < facilities.length - 1 && (
+                      <button
+                        onClick={() => handleMoveDown(index)}
+                        style={{
+                          padding: "4px 8px",
+                          backgroundColor: "#666",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "3px",
+                          cursor: "pointer",
+                          fontSize: "11px"
+                        }}
+                      >
+                        ↓
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "20px" }}>
+              <button
+                onClick={() => {
+                  setShowSortModal(false);
+                  setSortingFacility(null);
+                  setSortError("");
+                  loadFacilities(); // 元の順序に戻す
+                }}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#ccc",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: "bold"
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveOrder}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#4CAF50",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: "bold"
+                }}
+              >
+                💾 順序を保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ========== ディープリマスター モーダル ========== */}
       {remasteringFacility && (
@@ -599,7 +1109,7 @@ export default function AdminPage() {
                         textAlign: "center",
                         color: "#3d1a6e"
                       }}>
-                        {["🏺 象徴的遺物", "🌿 遺構/環境", "🏛️ 再現"][idx]}
+                        {["🏺 象徴的遺物(A)", "🌿 遺構/環境(B)", "🏛️ 再現(C)"][idx]}
                       </div>
                     </div>
                   ))}
